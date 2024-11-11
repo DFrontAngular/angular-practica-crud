@@ -1,6 +1,6 @@
 # Proyecto CRUD Angular & Nest.js
 
-Este proyecto está dividido en dos partes principales:
+Este proyecto está dividido en dos partes principales;
 
 1. **Backend**: Implementado con Nest.js.
 2. **Frontend**: Implementado con Angular.
