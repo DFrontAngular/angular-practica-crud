@@ -1,0 +1,13 @@
+.crud-table {
+  width: 100%;
+  margin-top: 3rem;
+}
+
+.crud-table__btn {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+}
