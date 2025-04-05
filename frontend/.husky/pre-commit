@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 echo "Ejecutando Prettier..."  # Esto debería mostrar un mensaje en la terminal
 
 npx prettier . --write
