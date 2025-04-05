@@ -12,6 +12,11 @@
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "private": true,
   "dependencies": {
     "@angular-eslint/eslint-plugin": "^19.3.0",

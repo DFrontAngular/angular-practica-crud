@@ -1,3 +1,4 @@
-echo "Ejecutando Prettier..."  # Esto debería mostrar un mensaje en la terminal
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-npx prettier . --write
+npx lint-staged
