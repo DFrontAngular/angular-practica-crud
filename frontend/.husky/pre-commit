@@ -1,2 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
 npx prettier . --write
 # test script will run every time you commit
