@@ -1,3 +1,1 @@
-echo "Ejecutando Prettier..."
-npx prettier . --write
-# test script will run every time you commit
+npm test
