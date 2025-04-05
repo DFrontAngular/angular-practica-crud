@@ -1,2 +1,4 @@
-git commit -m "Keep calm and commit"
-# test script will run every time you commit
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx prettier . --write
