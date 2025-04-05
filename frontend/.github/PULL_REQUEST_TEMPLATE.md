@@ -26,6 +26,7 @@ Marca las opciones que apliquen:
 - ¿En qué entorno probaste los cambios?
 
 Ejemplo:
+
 - Se ejecutaron los tests unitarios y todos pasaron.
 - Pruebas realizadas en el entorno de staging.
 
@@ -54,4 +55,3 @@ Si el PR incluye cambios visuales, agrega capturas de pantalla aquí para que lo
 ## Comentarios adicionales
 
 Agrega cualquier comentario o contexto adicional que los revisores puedan necesitar para entender mejor tu PR.
-

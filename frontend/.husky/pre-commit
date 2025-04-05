@@ -1,2 +1,2 @@
-git commit -m "Keep calm and commit"
+npx prettier . --write
 # test script will run every time you commit
