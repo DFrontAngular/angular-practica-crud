@@ -1,0 +1,43 @@
+<button customizedButton>Create</button>
+
+<table
+  class="min-w-full table-auto border-collapse bg-white shadow-md rounded-lg"
+>
+  <thead>
+    <tr class="bg-gray-100 text-left">
+      <th class="py-2 px-4 border-b font-semibold text-sm text-gray-700">ID</th>
+      <th class="py-2 px-4 border-b font-semibold text-sm text-gray-700">
+        Brand
+      </th>
+      <th class="py-2 px-4 border-b font-semibold text-sm text-gray-700">
+        Model
+      </th>
+      <th class="py-2 px-4 border-b font-semibold text-sm text-gray-700">
+        Total
+      </th>
+      <th class="py-2 px-4 border-b font-semibold text-sm text-gray-700">
+        Actions
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="hover:bg-gray-50">
+      <td class="py-2 px-4 border-b text-sm text-gray-600">1</td>
+      <td class="py-2 px-4 border-b text-sm text-gray-600">Brand A</td>
+      <td class="py-2 px-4 border-b text-sm text-gray-600">Model X</td>
+      <td class="py-2 px-4 border-b text-sm text-gray-600">$1000</td>
+      <td class="py-2 px-4 border-b text-sm">
+        <a [cdkMenuTriggerFor]="menu" class="example-standalone-item"
+          >Click me!</a
+        >
+
+        <ng-template #menu>
+          <div class="example-menu" cdkMenu>
+            <button cdkMenuItem class="example-menu-item">Edit</button>
+            <button cdkMenuItem class="example-menu-item">Delete</button>
+          </div>
+        </ng-template>
+      </td>
+    </tr>
+  </tbody>
+</table>

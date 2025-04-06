@@ -21,6 +21,7 @@
   "dependencies": {
     "@angular-eslint/eslint-plugin": "^19.3.0",
     "@angular/animations": "^19.0.1",
+    "@angular/cdk": "^19.2.8",
     "@angular/common": "^19.0.1",
     "@angular/compiler": "^19.0.1",
     "@angular/core": "^19.0.1",
