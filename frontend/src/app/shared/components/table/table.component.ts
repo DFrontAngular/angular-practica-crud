@@ -23,4 +23,8 @@ import {
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',
 })
-export class TableComponent {}
+export class TableComponent {
+  ngOnInit(): void {
+    localStorage.setItem('auth-token', 'mock-token');
+  }
+}
