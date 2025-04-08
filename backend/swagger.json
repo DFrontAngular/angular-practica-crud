@@ -253,9 +253,9 @@
   "components": {
     "securitySchemes": {
       "bearer": {
+        "type": "http",
         "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "type": "http"
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {

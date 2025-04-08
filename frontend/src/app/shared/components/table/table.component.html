@@ -32,12 +32,27 @@
         >
 
         <ng-template #menu>
-          <div class="example-menu" cdkMenu>
-            <button cdkMenuItem class="example-menu-item">Edit</button>
-            <button cdkMenuItem class="example-menu-item">Delete</button>
+          <div
+            class="example-menu cdk-menu bg-white shadow-lg rounded-lg border border-gray-300 p-2"
+            cdkMenu
+          >
+            <button
+              cdkMenuItem
+              class="example-menu-item text-gray-700 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-md transition duration-200"
+            >
+              Edit
+            </button>
+            <button
+              cdkMenuItem
+              class="example-menu-item text-white bg-red-500 hover:bg-red-400 px-4 py-2 rounded-md transition duration-200"
+            >
+              Delete
+            </button>
           </div>
         </ng-template>
       </td>
     </tr>
   </tbody>
 </table>
+
+<data>{{ cars | json }}</data>
