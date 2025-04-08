@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CustomizedButtonDirective } from '../../directives/customized-button.directive';
 import {
   CdkMenu,
@@ -9,22 +9,16 @@ import {
   CdkMenuTrigger,
 } from '@angular/cdk/menu';
 import { CarsService } from '../../services/cars.service';
-import { JsonPipe } from '@angular/common';
+import { Car } from '../../interfaces/Car.interface';
 
 @Component({
   selector: 'cars-table',
-  imports: [
-    CustomizedButtonDirective,
-    CdkMenuTrigger,
-    CdkMenu,
-    CdkMenuItem,
-    JsonPipe,
-  ],
+  imports: [CustomizedButtonDirective, CdkMenuTrigger, CdkMenu, CdkMenuItem],
   templateUrl: './table.component.html',
   styleUrl: './table.component.css',
 })
 export class TableComponent {
-  cars: any[] = [];
+  cars = signal<Car[]>([]);
   private carService = inject(CarsService);
 
   ngOnInit(): void {
@@ -35,7 +29,8 @@ export class TableComponent {
   loadCars(): void {
     this.carService.getCars().subscribe(
       (data) => {
-        this.cars = data;
+        this.cars = signal(data);
+        console.log(this.cars());
       },
       (error) => {
         console.error('Error fetching cars:', error);

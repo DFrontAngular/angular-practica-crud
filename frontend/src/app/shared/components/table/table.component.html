@@ -21,38 +21,44 @@
     </tr>
   </thead>
   <tbody>
-    <tr class="hover:bg-gray-50">
-      <td class="py-2 px-4 border-b text-sm text-gray-600">1</td>
-      <td class="py-2 px-4 border-b text-sm text-gray-600">Brand A</td>
-      <td class="py-2 px-4 border-b text-sm text-gray-600">Model X</td>
-      <td class="py-2 px-4 border-b text-sm text-gray-600">$1000</td>
-      <td class="py-2 px-4 border-b text-sm">
-        <a [cdkMenuTriggerFor]="menu" class="example-standalone-item"
-          >Click me!</a
-        >
-
-        <ng-template #menu>
-          <div
-            class="example-menu cdk-menu bg-white shadow-lg rounded-lg border border-gray-300 p-2"
-            cdkMenu
+    @for (car of cars(); track car.id) {
+      <tr class="hover:bg-gray-50">
+        <td class="py-2 px-4 border-b text-sm text-gray-600">{{ car.id }}</td>
+        <td class="py-2 px-4 border-b text-sm text-gray-600">
+          {{ car.brand }}
+        </td>
+        <td class="py-2 px-4 border-b text-sm text-gray-600">
+          {{ car.model }}
+        </td>
+        <td class="py-2 px-4 border-b text-sm text-gray-600">
+          {{ car.total }}
+        </td>
+        <td class="py-2 px-4 border-b text-sm">
+          <a [cdkMenuTriggerFor]="menu" class="example-standalone-item"
+            >Click me!</a
           >
-            <button
-              cdkMenuItem
-              class="example-menu-item text-gray-700 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-md transition duration-200"
+
+          <ng-template #menu>
+            <div
+              class="example-menu cdk-menu bg-white shadow-lg rounded-lg border border-gray-300 p-2"
+              cdkMenu
             >
-              Edit
-            </button>
-            <button
-              cdkMenuItem
-              class="example-menu-item text-white bg-red-500 hover:bg-red-400 px-4 py-2 rounded-md transition duration-200"
-            >
-              Delete
-            </button>
-          </div>
-        </ng-template>
-      </td>
-    </tr>
+              <button
+                cdkMenuItem
+                class="example-menu-item text-gray-700 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-md transition duration-200"
+              >
+                Edit
+              </button>
+              <button
+                cdkMenuItem
+                class="example-menu-item text-white bg-red-500 hover:bg-red-400 px-4 py-2 rounded-md transition duration-200"
+              >
+                Delete
+              </button>
+            </div>
+          </ng-template>
+        </td>
+      </tr>
+    }
   </tbody>
 </table>
-
-<data>{{ cars | json }}</data>
