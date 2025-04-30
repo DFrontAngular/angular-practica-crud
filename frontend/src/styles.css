@@ -1,1 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.car-button {
+    background-color: #1e5ea2;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 20px;
+    text-decoration: none;   
+    transition: all 500ms; 
+}
+
+.car-button-hover {
+    background-color: #dbe7f5;
+    color: #1e5ea2;
+    cursor: pointer;
+}
