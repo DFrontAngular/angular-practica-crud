@@ -1,0 +1,69 @@
+table {
+  border-collapse: collapse;
+  border:
+    solid 2px,
+    gainsboro;
+}
+
+table tr:not(:last-child) {
+  border-bottom: solid 2px gainsboro;
+}
+
+table tr:nth-child(even) {
+  background-color: #f6faff;
+}
+
+table tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+table th {
+  background-color: #1e5ea2;
+  text-align: center;
+  color: white;
+}
+
+table th,
+table td {
+  padding: 20px 30px;
+}
+
+td button {
+  border: none;
+  font-size: 14px;
+  width: 100px;
+}
+
+.menu-actions {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-width: 280px;
+  background-color: rgba(255, 255, 255);
+  padding: 6px 0;
+}
+
+.menu-actions-item {
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+
+  user-select: none;
+  min-width: 64px;
+  line-height: 36px;
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex: 1;
+}
+
+.menu-actions-item:hover {
+  background-color: #dbe7f5;
+}
+/* dbe7f5*/
+.menu-actions-item:active {
+  background-color: #1e5ea2;
+  color: white;
+}
