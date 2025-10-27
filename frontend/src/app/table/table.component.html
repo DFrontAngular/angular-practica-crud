@@ -1,0 +1,35 @@
+
+<!--Menu rapido-->
+<nav>
+  <span>Inicio</span> / <span>Listados de coches</span>
+</nav>
+
+<!--Boton para crear-->
+<button>Crear</button>
+
+<!-- Tabla-->
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Marca</th>
+      <th>Modelo</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let coche of coches"> <!--ngFor recorre la raid de coches-->
+      <td>
+        <a [routerLink]="['/detalle', coche.id]"> {{coche.id}}</a> <!-- routerLink navegar entre componentes-->
+      </td>
+      <td>{{coche.marca}}</td>
+      <td>{{coche.modelo}}</td>
+      <td>{{coche.total}}</td>
+      <td>
+        <button [routerLink]="['/editar', coche.id]">Editar</button>
+        <button (click)="eliminar(coche.id)">Eliminar</button> <!-- Llamada a la función eliminar-->
+      </td>
+    </tr>
+  </tbody>
+</table>
