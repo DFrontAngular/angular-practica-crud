@@ -9,6 +9,12 @@
     "test": "ng test",
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.{ts,js,json,css,scss,html}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.0.1",
