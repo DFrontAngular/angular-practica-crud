@@ -1,0 +1,32 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  font-size: 0.875rem;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:not(:last-child)::after {
+      content: ">";
+      color: #999;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    &:last-child a {
+      color: #999;
+      pointer-events: none;
+    }
+  }
+}
