@@ -1,3 +1,25 @@
 table {
   text-align: center;
 }
+.actions {
+  position: relative;
+}
+
+.context-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  padding: 4px;
+}
+.menu-trigger {
+  border: none;
+  background-color: transparent;
+}

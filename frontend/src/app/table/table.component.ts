@@ -1,10 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { DirectivaDirective } from '../directiva.directive';
 import { Car } from '../model/Car';
+import { OverlayModule } from '@angular/cdk/overlay';
 
 @Component({
   selector: 'app-table',
-  imports: [DirectivaDirective],
+  imports: [DirectivaDirective, OverlayModule],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
 })
