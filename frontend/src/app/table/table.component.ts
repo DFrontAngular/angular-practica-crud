@@ -4,7 +4,7 @@ import { Car } from '../model/Car';
 
 @Component({
   selector: 'app-table',
-  imports: [OverlayModule, DirectivaDirective],
+  imports: [DirectivaDirective],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
 })
