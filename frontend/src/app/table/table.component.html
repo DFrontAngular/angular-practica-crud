@@ -1,0 +1,44 @@
+<div class="table-container">
+  <div class="table-header">
+    <button appButton>Nuevo coche</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Total</th>
+        <th colspan="2">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (car of cars; track car.id) {
+        <tr>
+          <td>{{ car.id }}</td>
+          <td>{{ car.brand }}</td>
+          <td>{{ car.model }}</td>
+          <td>{{ car.total }}</td>
+          <td class="actions">
+            <button (click)="toggleMenu(car.id)">⋮</button>
+
+            @if (activeMenuId() === car.id) {
+              <div class="context-menu">
+                <button appButton variant="ghost" size="sm">Editar</button>
+                <button
+                  appButton
+                  variant="danger"
+                  size="sm"
+                  (click)="deleteCar(car.id)"
+                >
+                  Eliminar
+                </button>
+              </div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
