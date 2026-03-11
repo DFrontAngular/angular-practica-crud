@@ -14,7 +14,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (car of cars; track car.id) {
+      @for (car of cars$ | async; track car.id) {
         <tr>
           <td>{{ car.id }}</td>
           <td>{{ car.brand }}</td>
