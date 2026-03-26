@@ -12,7 +12,7 @@ Asegúrate de tener instalados los siguientes programas en tu sistema:
 - [Visual Studio Code](https://code.visualstudio.com/).
 - [Node.js](https://nodejs.org) (versión 22 o superior).
 - [npm](https://www.npmjs.com/) (incluido con Node.js).
-- [Angular CLI](https://angular.dev/tools/cli) (para ejecutar el frontend 19.2.1 o superior).
+- [Angular CLI](https://angular.dev/tools/cli) (para ejecutar el frontend 21.0.0 o superior).
 - Puedes comprobar la compatibilidad de las versiones de Angular [aquí](https://angular.dev/reference/versions)
 
 ```bash
@@ -294,7 +294,7 @@ Implementa un [interceptor](https://angular.dev/guide/http/interceptors) para a�
 
 ### Documenta todo lo que que consideres necesario y aporte valor. Evita describir lo que hace el código línea a línea. Busca que sea un código auto explicativo, orienta la documentación utilizando formato [JSDoc](https://jsdoc.app/).
 
-### Se trata de un proyecto en versión 19, por lo que se valorará la elección de las últimas funcionalidades (standalone components, nuevo template flow, signals, etc.) pero no es requisito obligatorio.
+### Se trata de un proyecto en versión 21, por lo que se valorará la elección de las últimas funcionalidades (standalone components, nuevo template flow, signals, etc.) pero no es requisito obligatorio.
 
 ### BONUS: Conseguir un 80% de code coverage.
 
