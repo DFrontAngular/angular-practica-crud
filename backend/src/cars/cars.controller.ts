@@ -17,6 +17,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -137,12 +138,66 @@ export class CarsController {
     return this.carsService.update(id, carToUpdate);
   }
 
+  @Get(':id/documents')
+  @ApiOperation({
+    summary: 'Retrieve metadata for the single document linked to a vehicle',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Document metadata returned successfully',
+    type: UploadedCarDocumentResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vehicle or document not found' })
+  getCarDocumentMetadata(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): UploadedCarDocumentResponseDto {
+    return this.carsService.getDocumentMetadata(id);
+  }
+
+  @Get(':id/documents/download')
+  @ApiOperation({
+    summary: 'Download the single document linked to a vehicle',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Document download started successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Vehicle or document not found' })
+  downloadCarDocument(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() response: Response,
+  ): void {
+    const document = this.carsService.getDocumentForDownload(id);
+    response.download(document.storagePath, document.originalName);
+  }
+
+  @Delete(':id/documents')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Delete the single document linked to a vehicle (ADMIN only)',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiResponse({ status: 204, description: 'Document deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Vehicle or document not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  deleteCarDocument(@Param('id', ParseUUIDPipe) id: string): void {
+    this.carsService.removeDocument(id);
+  }
+
   @Post(':id/documents')
   @Roles(UserRole.ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: 'Upload a practice document for a vehicle (ADMIN only)',
+    summary:
+      'Upload or replace the single stored document for a vehicle (ADMIN only)',
   })
   @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
   @ApiBody({
@@ -169,7 +224,7 @@ export class CarsController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Document received successfully and processed in memory',
+    description: 'Document stored successfully',
     type: UploadedCarDocumentResponseDto,
   })
   @ApiResponse({

@@ -207,6 +207,8 @@ Endpoints restringidos a `ADMIN`:
 - `GET /cars`
 - `GET /cars/export/excel`
 - `GET /cars/:id`
+- `GET /cars/:id/documents`
+- `GET /cars/:id/documents/download`
 - `POST /cars`
 - `POST /cars/:id/documents`
 - `PUT /cars/:id`
@@ -296,7 +298,7 @@ Devuelve el coche completo:
       "color": "Midnight Blue",
       "description": "Excellent condition",
       "licensePlate": "1234 BBB",
-      "imageUrl": "https://images.unsplash.com/..."
+      "imageUrl": "/images/car_images/model-1_toyota_corolla.webp"
     }
   ],
   "total": 1
@@ -311,9 +313,10 @@ El backend:
 
 - recibe un fichero real como `blob/file`
 - valida tipo y tamaño
-- procesa el binario en memoria
+- guarda el binario en disco local
 - devuelve metadatos del upload
-- no persiste el fichero realmente
+- permite un solo documento por vehiculo
+- si subes uno nuevo para el mismo coche, reemplaza el anterior
 
 Tipos admitidos:
 
@@ -348,10 +351,19 @@ Respuesta de ejemplo:
   "title": "Ficha tecnica ITV",
   "description": "Documento de prueba para practicar subida con FormData",
   "uploadedAt": "2026-03-27T10:15:00.000Z",
-  "persisted": false,
-  "message": "The file was received as multipart/form-data and processed in memory, but it was not stored."
+  "persisted": true,
+  "downloadUrl": "/cars/uuid/documents/download",
+  "message": "The file was stored on disk and replaced any previous document linked to the vehicle."
 }
 ```
+
+### `GET /cars/:id/documents`
+
+Devuelve los metadatos del unico documento asociado al coche.
+
+### `GET /cars/:id/documents/download`
+
+Descarga el unico documento asociado al coche usando el `id` del vehiculo.
 
 ### `GET /brands`
 

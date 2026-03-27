@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
+import * as fs from 'fs';
+import { join, extname } from 'path';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -18,10 +20,15 @@ import {
   SortOrder,
 } from './dto/get-cars-filter.dto';
 
+interface StoredCarDocument extends UploadedCarDocumentResponseDto {
+  storagePath: string;
+}
+
 @Injectable()
 export class CarsService {
   // In-memory storage for cars
-  private cars: Car[] = this.generateSeedData(50);
+  private cars: Car[];
+  private readonly carDocuments = new Map<string, StoredCarDocument>();
 
   /**
    * Public image path catalog keyed by model id.
@@ -71,6 +78,13 @@ export class CarsService {
     'brand-9': 'model-24',
     'brand-10': 'model-26',
   };
+
+  private readonly documentsRootPath = join(process.cwd(), 'uploads', 'cars');
+
+  constructor() {
+    fs.mkdirSync(this.documentsRootPath, { recursive: true });
+    this.cars = this.generateSeedData(50);
+  }
 
   private getImageUrlForCar(modelId: string, brandId: string): string {
     const exactImage = this.carImagesByModelId[modelId];
@@ -228,6 +242,7 @@ export class CarsService {
    */
   remove(id: string): Car {
     const carToDelete = this.findOne(id);
+    this.deleteStoredDocument(id);
     this.cars = this.cars.filter((car) => car.id !== id);
     return carToDelete;
   }
@@ -270,9 +285,20 @@ export class CarsService {
     file: UploadedPracticeFile,
   ): UploadedCarDocumentResponseDto {
     this.findOne(id);
+    const carDirectory = join(this.documentsRootPath, id);
+    fs.mkdirSync(carDirectory, { recursive: true });
 
-    return {
-      id: uuid(),
+    this.deleteStoredDocument(id);
+
+    const documentId = uuid();
+    const fileExtension = extname(file.originalname) || this.getExtensionFromMimeType(file.mimetype);
+    const storedFileName = `${documentId}${fileExtension}`;
+    const storagePath = join(carDirectory, storedFileName);
+
+    fs.writeFileSync(storagePath, file.buffer);
+
+    const document: StoredCarDocument = {
+      id: documentId,
       carId: id,
       originalName: file.originalname,
       mimeType: file.mimetype,
@@ -281,10 +307,49 @@ export class CarsService {
       title: uploadDocumentDto.title?.trim() || undefined,
       description: uploadDocumentDto.description?.trim() || undefined,
       uploadedAt: new Date().toISOString(),
-      persisted: false,
+      persisted: true,
+      downloadUrl: `/cars/${id}/documents/download`,
       message:
-        'The file was received as multipart/form-data and processed in memory, but it was not stored.',
+        'The file was stored on disk and replaced any previous document linked to the vehicle.',
+      storagePath,
     };
+
+    this.carDocuments.set(id, document);
+
+    return this.toDocumentResponse(document);
+  }
+
+  getDocumentMetadata(id: string): UploadedCarDocumentResponseDto {
+    this.findOne(id);
+
+    const document = this.carDocuments.get(id);
+    if (!document) {
+      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
+    }
+
+    return this.toDocumentResponse(document);
+  }
+
+  getDocumentForDownload(id: string): StoredCarDocument {
+    this.findOne(id);
+
+    const document = this.carDocuments.get(id);
+    if (!document || !fs.existsSync(document.storagePath)) {
+      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
+    }
+
+    return document;
+  }
+
+  removeDocument(id: string): void {
+    this.findOne(id);
+
+    const document = this.carDocuments.get(id);
+    if (!document || !fs.existsSync(document.storagePath)) {
+      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
+    }
+
+    this.deleteStoredDocument(id);
   }
 
   async exportCarsToExcel(
@@ -537,5 +602,47 @@ export class CarsService {
 
   private getModelName(modelId: string): string {
     return modelsDB.find((model) => model.id === modelId)?.name ?? modelId;
+  }
+
+  private deleteStoredDocument(carId: string): void {
+    const existingDocument = this.carDocuments.get(carId);
+    if (!existingDocument) {
+      return;
+    }
+
+    if (fs.existsSync(existingDocument.storagePath)) {
+      fs.unlinkSync(existingDocument.storagePath);
+    }
+
+    const carDirectory = join(this.documentsRootPath, carId);
+    if (fs.existsSync(carDirectory)) {
+      const remainingFiles = fs.readdirSync(carDirectory);
+      if (remainingFiles.length === 0) {
+        fs.rmdirSync(carDirectory);
+      }
+    }
+
+    this.carDocuments.delete(carId);
+  }
+
+  private getExtensionFromMimeType(mimeType: string): string {
+    const extensionByMimeType: Record<string, string> = {
+      'application/pdf': '.pdf',
+      'text/plain': '.txt',
+      'application/msword': '.doc',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        '.docx',
+      'image/png': '.png',
+      'image/jpeg': '.jpg',
+    };
+
+    return extensionByMimeType[mimeType] ?? '';
+  }
+
+  private toDocumentResponse(
+    document: StoredCarDocument,
+  ): UploadedCarDocumentResponseDto {
+    const { storagePath: _storagePath, ...publicDocument } = document;
+    return publicDocument;
   }
 }

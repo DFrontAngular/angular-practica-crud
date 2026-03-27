@@ -15,6 +15,7 @@ export interface UploadedPracticeFile {
   originalname: string;
   mimetype: string;
   size: number;
+  buffer: Buffer;
 }
 
 export class UploadCarDocumentDto {
@@ -108,15 +109,20 @@ export class UploadedCarDocumentResponseDto {
 
   @ApiProperty({
     description: 'Indicates whether the backend persisted the binary content',
-    example: false,
+    example: true,
   })
   persisted: boolean;
 
   @ApiProperty({
-    description:
-      'Explains how the practice upload is handled in this training backend',
+    description: 'Download URL for the single document associated with the car',
+    example: '/cars/9f65ec7a-ef2c-4d8a-a7dc-248018fca712/documents/download',
+  })
+  downloadUrl: string;
+
+  @ApiProperty({
+    description: 'Explains how the backend handled the uploaded file',
     example:
-      'The file was received as multipart/form-data and processed in memory, but it was not stored.',
+      'The file was stored on disk and replaced any previous document linked to the vehicle.',
   })
   message: string;
 }
