@@ -207,6 +207,7 @@ Endpoints restringidos a `ADMIN`:
 - `GET /cars`
 - `GET /cars/:id`
 - `POST /cars`
+- `POST /cars/:id/documents`
 - `PUT /cars/:id`
 - `DELETE /cars/:id`
 
@@ -266,6 +267,56 @@ Devuelve el coche completo:
     }
   ],
   "total": 1
+}
+```
+
+### `POST /cars/:id/documents`
+
+Permite practicar subida de ficheros usando `multipart/form-data`.
+
+El backend:
+
+- recibe un fichero real como `blob/file`
+- valida tipo y tamaño
+- procesa el binario en memoria
+- devuelve metadatos del upload
+- no persiste el fichero realmente
+
+Tipos admitidos:
+
+- `application/pdf`
+- `text/plain`
+- `application/msword`
+- `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+- `image/png`
+- `image/jpeg`
+
+Límite de tamaño:
+
+- `5 MB`
+
+Campos del formulario:
+
+- `file` obligatorio
+- `title` opcional
+- `documentType` opcional: `invoice`, `inspection`, `insurance`, `registration`, `other`
+- `description` opcional
+
+Respuesta de ejemplo:
+
+```json
+{
+  "id": "uuid",
+  "carId": "uuid",
+  "originalName": "itv.pdf",
+  "mimeType": "application/pdf",
+  "size": 184532,
+  "documentType": "inspection",
+  "title": "Ficha tecnica ITV",
+  "description": "Documento de prueba para practicar subida con FormData",
+  "uploadedAt": "2026-03-27T10:15:00.000Z",
+  "persisted": false,
+  "message": "The file was received as multipart/form-data and processed in memory, but it was not stored."
 }
 ```
 
@@ -480,6 +531,21 @@ Content-Type: application/json
 }
 ```
 
+### Subir documento de práctica
+
+```http
+POST /cars/:id/documents
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+Ejemplo conceptual desde frontend:
+
+- campo `file`: un `File` real seleccionado por el usuario
+- campo `title`: `Ficha tecnica ITV`
+- campo `documentType`: `inspection`
+- campo `description`: `Documento de prueba`
+
 ### Obtener perfil
 
 ```http
@@ -494,6 +560,7 @@ Authorization: Bearer <token>
 - no hay refresh token
 - no hay logout de servidor
 - no hay subida real de imágenes
+- los documentos subidos no se persisten; solo se procesan en memoria para practicar `multipart/form-data`
 - no hay usuarios dinámicos ni registro
 - las credenciales son fijas para práctica
 

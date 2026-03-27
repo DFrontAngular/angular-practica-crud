@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
 
-import { CreateCarDto } from './dto';
+import {
+  CreateCarDto,
+  UploadCarDocumentDto,
+  UploadedPracticeFile,
+  UploadedCarDocumentResponseDto,
+} from './dto';
 import { Car, CarDetailEntity, CarSummary } from './entities';
 
 import { brandsDB, modelsDB } from '../brands/data/brand.data';
@@ -279,6 +284,29 @@ export class CarsService {
     this.cars[carIndex] = updatedCar;
 
     return updatedCar;
+  }
+
+  uploadDocument(
+    id: string,
+    uploadDocumentDto: UploadCarDocumentDto,
+    file: UploadedPracticeFile,
+  ): UploadedCarDocumentResponseDto {
+    this.findOne(id);
+
+    return {
+      id: uuid(),
+      carId: id,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+      documentType: uploadDocumentDto.documentType ?? 'other',
+      title: uploadDocumentDto.title?.trim() || undefined,
+      description: uploadDocumentDto.description?.trim() || undefined,
+      uploadedAt: new Date().toISOString(),
+      persisted: false,
+      message:
+        'The file was received as multipart/form-data and processed in memory, but it was not stored.',
+    };
   }
 
   /**

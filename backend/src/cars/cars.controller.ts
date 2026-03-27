@@ -10,15 +10,32 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ParseFilePipeBuilder } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../auth/auth.service';
 import { CarsService } from './cars.service';
-import { CreateCarDto } from './dto';
+import {
+  CreateCarDto,
+  UploadCarDocumentDto,
+  UploadedPracticeFile,
+  UploadedCarDocumentResponseDto,
+} from './dto';
 import { Car, CarSummary } from './entities';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
@@ -68,6 +85,62 @@ export class CarsController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Car {
     return this.carsService.update(id, carToUpdate);
+  }
+
+  @Post(':id/documents')
+  @Roles(UserRole.ADMIN)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload a practice document for a vehicle (ADMIN only)' })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'Ficha tecnica ITV' },
+        documentType: {
+          type: 'string',
+          enum: ['invoice', 'inspection', 'insurance', 'registration', 'other'],
+          example: 'inspection',
+        },
+        description: {
+          type: 'string',
+          example: 'Documento de prueba para practicar subida con FormData',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Document received successfully and processed in memory',
+    type: UploadedCarDocumentResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid multipart payload or unsupported file type' })
+  @ApiResponse({ status: 404, description: 'Vehicle not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  uploadCarDocument(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() uploadDocumentDto: UploadCarDocumentDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
+        .addFileTypeValidator({
+          fileType:
+            /^(application\/pdf|text\/plain|application\/msword|application\/vnd.openxmlformats-officedocument.wordprocessingml.document|image\/png|image\/jpeg)$/,
+        })
+        .build({
+          fileIsRequired: true,
+          errorHttpStatusCode: 400,
+        }),
+    )
+    file: UploadedPracticeFile,
+  ): UploadedCarDocumentResponseDto {
+    return this.carsService.uploadDocument(id, uploadDocumentDto, file);
   }
 
   @Delete(':id')
