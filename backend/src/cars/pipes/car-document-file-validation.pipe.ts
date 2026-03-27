@@ -7,9 +7,9 @@ import {
 } from '@nestjs/common';
 import { UploadedPracticeFile } from '../dto';
 
-const MAX_DOCUMENT_FILE_SIZE = 5 * 1024 * 1024;
+export const MAX_DOCUMENT_FILE_SIZE = 5 * 1024 * 1024;
 
-const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
+export const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
   'application/pdf',
   'text/plain',
   'application/msword',
@@ -44,4 +44,3 @@ export class CarDocumentFileValidationPipe
     return file;
   }
 }
-

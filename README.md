@@ -311,9 +311,9 @@ Endpoints:
 
 Endpoint:
 
-- `GET /seed`
+- `POST /seed`
 
-Sirve para cargar un dataset fijo de ejemplo.
+Sirve para cargar un dataset fijo de ejemplo. Requiere rol `ADMIN`.
 
 ## 7. Contrato actual de la API
 
@@ -471,6 +471,7 @@ Devuelve:
 {
   access_token: string,
   user: {
+    id: string,
     email: string,
     name: string,
     role: 'ADMIN' | 'USER'

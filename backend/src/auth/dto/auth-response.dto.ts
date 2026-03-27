@@ -38,5 +38,5 @@ export class LoginResponseDto {
     type: UserProfileDto,
     description: 'Profile of the authenticated user',
   })
-  user: Omit<UserProfileDto, 'id'>;
+  user: UserProfileDto;
 }

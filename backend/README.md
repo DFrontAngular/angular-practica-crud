@@ -160,6 +160,7 @@ Respuesta:
 {
   "access_token": "jwt-token",
   "user": {
+    "id": "1",
     "email": "admin@example.com",
     "name": "Admin User",
     "role": "ADMIN"
@@ -221,7 +222,7 @@ Endpoints restringidos a `ADMIN`:
 
 ### Seed
 
-- `GET /seed`
+- `POST /seed`
 
 ## Contrato de datos
 
@@ -521,7 +522,7 @@ Prácticamente, para frontend significa que crear y editar comparten la misma fo
 
 ### Seed
 
-`GET /seed` rellena el almacenamiento en memoria con un dataset fijo definido en `src/seed/data/cars.seed.ts`.
+`POST /seed` rellena el almacenamiento en memoria con un dataset fijo definido en `src/seed/data/cars.seed.ts`. Requiere rol `ADMIN`.
 
 ## Flujo recomendado para el frontend
 

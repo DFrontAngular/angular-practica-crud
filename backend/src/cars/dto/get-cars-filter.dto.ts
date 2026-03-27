@@ -1,11 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsIn,
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   Min,
 } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
@@ -24,6 +25,29 @@ export const CAR_SORT_FIELDS = [
 
 export type CarSortField = (typeof CAR_SORT_FIELDS)[number];
 export type SortOrder = 'asc' | 'desc';
+const CURRENT_YEAR = new Date().getFullYear();
+
+function transformBooleanQueryValue(value: unknown): unknown {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalizedValue = value.trim().toLowerCase();
+    if (normalizedValue === 'true') {
+      return true;
+    }
+    if (normalizedValue === 'false') {
+      return false;
+    }
+  }
+
+  return value;
+}
 
 export class GetCarsFilterDto extends PaginationDto {
   @ApiPropertyOptional({
@@ -80,11 +104,12 @@ export class GetCarsFilterDto extends PaginationDto {
 
   @ApiPropertyOptional({
     description: 'Return only vehicles manufactured in or before this year',
-    maximum: new Date().getFullYear(),
+    maximum: CURRENT_YEAR,
     example: 2024,
   })
   @Type(() => Number)
   @IsNumber()
+  @Max(CURRENT_YEAR)
   @IsOptional()
   maxYear?: number;
 
@@ -93,8 +118,8 @@ export class GetCarsFilterDto extends PaginationDto {
       'When true, returns only available vehicles. When false, returns only unavailable ones.',
     example: true,
   })
-  @Type(() => Boolean)
-  @IsBoolean()
+  @Transform(({ value }) => transformBooleanQueryValue(value))
+  @IsBoolean({ message: 'available must be either true or false' })
   @IsOptional()
   available?: boolean;
 

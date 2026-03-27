@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CarsModule } from 'src/cars/cars.module';
+import { CarsModule } from '../cars/cars.module';
 import { SeedController } from './seed.controller';
 import { SeedService } from './seed.service';
 

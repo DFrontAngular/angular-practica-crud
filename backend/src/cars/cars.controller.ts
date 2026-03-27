@@ -11,29 +11,38 @@ import {
   Put,
   Query,
   Res,
+  UnsupportedMediaTypeException,
   UploadedFile,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
+import { FileFilterCallback, memoryStorage } from 'multer';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiExtraModels,
   ApiOperation,
   ApiParam,
   ApiProduces,
   ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { UserRole } from '../auth/auth.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { CarDocumentFileValidationPipe } from './pipes/car-document-file-validation.pipe';
+import { MulterExceptionFilter } from './filters/multer-exception.filter';
+import {
+  ALLOWED_DOCUMENT_MIME_TYPES,
+  CarDocumentFileValidationPipe,
+  MAX_DOCUMENT_FILE_SIZE,
+} from './pipes/car-document-file-validation.pipe';
 import { CarsService } from './cars.service';
 import {
   CreateCarDto,
@@ -46,6 +55,7 @@ import { Car, CarSummary } from './entities';
 
 @ApiTags('Vehicles')
 @ApiBearerAuth()
+@ApiExtraModels(PaginatedResponseDto, CarSummary)
 @Controller('cars')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CarsController {
@@ -58,7 +68,19 @@ export class CarsController {
   @ApiResponse({
     status: 200,
     description: 'Vehicle catalog returned successfully',
-    type: PaginatedResponseDto,
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponseDto) },
+        {
+          properties: {
+            items: {
+              type: 'array',
+              items: { $ref: getSchemaPath(CarSummary) },
+            },
+          },
+        },
+      ],
+    },
   })
   getAllCars(
     @Query() filterDto: GetCarsFilterDto,
@@ -129,6 +151,11 @@ export class CarsController {
     description: 'Vehicle updated successfully',
     type: Car,
   })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Invalid vehicle payload. PUT expects the full CreateCarDto contract.',
+  })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   updateCar(
@@ -192,8 +219,29 @@ export class CarsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
+      limits: {
+        fileSize: MAX_DOCUMENT_FILE_SIZE,
+      },
+      fileFilter: (
+        _request: Request,
+        file: { mimetype: string },
+        callback: FileFilterCallback,
+      ) => {
+        if (!ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype)) {
+          callback(
+            new UnsupportedMediaTypeException(
+              `Unsupported file type "${file.mimetype}".`,
+            ),
+            false,
+          );
+          return;
+        }
+
+        callback(null, true);
+      },
     }),
   )
+  @UseFilters(MulterExceptionFilter)
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary:

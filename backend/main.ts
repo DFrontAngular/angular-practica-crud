@@ -25,15 +25,6 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  document.components = document.components || {};
-  document.components.securitySchemes = {
-    bearer: {
-      type: 'http',
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-    },
-  };
-  document.security = [{ bearer: [] }];
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(document));
   app.useStaticAssets(join(process.cwd(), 'public'));

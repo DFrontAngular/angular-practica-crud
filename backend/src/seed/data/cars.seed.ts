@@ -1,4 +1,4 @@
-import { Car } from 'src/cars/entities/car.entity';
+import { Car } from '../../cars/entities/car.entity';
 import { v4 as uuid } from 'uuid';
 
 export const CARS_SEED: Car[] = [

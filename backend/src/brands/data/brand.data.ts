@@ -1,11 +1,24 @@
-export interface Brand {
+import { ApiProperty } from '@nestjs/swagger';
+
+export class Brand {
+  @ApiProperty({ description: 'Brand identifier', example: 'brand-1' })
   id: string;
+
+  @ApiProperty({ description: 'Display name of the brand', example: 'Toyota' })
   name: string;
 }
 
-export interface Model {
+export class Model {
+  @ApiProperty({ description: 'Model identifier', example: 'model-1' })
   id: string;
+
+  @ApiProperty({ description: 'Display name of the model', example: 'Corolla' })
   name: string;
+
+  @ApiProperty({
+    description: 'Identifier of the brand this model belongs to',
+    example: 'brand-1',
+  })
   brandId: string;
 }
 

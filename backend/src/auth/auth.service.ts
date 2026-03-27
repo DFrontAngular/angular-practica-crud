@@ -13,20 +13,26 @@ export interface User {
   role: UserRole;
 }
 
+interface StoredUser extends User {
+  password: string;
+}
+
 @Injectable()
 export class AuthService {
-  private users: User[] = [
+  private readonly users: StoredUser[] = [
     {
       id: '1',
       email: 'admin@example.com',
       name: 'Admin User',
       role: UserRole.ADMIN,
+      password: 'admin123',
     },
     {
       id: '2',
       email: 'user@example.com',
       name: 'Standard User',
       role: UserRole.USER,
+      password: 'user123',
     },
   ];
 
@@ -34,22 +40,26 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = this.users.find((u) => u.email === email);
-    if (!user || (password !== 'admin123' && password !== 'user123')) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (!user || user.password !== password) {
+      throw new UnauthorizedException('Invalid email or password.');
     }
 
+    const publicUser = this.toPublicUser(user);
     const payload = { sub: user.id, email: user.email, role: user.role };
+
     return {
       access_token: this.jwtService.sign(payload),
-      user: {
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
+      user: publicUser,
     };
   }
 
   async findById(id: string): Promise<User | undefined> {
-    return this.users.find((u) => u.id === id);
+    const user = this.users.find((u) => u.id === id);
+    return user ? this.toPublicUser(user) : undefined;
+  }
+
+  private toPublicUser(user: StoredUser): User {
+    const { password: _password, ...publicUser } = user;
+    return publicUser;
   }
 }

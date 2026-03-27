@@ -223,7 +223,21 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponseDto"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CarSummary"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -519,6 +533,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid vehicle payload. PUT expects the full CreateCarDto contract."
+          },
           "403": {
             "description": "Forbidden"
           },
@@ -707,13 +724,19 @@
             }
           },
           "400": {
-            "description": "Invalid multipart payload or unsupported file type"
+            "description": "Invalid multipart payload or missing file"
           },
           "403": {
             "description": "Forbidden"
           },
           "404": {
             "description": "Vehicle not found"
+          },
+          "413": {
+            "description": "Uploaded file exceeds the 5 MB limit"
+          },
+          "415": {
+            "description": "Unsupported file type"
           }
         },
         "security": [
@@ -761,7 +784,7 @@
       }
     },
     "/seed": {
-      "get": {
+      "post": {
         "description": "Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding.",
         "operationId": "SeedController_populateDB",
         "parameters": [],
@@ -769,10 +792,21 @@
           "200": {
             "description": "Catalog dataset loaded successfully"
           },
+          "401": {
+            "description": "Missing or invalid JWT token"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "500": {
             "description": "Unexpected error while loading the catalog dataset"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Load the predefined catalog dataset",
         "tags": [
           "Catalog Administration"
@@ -791,7 +825,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/Brand"
                   }
                 }
               }
@@ -817,6 +851,7 @@
             "name": "brandId",
             "required": true,
             "in": "path",
+            "description": "Brand identifier",
             "schema": {
               "type": "string"
             }
@@ -830,11 +865,14 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/Model"
                   }
                 }
               }
             }
+          },
+          "404": {
+            "description": "Brand not found"
           }
         },
         "security": [
@@ -860,9 +898,9 @@
   "components": {
     "securitySchemes": {
       "bearer": {
-        "type": "http",
         "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "bearerFormat": "JWT",
+        "type": "http"
       }
     },
     "schemas": {
@@ -1013,6 +1051,39 @@
         "required": [
           "items",
           "meta"
+        ]
+      },
+      "CarSummary": {
+        "type": "object",
+        "properties": {
+          "brandId": {
+            "type": "string",
+            "description": "ID of the car brand. Must reference an existing brand (e.g. brand-1, brand-2).",
+            "example": "brand-1"
+          },
+          "modelId": {
+            "type": "string",
+            "description": "ID of the car model. Must reference a model that belongs to the selected brand.",
+            "example": "model-1"
+          },
+          "id": {
+            "type": "string",
+            "description": "Vehicle identifier"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of vehicle detail entries"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Representative vehicle image URL for list and card views",
+            "example": "/images/car_images/model-1_toyota_corolla.webp"
+          }
+        },
+        "required": [
+          "brandId",
+          "modelId",
+          "id"
         ]
       },
       "CarDetailEntity": {
@@ -1397,12 +1468,51 @@
           "downloadUrl",
           "message"
         ]
+      },
+      "Brand": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Brand identifier",
+            "example": "brand-1"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the brand",
+            "example": "Toyota"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "Model": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Model identifier",
+            "example": "model-1"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the model",
+            "example": "Corolla"
+          },
+          "brandId": {
+            "type": "string",
+            "description": "Identifier of the brand this model belongs to",
+            "example": "brand-1"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brandId"
+        ]
       }
     }
-  },
-  "security": [
-    {
-      "bearer": []
-    }
-  ]
+  }
 }

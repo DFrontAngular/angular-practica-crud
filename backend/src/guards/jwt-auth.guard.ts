@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
+import { UserRole } from '../auth/auth.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -20,9 +21,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       // Bypass authentication: inject a default admin user into the request
       const request = context.switchToHttp().getRequest();
       request.user = {
-        userId: 'admin-id',
+        id: '1',
         email: 'admin@example.com',
-        role: 'ADMIN',
+        name: 'Admin User',
+        role: UserRole.ADMIN,
       };
       return true;
     }

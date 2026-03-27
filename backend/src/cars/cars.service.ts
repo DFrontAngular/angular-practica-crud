@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import { join, extname } from 'path';
@@ -232,6 +232,8 @@ export class CarsService {
       carDetails: processedDetails,
       id: uuid(),
     };
+
+    this.ensureLicensePlatesAreUnique(processedDetails);
     this.cars.push(newCar);
     return newCar;
   }
@@ -275,6 +277,8 @@ export class CarsService {
       ...(processedDetails && { carDetails: processedDetails }),
       id,
     };
+
+    this.ensureLicensePlatesAreUnique(updatedCar.carDetails ?? [], id);
     const carIndex = this.cars.findIndex((car) => car.id === id);
     this.cars[carIndex] = updatedCar;
 
@@ -322,35 +326,16 @@ export class CarsService {
   }
 
   getDocumentMetadata(id: string): UploadedCarDocumentResponseDto {
-    this.findOne(id);
-
-    const document = this.carDocuments.get(id);
-    if (!document) {
-      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
-    }
-
+    const document = this.getExistingStoredDocument(id);
     return this.toDocumentResponse(document);
   }
 
   getDocumentForDownload(id: string): StoredCarDocument {
-    this.findOne(id);
-
-    const document = this.carDocuments.get(id);
-    if (!document || !fs.existsSync(document.storagePath)) {
-      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
-    }
-
-    return document;
+    return this.getExistingStoredDocument(id);
   }
 
   removeDocument(id: string): void {
-    this.findOne(id);
-
-    const document = this.carDocuments.get(id);
-    if (!document || !fs.existsSync(document.storagePath)) {
-      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
-    }
-
+    this.getExistingStoredDocument(id);
     this.deleteStoredDocument(id);
   }
 
@@ -444,10 +429,13 @@ export class CarsService {
    * @returns True if the license plate is already taken, false otherwise.
    */
   isLicensePlateTaken(licensePlate: string, excludeId?: string): boolean {
+    const normalizedLicensePlate = this.normalizeLicensePlate(licensePlate);
+
     return this.cars.some((car) =>
       car.carDetails.some(
         (carDetail) =>
-          carDetail.licensePlate === licensePlate && car.id !== excludeId,
+          this.normalizeLicensePlate(carDetail.licensePlate) ===
+            normalizedLicensePlate && car.id !== excludeId,
       ),
     );
   }
@@ -478,8 +466,7 @@ export class CarsService {
         if (maxYear !== undefined && detail.manufactureYear > maxYear)
           return false;
         if (
-          available !== undefined &&
-          detail.availability !== (String(available) === 'true')
+          available !== undefined && detail.availability !== available
         )
           return false;
         if (
@@ -582,8 +569,7 @@ export class CarsService {
         if (maxYear !== undefined && detail.manufactureYear > maxYear)
           return false;
         if (
-          available !== undefined &&
-          detail.availability !== (String(available) === 'true')
+          available !== undefined && detail.availability !== available
         )
           return false;
         if (
@@ -604,6 +590,53 @@ export class CarsService {
 
   private getModelName(modelId: string): string {
     return modelsDB.find((model) => model.id === modelId)?.name ?? modelId;
+  }
+
+  private ensureLicensePlatesAreUnique(
+    carDetails: CarDetailEntity[],
+    excludeCarId?: string,
+  ): void {
+    const seenLicensePlates = new Set<string>();
+
+    for (const detail of carDetails) {
+      const normalizedLicensePlate = this.normalizeLicensePlate(
+        detail.licensePlate,
+      );
+
+      if (seenLicensePlates.has(normalizedLicensePlate)) {
+        throw new BadRequestException(
+          `Duplicate license plate "${detail.licensePlate}" found in the same request.`,
+        );
+      }
+
+      if (this.isLicensePlateTaken(detail.licensePlate, excludeCarId)) {
+        throw new BadRequestException(
+          `The license plate ${detail.licensePlate} is already registered to another car.`,
+        );
+      }
+
+      seenLicensePlates.add(normalizedLicensePlate);
+    }
+  }
+
+  private normalizeLicensePlate(licensePlate: string): string {
+    return licensePlate.replace(/\s+/g, '').trim().toUpperCase();
+  }
+
+  private getExistingStoredDocument(id: string): StoredCarDocument {
+    this.findOne(id);
+
+    const document = this.carDocuments.get(id);
+    if (!document) {
+      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
+    }
+
+    if (!fs.existsSync(document.storagePath)) {
+      this.carDocuments.delete(id);
+      throw new NotFoundException(`Car with id ${id} has no uploaded document`);
+    }
+
+    return document;
   }
 
   private deleteStoredDocument(carId: string): void {

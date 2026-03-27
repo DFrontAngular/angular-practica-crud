@@ -20,7 +20,6 @@ import { ISO_CURRENCIES_CODE } from '../data/iso-currencies.data';
 import { IsBrandValid } from '../validators/brand-exists.validator';
 import { IsModelValid } from '../validators/model-exists.validator';
 import { IsManufactureYearValid } from '../validators/is-manufacture-year-valid.validator';
-import { IsUniqueLicensePlate } from '../validators/unique-license-plate.validator';
 
 const licensePlateRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
 const registrationDateRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)$/;
@@ -141,7 +140,6 @@ Also must be less than or equal to the year in registrationDate.`,
       'Car license plate must be a valid Spanish license plate, e.g. 1234 BBB.',
   })
   @IsNotEmpty()
-  @IsUniqueLicensePlate()
   readonly licensePlate: string;
 }
 
