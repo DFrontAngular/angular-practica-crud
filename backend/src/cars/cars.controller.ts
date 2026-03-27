@@ -67,21 +67,23 @@ export class CarsController {
 
   @Get('export/excel')
   @ApiOperation({
-    summary: 'Export the filtered vehicle table to an Excel-compatible file',
+    summary: 'Export the filtered vehicle table to a real Excel file',
   })
-  @ApiProduces('application/vnd.ms-excel')
+  @ApiProduces(
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
   @ApiResponse({
     status: 200,
-    description: 'Excel-compatible file generated successfully',
+    description: 'Excel file generated successfully',
   })
-  exportCarsToExcel(
+  async exportCarsToExcel(
     @Query() filterDto: GetCarsFilterDto,
     @Res() response: Response,
-  ): void {
-    const file = this.carsService.exportCarsToExcel(filterDto);
+  ): Promise<void> {
+    const file = await this.carsService.exportCarsToExcel(filterDto);
     response.setHeader(
       'Content-Type',
-      'application/vnd.ms-excel; charset=utf-8',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
     response.setHeader(
       'Content-Disposition',

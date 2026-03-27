@@ -179,6 +179,42 @@
               "example": "1234",
               "type": "string"
             }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field used to sort the vehicle list",
+            "schema": {
+              "example": "price",
+              "enum": [
+                "brandId",
+                "modelId",
+                "total",
+                "price",
+                "manufactureYear",
+                "registrationDate",
+                "mileage",
+                "licensePlate",
+                "availability"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction applied to sortBy",
+            "schema": {
+              "default": "asc",
+              "example": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -198,7 +234,7 @@
             "bearer": []
           }
         ],
-        "summary": "List vehicles with pagination and filters",
+        "summary": "List vehicles with pagination, filters and sorting",
         "tags": [
           "Vehicles"
         ]
@@ -240,6 +276,171 @@
           }
         ],
         "summary": "Create a new vehicle entry (ADMIN only)",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/cars/export/excel": {
+      "get": {
+        "operationId": "CarsController_exportCarsToExcel",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number to retrieve (1-indexed)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of items to return per page",
+            "schema": {
+              "minimum": 1,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "brandId",
+            "required": false,
+            "in": "query",
+            "description": "Filter results to a single brand by exact brand identifier",
+            "schema": {
+              "example": "brand-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "modelId",
+            "required": false,
+            "in": "query",
+            "description": "Filter results to a single model by exact model identifier. Typically combined with brandId.",
+            "schema": {
+              "example": "model-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPrice",
+            "required": false,
+            "in": "query",
+            "description": "Return only vehicles whose price is greater than or equal to this value",
+            "schema": {
+              "minimum": 0,
+              "example": 10000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "required": false,
+            "in": "query",
+            "description": "Return only vehicles whose price is lower than or equal to this value",
+            "schema": {
+              "minimum": 0,
+              "example": 40000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "minYear",
+            "required": false,
+            "in": "query",
+            "description": "Return only vehicles manufactured in or after this year",
+            "schema": {
+              "minimum": 1900,
+              "example": 2018,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxYear",
+            "required": false,
+            "in": "query",
+            "description": "Return only vehicles manufactured in or before this year",
+            "schema": {
+              "maximum": 2026,
+              "example": 2024,
+              "type": "number"
+            }
+          },
+          {
+            "name": "available",
+            "required": false,
+            "in": "query",
+            "description": "When true, returns only available vehicles. When false, returns only unavailable ones.",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "licensePlate",
+            "required": false,
+            "in": "query",
+            "description": "Partial, case-insensitive search on the license plate field",
+            "schema": {
+              "example": "1234",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field used to sort the vehicle list",
+            "schema": {
+              "example": "price",
+              "enum": [
+                "brandId",
+                "modelId",
+                "total",
+                "price",
+                "manufactureYear",
+                "registrationDate",
+                "mileage",
+                "licensePlate",
+                "availability"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction applied to sortBy",
+            "schema": {
+              "default": "asc",
+              "example": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel file generated successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export the filtered vehicle table to a real Excel file",
         "tags": [
           "Vehicles"
         ]
@@ -365,6 +566,90 @@
           }
         ],
         "summary": "Delete a vehicle entry (ADMIN only)",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/cars/{id}/documents": {
+      "post": {
+        "operationId": "CarsController_uploadCarDocument",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle identifier",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Ficha tecnica ITV"
+                  },
+                  "documentType": {
+                    "type": "string",
+                    "enum": [
+                      "invoice",
+                      "inspection",
+                      "insurance",
+                      "registration",
+                      "other"
+                    ],
+                    "example": "inspection"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Documento de prueba para practicar subida con FormData"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document received successfully and processed in memory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedCarDocumentResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid multipart payload or unsupported file type"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Vehicle not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a practice document for a vehicle (ADMIN only)",
         "tags": [
           "Vehicles"
         ]
@@ -698,7 +983,7 @@
           },
           "manufactureYear": {
             "type": "number",
-            "description": "Year the car was manufactured. Must be between 1900 and the current year (2026).\nAlso must be ≤ the year in registrationDate.",
+            "description": "Year the car was manufactured. Must be an integer between 1900 and the current year (2026).\nAlso must be less than or equal to the year in registrationDate.",
             "example": 2020,
             "minimum": 1900,
             "maximum": 2026
@@ -849,7 +1134,7 @@
           },
           "manufactureYear": {
             "type": "number",
-            "description": "Year the car was manufactured. Must be between 1900 and the current year (2026).\nAlso must be ≤ the year in registrationDate.",
+            "description": "Year the car was manufactured. Must be an integer between 1900 and the current year (2026).\nAlso must be less than or equal to the year in registrationDate.",
             "example": 2020,
             "minimum": 1900,
             "maximum": 2026
@@ -922,6 +1207,84 @@
         "required": [
           "brandId",
           "modelId"
+        ]
+      },
+      "UploadedCarDocumentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Generated identifier for the uploaded document metadata",
+            "example": "a3f7d1e3-5c7e-4a50-8b84-df73b46e5d4f"
+          },
+          "carId": {
+            "type": "string",
+            "description": "Vehicle identifier the upload was associated with",
+            "example": "9f65ec7a-ef2c-4d8a-a7dc-248018fca712"
+          },
+          "originalName": {
+            "type": "string",
+            "description": "Original filename received in the multipart upload",
+            "example": "itv.pdf"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type reported for the uploaded file",
+            "example": "application/pdf"
+          },
+          "size": {
+            "type": "number",
+            "description": "File size in bytes",
+            "example": 184532
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Functional category assigned to the document",
+            "enum": [
+              "invoice",
+              "inspection",
+              "insurance",
+              "registration",
+              "other"
+            ],
+            "example": "inspection"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional display title for the document",
+            "example": "Ficha tecnica ITV"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional notes attached to the document",
+            "example": "Documento de prueba para practicar subida con FormData"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "description": "Timestamp when the upload was received",
+            "example": "2026-03-27T10:15:00.000Z"
+          },
+          "persisted": {
+            "type": "boolean",
+            "description": "Indicates whether the backend persisted the binary content",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "description": "Explains how the practice upload is handled in this training backend",
+            "example": "The file was received as multipart/form-data and processed in memory, but it was not stored."
+          }
+        },
+        "required": [
+          "id",
+          "carId",
+          "originalName",
+          "mimeType",
+          "size",
+          "documentType",
+          "uploadedAt",
+          "persisted",
+          "message"
         ]
       }
     }

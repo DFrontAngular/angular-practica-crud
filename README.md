@@ -178,6 +178,9 @@ Contenido actual:
 AUTH_ENABLED=true
 JWT_SECRET=super-secret-key-123
 JWT_EXPIRES_IN=3600s
+API_DELAY_ENABLED=true
+API_DELAY_MIN_MS=200
+API_DELAY_MAX_MS=900
 ```
 
 ### Modo 1: Login real activado
@@ -227,6 +230,25 @@ Para una persona junior o alguien que esta aprendiendo Angular desde cero:
 4. implementa login, interceptor y control de roles
 
 Ese orden es mejor que intentar hacer todo a la vez.
+
+## 5.1 Latencia simulada para desarrollo
+
+El backend puede introducir una latencia artificial aleatoria para que el frontend se comporte como si hablara con una API real y no con respuestas instantaneas de `localhost`.
+
+Se controla tambien desde `backend/.env`:
+
+```env
+API_DELAY_ENABLED=true
+API_DELAY_MIN_MS=200
+API_DELAY_MAX_MS=900
+```
+
+Que implica:
+
+- todas las respuestas del backend pueden tardar entre `200` y `900` ms
+- sirve para probar loaders, estados vacios, feedback visual y UX realista
+- puedes desactivarlo poniendo `API_DELAY_ENABLED=false`
+- puedes ajustar el rango si quieres una sensacion mas rapida o mas exigente
 
 ## 6. Backend revisado: que hay realmente
 

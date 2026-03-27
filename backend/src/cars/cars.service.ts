@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import * as ExcelJS from 'exceljs';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -257,75 +258,78 @@ export class CarsService {
     };
   }
 
-  exportCarsToExcel(filterDto: GetCarsFilterDto = { page: 1, limit: 10 }): {
+  async exportCarsToExcel(
+    filterDto: GetCarsFilterDto = { page: 1, limit: 10 },
+  ): Promise<{
     fileName: string;
     content: Buffer;
-  } {
+  }> {
     const exportedCars = this.getFilteredCars(filterDto);
     const rows = exportedCars.map((car) => {
       const detail = this.getMatchingCarDetail(car, filterDto);
 
-      return [
-        this.getBrandName(car.brandId),
-        this.getModelName(car.modelId),
-        detail?.licensePlate ?? '',
-        detail?.manufactureYear?.toString() ?? '',
-        detail?.registrationDate ?? '',
-        detail?.price?.toString() ?? '',
-        detail?.currency ?? '',
-        detail?.mileage?.toString() ?? '',
-        detail?.availability ? 'Yes' : 'No',
-        detail?.color ?? '',
-        detail?.description ?? '',
-        (car.carDetails?.length ?? 0).toString(),
-      ];
+      return {
+        brand: this.getBrandName(car.brandId),
+        model: this.getModelName(car.modelId),
+        licensePlate: detail?.licensePlate ?? '',
+        manufactureYear: detail?.manufactureYear ?? '',
+        registrationDate: detail?.registrationDate ?? '',
+        price: detail?.price ?? '',
+        currency: detail?.currency ?? '',
+        mileage: detail?.mileage ?? '',
+        available: detail?.availability ? 'Yes' : 'No',
+        color: detail?.color ?? '',
+        description: detail?.description ?? '',
+        totalDetails: car.carDetails?.length ?? 0,
+      };
     });
 
-    const worksheetRows = [
-      [
-        'Brand',
-        'Model',
-        'License Plate',
-        'Manufacture Year',
-        'Registration Date',
-        'Price',
-        'Currency',
-        'Mileage',
-        'Available',
-        'Color',
-        'Description',
-        'Total Details',
-      ],
-      ...rows,
-    ]
-      .map(
-        (row) =>
-          `<Row>${row
-            .map(
-              (cell) =>
-                `<Cell><Data ss:Type="String">${this.escapeExcelXml(cell)}</Data></Cell>`,
-            )
-            .join('')}</Row>`,
-      )
-      .join('');
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'car-dealership backend';
+    workbook.created = new Date();
 
-    const xml = `<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:html="http://www.w3.org/TR/REC-html40">
-  <Worksheet ss:Name="Cars">
-    <Table>
-      ${worksheetRows}
-    </Table>
-  </Worksheet>
-</Workbook>`;
+    const worksheet = workbook.addWorksheet('Cars');
+
+    worksheet.columns = [
+      { header: 'Brand', key: 'brand', width: 18 },
+      { header: 'Model', key: 'model', width: 22 },
+      { header: 'License Plate', key: 'licensePlate', width: 18 },
+      { header: 'Manufacture Year', key: 'manufactureYear', width: 18 },
+      { header: 'Registration Date', key: 'registrationDate', width: 24 },
+      { header: 'Price', key: 'price', width: 14 },
+      { header: 'Currency', key: 'currency', width: 12 },
+      { header: 'Mileage', key: 'mileage', width: 14 },
+      { header: 'Available', key: 'available', width: 12 },
+      { header: 'Color', key: 'color', width: 14 },
+      { header: 'Description', key: 'description', width: 40 },
+      { header: 'Total Details', key: 'totalDetails', width: 14 },
+    ];
+
+    worksheet.addRows(rows);
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1F4E78' },
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+    worksheet.autoFilter = {
+      from: 'A1',
+      to: 'L1',
+    };
+
+    const priceColumn = worksheet.getColumn('price');
+    priceColumn.numFmt = '#,##0.00';
+
+    const buffer = await workbook.xlsx.writeBuffer();
 
     return {
-      fileName: `cars-export-${new Date().toISOString().slice(0, 10)}.xls`,
-      content: Buffer.from(xml, 'utf-8'),
+      fileName: `cars-export-${new Date().toISOString().slice(0, 10)}.xlsx`,
+      content: Buffer.from(buffer),
     };
   }
 
@@ -504,14 +508,5 @@ export class CarsService {
 
   private getModelName(modelId: string): string {
     return modelsDB.find((model) => model.id === modelId)?.name ?? modelId;
-  }
-
-  private escapeExcelXml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
   }
 }
