@@ -118,8 +118,10 @@ export class CarsService {
 
     const paginatedItems = filteredCars.slice(skip, skip + limit).map((car) => {
       const { carDetails, ...carWithoutDetails } = car;
+      const matchingDetail = this.getMatchingCarDetail(car, filterDto);
       return {
         ...carWithoutDetails,
+        imageUrl: matchingDetail?.imageUrl,
         total: carDetails?.length || 0,
       };
     });

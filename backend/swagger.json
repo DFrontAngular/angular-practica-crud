@@ -572,6 +572,78 @@
       }
     },
     "/cars/{id}/documents": {
+      "get": {
+        "operationId": "CarsController_getCarDocumentMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle identifier",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document metadata returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadedCarDocumentResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vehicle or document not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieve metadata for the single document linked to a vehicle",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "delete": {
+        "operationId": "CarsController_deleteCarDocument",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle identifier",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Document deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Vehicle or document not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete the single document linked to a vehicle (ADMIN only)",
+        "tags": [
+          "Vehicles"
+        ]
+      },
       "post": {
         "operationId": "CarsController_uploadCarDocument",
         "parameters": [
@@ -625,7 +697,7 @@
         },
         "responses": {
           "201": {
-            "description": "Document received successfully and processed in memory",
+            "description": "Document stored successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -649,7 +721,40 @@
             "bearer": []
           }
         ],
-        "summary": "Upload a practice document for a vehicle (ADMIN only)",
+        "summary": "Upload or replace the single stored document for a vehicle (ADMIN only)",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/cars/{id}/documents/download": {
+      "get": {
+        "operationId": "CarsController_downloadCarDocument",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Vehicle identifier",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document download started successfully"
+          },
+          "404": {
+            "description": "Vehicle or document not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download the single document linked to a vehicle",
         "tags": [
           "Vehicles"
         ]
@@ -1267,12 +1372,17 @@
           "persisted": {
             "type": "boolean",
             "description": "Indicates whether the backend persisted the binary content",
-            "example": false
+            "example": true
+          },
+          "downloadUrl": {
+            "type": "string",
+            "description": "Download URL for the single document associated with the car",
+            "example": "/cars/9f65ec7a-ef2c-4d8a-a7dc-248018fca712/documents/download"
           },
           "message": {
             "type": "string",
-            "description": "Explains how the practice upload is handled in this training backend",
-            "example": "The file was received as multipart/form-data and processed in memory, but it was not stored."
+            "description": "Explains how the backend handled the uploaded file",
+            "example": "The file was stored on disk and replaced any previous document linked to the vehicle."
           }
         },
         "required": [
@@ -1284,6 +1394,7 @@
           "documentType",
           "uploadedAt",
           "persisted",
+          "downloadUrl",
           "message"
         ]
       }

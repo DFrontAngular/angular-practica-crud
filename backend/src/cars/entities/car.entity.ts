@@ -34,4 +34,12 @@ export class Car extends OmitType(CreateCarDto, ['carDetails'] as const) {
   total?: number;
 }
 
-export class CarSummary extends OmitType(Car, ['carDetails'] as const) {}
+export class CarSummary extends OmitType(Car, ['carDetails'] as const) {
+  @ApiProperty({
+    description: 'Representative vehicle image URL for list and card views',
+    type: String,
+    required: false,
+    example: '/images/car_images/model-1_toyota_corolla.webp',
+  })
+  imageUrl?: string;
+}
