@@ -24,29 +24,68 @@ export class CarsService {
   private cars: Car[] = this.generateSeedData(50);
 
   /**
-   * Curated Unsplash car photo IDs. The backend always resolves imageUrl
-   * here so the frontend never has to deal with it.
+   * Public image path catalog keyed by model id.
+   * Files live under backend/public/images/car_images.
    */
-  private readonly carImageUrls: string[] = [
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
-    'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
-    'https://images.unsplash.com/photo-1542362567-b058c03b46cf',
-    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d',
-    'https://images.unsplash.com/photo-1583121274602-3e2820c69888',
-    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7',
-    'https://images.unsplash.com/photo-1555215695-3004980ad54e',
-    'https://images.unsplash.com/photo-1544636331-e26879cd4d9b',
-    'https://images.unsplash.com/photo-1511919884226-fd3cad34687c',
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7',
-    'https://images.unsplash.com/photo-1609521263047-f8f205293f24',
-    'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023',
-  ];
+  private readonly imageBasePath = '/images/car_images';
 
-  /** Returns a random Unsplash car photo URL. */
-  private getRandomCarImageUrl(): string {
-    return this.carImageUrls[
-      Math.floor(Math.random() * this.carImageUrls.length)
-    ];
+  private readonly carImagesByModelId: Record<string, string> = {
+    'model-1': 'model-1_toyota_corolla.webp',
+    'model-2': 'model-2_toyota_camry.webp',
+    'model-3': 'model-3_toyota_prius.webp',
+    'model-4': 'model-4_toyota_rav4.webp',
+    'model-5': 'model-5_toyota_land_cruiser.webp',
+    'model-6': 'model-6_ford_focus.webp',
+    'model-7': 'model-7_ford_mustang.webp',
+    'model-8': 'model-8_ford_escape.webp',
+    'model-9': 'model-9_ford_explorer.webp',
+    'model-10': 'model-10_ford_f150.webp',
+    'model-11': 'model-11_honda_civic.webp',
+    'model-12': 'model-12_honda_accord.webp',
+    'model-13': 'model-13_honda_crv.webp',
+    'model-14': 'model-14_bmw_x5.webp',
+    'model-15': 'model-15_bmw_m3.webp',
+    'model-16': 'model-16_mercedes_c_class.webp',
+    'model-17': 'model-17_mercedes_e_class.webp',
+    'model-18': 'model-18_chevrolet_camaro.webp',
+    'model-19': 'model-19_chevrolet_silverado.webp',
+    'model-20': 'model-20_nissan_altima.webp',
+    'model-21': 'model-21_nissan_z.webp',
+    'model-22': 'model-22_audi_a4.webp',
+    'model-23': 'model-23_audi_q5.webp',
+    'model-24': 'model-24_hyundai_tucson.webp',
+    'model-25': 'model-25_hyundai_ioniq5.webp',
+    'model-26': 'model-26_kia_sportage.webp',
+    'model-27': 'model-27_kia_ev6.webp',
+  };
+
+  private readonly fallbackImageByBrandId: Record<string, string> = {
+    'brand-1': 'model-1',
+    'brand-2': 'model-6',
+    'brand-3': 'model-11',
+    'brand-4': 'model-14',
+    'brand-5': 'model-16',
+    'brand-6': 'model-18',
+    'brand-7': 'model-20',
+    'brand-8': 'model-22',
+    'brand-9': 'model-24',
+    'brand-10': 'model-26',
+  };
+
+  private getImageUrlForCar(modelId: string, brandId: string): string {
+    const exactImage = this.carImagesByModelId[modelId];
+    if (exactImage) {
+      return `${this.imageBasePath}/${exactImage}`;
+    }
+
+    const fallbackModelId = this.fallbackImageByBrandId[brandId];
+    const fallbackImage = fallbackModelId
+      ? this.carImagesByModelId[fallbackModelId]
+      : undefined;
+
+    return fallbackImage
+      ? `${this.imageBasePath}/${fallbackImage}`
+      : `${this.imageBasePath}/${this.carImagesByModelId['model-1']}`;
   }
 
   /**
@@ -103,14 +142,6 @@ export class CarsService {
       'Ready for adventure, off-road capable.',
       'Sporty look with high performance engine.',
     ];
-    const carImages = [
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
-      'https://images.unsplash.com/photo-1542362567-b058c03b46cf',
-      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d',
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888',
-      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7',
-    ];
 
     for (let i = 0; i < count; i++) {
       const brand = brandsDB[Math.floor(Math.random() * brandsDB.length)];
@@ -140,7 +171,7 @@ export class CarsService {
             ).toISOString(),
             color: colors[i % colors.length],
             description: descriptions[i % descriptions.length],
-            imageUrl: carImages[i % carImages.length],
+            imageUrl: this.getImageUrlForCar(model.id, brand.id),
           },
         ],
       });
@@ -168,16 +199,15 @@ export class CarsService {
   create(createCarDto: CreateCarDto): Car {
     const { carDetails, ...rest } = createCarDto;
 
-    // Apply defaults to carDetails and assign a random Unsplash image.
-    // The frontend sends a real file (multipart), but we mock storage
-    // by always resolving to a curated Unsplash URL.
+    // Resolve the image from the local public catalog instead of relying
+    // on client-provided image URLs.
     const processedDetails: CarDetailEntity[] =
       carDetails?.map(
         (detail): CarDetailEntity => ({
           ...detail,
           availability: detail.availability ?? true,
           currency: detail.currency ?? 'EUR',
-          imageUrl: this.getRandomCarImageUrl(),
+          imageUrl: this.getImageUrlForCar(rest.modelId, rest.brandId),
         }),
       ) || [];
 
@@ -212,14 +242,13 @@ export class CarsService {
     const carDB = this.findOne(id);
     const { carDetails, ...rest } = carToUpdate;
 
-    // Apply defaults to carDetails if provided.
-    // The client never sends imageUrl; we always assign a random Unsplash URL.
+    // Keep image resolution backend-owned and based on the selected model.
     const processedDetails = carDetails?.map(
       (detail): CarDetailEntity => ({
         ...detail,
         availability: detail.availability ?? true,
         currency: detail.currency ?? 'EUR',
-        imageUrl: this.getRandomCarImageUrl(),
+        imageUrl: this.getImageUrlForCar(rest.modelId, rest.brandId),
       }),
     );
 

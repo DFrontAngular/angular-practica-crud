@@ -288,6 +288,7 @@ Endpoints:
 Comportamiento importante:
 
 - `GET /cars` devuelve paginacion real
+- `GET /cars/:id` devuelve el coche con sus `carDetails`, incluyendo `imageUrl` ya resuelta por el backend
 - `GET /cars/export/excel` reutiliza filtros y ordenacion y descarga un `.xls`
 - `POST /cars/:id/documents` acepta documentos e imagenes de practica y los procesa en memoria
 - `POST`, `PUT`, `DELETE` y upload de documentos estan protegidos por rol
@@ -329,6 +330,12 @@ No devuelve un array plano. Devuelve un objeto paginado con esta estructura:
   }
 }
 ```
+
+Nota:
+
+- cada item resumido contiene `total`, pero no incluye `carDetails`
+- para obtener el detalle completo de un coche, el frontend debe consumir `GET /cars/:id`
+- en ese detalle, cada `carDetail` ya incluye `imageUrl` resuelta por el backend y lista para mostrarse en UI
 
 ### Filtros soportados en `GET /cars`
 
@@ -381,6 +388,39 @@ Devuelve modelos con forma:
 ### `GET /cars/export/excel`
 
 Devuelve una descarga Excel-compatible con el mismo conjunto filtrado y ordenado que `GET /cars`, pero sin paginacion.
+
+### `GET /cars/:id`
+
+Devuelve un coche completo con esta idea de estructura:
+
+```ts
+{
+  id: string,
+  brandId: string,
+  modelId: string,
+  carDetails: [
+    {
+      registrationDate: string,
+      mileage: number,
+      currency: string,
+      price: number,
+      manufactureYear: number,
+      availability?: boolean,
+      color?: string,
+      description?: string,
+      licensePlate: string,
+      imageUrl: string
+    }
+  ],
+  total: number
+}
+```
+
+Importante:
+
+- `imageUrl` no la envia el cliente en `POST` ni en `PUT`
+- `imageUrl` la resuelve siempre el backend
+- el frontend puede usar esa URL directamente para pintar la imagen del coche
 
 ### `POST /cars/:id/documents`
 
