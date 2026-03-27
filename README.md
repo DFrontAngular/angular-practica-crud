@@ -280,17 +280,24 @@ Endpoints:
 - `GET /cars`
 - `GET /cars/export/excel`
 - `GET /cars/:id`
+- `GET /cars/:id/documents`
+- `GET /cars/:id/documents/download`
 - `POST /cars`
 - `POST /cars/:id/documents`
+- `DELETE /cars/:id/documents`
 - `PUT /cars/:id`
 - `DELETE /cars/:id`
 
 Comportamiento importante:
 
 - `GET /cars` devuelve paginacion real
+- `GET /cars` devuelve `imageUrl` a nivel resumen para tablas o cards
 - `GET /cars/:id` devuelve el coche con sus `carDetails`, incluyendo `imageUrl` ya resuelta por el backend
 - `GET /cars/export/excel` reutiliza filtros y ordenacion y descarga un `.xls`
-- `POST /cars/:id/documents` acepta documentos e imagenes de practica y los procesa en memoria
+- `POST /cars/:id/documents` acepta documentos e imagenes y guarda un unico archivo por vehiculo
+- `GET /cars/:id/documents` devuelve los metadatos del documento actual del vehiculo
+- `GET /cars/:id/documents/download` descarga el documento actual del vehiculo
+- `DELETE /cars/:id/documents` elimina el documento actual del vehiculo
 - `POST`, `PUT`, `DELETE` y upload de documentos estan protegidos por rol
 - el backend anade `imageUrl` automaticamente a cada `carDetail`
 - la informacion se guarda en memoria
@@ -333,7 +340,7 @@ No devuelve un array plano. Devuelve un objeto paginado con esta estructura:
 
 Nota:
 
-- cada item resumido contiene `total`, pero no incluye `carDetails`
+- cada item resumido contiene `total` e `imageUrl`, pero no incluye `carDetails`
 - para obtener el detalle completo de un coche, el frontend debe consumir `GET /cars/:id`
 - en ese detalle, cada `carDetail` ya incluye `imageUrl` resuelta por el backend y lista para mostrarse en UI
 
@@ -424,7 +431,7 @@ Importante:
 
 ### `POST /cars/:id/documents`
 
-Acepta `multipart/form-data` para practicar subida de ficheros. El backend valida tipo y tamano, procesa el archivo en memoria y devuelve metadatos, pero no lo persiste.
+Acepta `multipart/form-data` para subir un unico documento por vehiculo. El backend valida tipo y tamano, guarda el archivo en disco local y, si ya existia uno para ese coche, lo reemplaza.
 
 Tipos admitidos:
 
@@ -445,6 +452,18 @@ Campos posibles:
 - `title` opcional
 - `documentType` opcional: `invoice`, `inspection`, `insurance`, `registration`, `other`
 - `description` opcional
+
+### `GET /cars/:id/documents`
+
+Devuelve los metadatos del documento actualmente asociado al vehiculo.
+
+### `GET /cars/:id/documents/download`
+
+Descarga el documento actualmente asociado al vehiculo.
+
+### `DELETE /cars/:id/documents`
+
+Elimina el documento actualmente asociado al vehiculo.
 
 ### `POST /auth/login`
 
