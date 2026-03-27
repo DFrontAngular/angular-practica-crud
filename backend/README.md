@@ -285,9 +285,7 @@ Respuesta:
 Respuesta:
 
 ```json
-[
-  { "id": "model-1", "name": "Corolla", "brandId": "brand-1" }
-]
+[{ "id": "model-1", "name": "Corolla", "brandId": "brand-1" }]
 ```
 
 ## Filtros y paginación en coches
@@ -304,11 +302,36 @@ Respuesta:
 - `maxYear`
 - `available`
 - `licensePlate`
+- `sortBy`
+- `sortOrder`
+
+Valores permitidos para `sortBy`:
+
+- `brandId`
+- `modelId`
+- `total`
+- `price`
+- `manufactureYear`
+- `registrationDate`
+- `mileage`
+- `licensePlate`
+- `availability`
+
+Valores permitidos para `sortOrder`:
+
+- `asc`
+- `desc`
 
 Ejemplo:
 
 ```http
 GET /cars?page=1&limit=10&brandId=brand-1&minYear=2020&available=true
+```
+
+Ejemplo con ordenación:
+
+```http
+GET /cars?page=1&limit=10&sortBy=price&sortOrder=desc
 ```
 
 ## Validaciones importantes

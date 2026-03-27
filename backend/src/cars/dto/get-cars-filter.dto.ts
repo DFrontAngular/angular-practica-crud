@@ -1,7 +1,22 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+
+export const CAR_SORT_FIELDS = [
+  'brandId',
+  'modelId',
+  'total',
+  'price',
+  'manufactureYear',
+  'registrationDate',
+  'mileage',
+  'licensePlate',
+  'availability',
+] as const;
+
+export type CarSortField = (typeof CAR_SORT_FIELDS)[number];
+export type SortOrder = 'asc' | 'desc';
 
 export class GetCarsFilterDto extends PaginationDto {
   @ApiPropertyOptional({
@@ -79,4 +94,25 @@ export class GetCarsFilterDto extends PaginationDto {
   @IsString()
   @IsOptional()
   licensePlate?: string;
+
+  @ApiPropertyOptional({
+    description: 'Field used to sort the vehicle list',
+    enum: CAR_SORT_FIELDS,
+    example: 'price',
+  })
+  @IsString()
+  @IsIn(CAR_SORT_FIELDS)
+  @IsOptional()
+  sortBy?: CarSortField;
+
+  @ApiPropertyOptional({
+    description: 'Sort direction applied to sortBy',
+    enum: ['asc', 'desc'],
+    default: 'asc',
+    example: 'asc',
+  })
+  @IsString()
+  @IsIn(['asc', 'desc'])
+  @IsOptional()
+  sortOrder?: SortOrder = 'asc';
 }

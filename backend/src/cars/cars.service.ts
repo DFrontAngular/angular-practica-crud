@@ -1,15 +1,16 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
 
 import { CreateCarDto } from './dto';
 import { Car, CarDetailEntity, CarSummary } from './entities';
 
-import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { brandsDB, modelsDB } from '../brands/data/brand.data';
-import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
+import { PaginatedResponseDto } from '../common/dto/pagination.dto';
+import {
+  CarSortField,
+  GetCarsFilterDto,
+  SortOrder,
+} from './dto/get-cars-filter.dto';
 
 @Injectable()
 export class CarsService {
@@ -47,25 +48,29 @@ export class CarsService {
    * @param filterDto - The filter and pagination options.
    * @returns A paginated response with filtered cars and metadata.
    */
-  findAll(filterDto: GetCarsFilterDto = { page: 1, limit: 10 }): PaginatedResponseDto<CarSummary> {
-    const { 
-      page = 1, 
-      limit = 10, 
-      brandId, 
-      modelId, 
-      minPrice, 
-      maxPrice, 
-      minYear, 
-      maxYear, 
-      available, 
-      licensePlate 
+  findAll(
+    filterDto: GetCarsFilterDto = { page: 1, limit: 10 },
+  ): PaginatedResponseDto<CarSummary> {
+    const {
+      page = 1,
+      limit = 10,
+      brandId,
+      modelId,
+      minPrice,
+      maxPrice,
+      minYear,
+      maxYear,
+      available,
+      licensePlate,
+      sortBy,
+      sortOrder = 'asc',
     } = filterDto;
 
     // Apply filters
     let filteredCars = this.cars.filter((car) => {
       // Brand filter
       if (brandId && car.brandId !== brandId) return false;
-      
+
       // Model filter
       if (modelId && car.modelId !== modelId) return false;
 
@@ -73,19 +78,37 @@ export class CarsService {
       const hasMatchingDetail = car.carDetails.some((detail) => {
         if (minPrice !== undefined && detail.price < minPrice) return false;
         if (maxPrice !== undefined && detail.price > maxPrice) return false;
-        if (minYear !== undefined && detail.manufactureYear < minYear) return false;
-        if (maxYear !== undefined && detail.manufactureYear > maxYear) return false;
-        if (available !== undefined && detail.availability !== (String(available) === 'true')) return false;
-        if (licensePlate && !detail.licensePlate.toLowerCase().includes(licensePlate.toLowerCase())) return false;
+        if (minYear !== undefined && detail.manufactureYear < minYear)
+          return false;
+        if (maxYear !== undefined && detail.manufactureYear > maxYear)
+          return false;
+        if (
+          available !== undefined &&
+          detail.availability !== (String(available) === 'true')
+        )
+          return false;
+        if (
+          licensePlate &&
+          !detail.licensePlate
+            .toLowerCase()
+            .includes(licensePlate.toLowerCase())
+        )
+          return false;
         return true;
       });
 
       return hasMatchingDetail;
     });
 
+    if (sortBy) {
+      filteredCars = [...filteredCars].sort((leftCar, rightCar) =>
+        this.compareCars(leftCar, rightCar, sortBy, sortOrder, filterDto),
+      );
+    }
+
     const skip = (page - 1) * limit;
     const totalItems = filteredCars.length;
-    
+
     const paginatedItems = filteredCars.slice(skip, skip + limit).map((car) => {
       const { carDetails, ...carWithoutDetails } = car;
       return {
@@ -141,7 +164,8 @@ export class CarsService {
       const model = brandModels[Math.floor(Math.random() * brandModels.length)];
 
       const consonants = 'BCDFGHJKLMNPRSTVWXYZ';
-      const getRandomConsonant = () => consonants[Math.floor(Math.random() * consonants.length)];
+      const getRandomConsonant = () =>
+        consonants[Math.floor(Math.random() * consonants.length)];
 
       seedCars.push({
         id: uuid(),
@@ -155,7 +179,11 @@ export class CarsService {
             manufactureYear: 2015 + (i % 10),
             mileage: Math.floor(Math.random() * 100000),
             price: 15000 + Math.floor(Math.random() * 30000),
-            registrationDate: new Date(2015 + (i % 10), i % 12, (i % 28) + 1).toISOString(),
+            registrationDate: new Date(
+              2015 + (i % 10),
+              i % 12,
+              (i % 28) + 1,
+            ).toISOString(),
             color: colors[i % colors.length],
             description: descriptions[i % descriptions.length],
             imageUrl: carImages[i % carImages.length],
@@ -185,16 +213,19 @@ export class CarsService {
    */
   create(createCarDto: CreateCarDto): Car {
     const { carDetails, ...rest } = createCarDto;
-    
+
     // Apply defaults to carDetails and assign a random Unsplash image.
     // The frontend sends a real file (multipart), but we mock storage
     // by always resolving to a curated Unsplash URL.
-    const processedDetails: CarDetailEntity[] = carDetails?.map((detail): CarDetailEntity => ({
-      ...detail,
-      availability: detail.availability ?? true,
-      currency: detail.currency ?? 'EUR',
-      imageUrl: this.getRandomCarImageUrl(),
-    })) || [];
+    const processedDetails: CarDetailEntity[] =
+      carDetails?.map(
+        (detail): CarDetailEntity => ({
+          ...detail,
+          availability: detail.availability ?? true,
+          currency: detail.currency ?? 'EUR',
+          imageUrl: this.getRandomCarImageUrl(),
+        }),
+      ) || [];
 
     const newCar: Car = {
       ...rest,
@@ -229,12 +260,14 @@ export class CarsService {
 
     // Apply defaults to carDetails if provided.
     // The client never sends imageUrl; we always assign a random Unsplash URL.
-    const processedDetails = carDetails?.map((detail): CarDetailEntity => ({
-      ...detail,
-      availability: detail.availability ?? true,
-      currency: detail.currency ?? 'EUR',
-      imageUrl: this.getRandomCarImageUrl(),
-    }));
+    const processedDetails = carDetails?.map(
+      (detail): CarDetailEntity => ({
+        ...detail,
+        availability: detail.availability ?? true,
+        currency: detail.currency ?? 'EUR',
+        imageUrl: this.getRandomCarImageUrl(),
+      }),
+    );
 
     const updatedCar = {
       ...carDB,
@@ -265,8 +298,113 @@ export class CarsService {
   isLicensePlateTaken(licensePlate: string, excludeId?: string): boolean {
     return this.cars.some((car) =>
       car.carDetails.some(
-        (carDetail) => carDetail.licensePlate === licensePlate && car.id !== excludeId,
+        (carDetail) =>
+          carDetail.licensePlate === licensePlate && car.id !== excludeId,
       ),
     );
+  }
+
+  private compareCars(
+    leftCar: Car,
+    rightCar: Car,
+    sortBy: CarSortField,
+    sortOrder: SortOrder,
+    filterDto: GetCarsFilterDto,
+  ): number {
+    const direction = sortOrder === 'desc' ? -1 : 1;
+    const leftValue = this.getSortableValue(leftCar, sortBy, filterDto);
+    const rightValue = this.getSortableValue(rightCar, sortBy, filterDto);
+
+    if (leftValue === rightValue) {
+      return leftCar.id.localeCompare(rightCar.id) * direction;
+    }
+
+    if (leftValue === undefined || leftValue === null) return 1;
+    if (rightValue === undefined || rightValue === null) return -1;
+
+    if (typeof leftValue === 'boolean' && typeof rightValue === 'boolean') {
+      return (Number(leftValue) - Number(rightValue)) * direction;
+    }
+
+    if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+      return (leftValue - rightValue) * direction;
+    }
+
+    return (
+      String(leftValue).localeCompare(String(rightValue), 'es', {
+        sensitivity: 'base',
+      }) * direction
+    );
+  }
+
+  private getSortableValue(
+    car: Car,
+    sortBy: CarSortField,
+    filterDto: GetCarsFilterDto,
+  ): string | number | boolean | undefined {
+    const matchingDetail = this.getMatchingCarDetail(car, filterDto);
+
+    switch (sortBy) {
+      case 'brandId':
+        return this.getBrandName(car.brandId);
+      case 'modelId':
+        return this.getModelName(car.modelId);
+      case 'total':
+        return car.carDetails?.length ?? 0;
+      case 'price':
+        return matchingDetail?.price;
+      case 'manufactureYear':
+        return matchingDetail?.manufactureYear;
+      case 'registrationDate':
+        return matchingDetail?.registrationDate;
+      case 'mileage':
+        return matchingDetail?.mileage;
+      case 'licensePlate':
+        return matchingDetail?.licensePlate;
+      case 'availability':
+        return matchingDetail?.availability;
+      default:
+        return undefined;
+    }
+  }
+
+  private getMatchingCarDetail(
+    car: Car,
+    filterDto: GetCarsFilterDto,
+  ): CarDetailEntity | undefined {
+    const { minPrice, maxPrice, minYear, maxYear, available, licensePlate } =
+      filterDto;
+
+    return (
+      car.carDetails.find((detail) => {
+        if (minPrice !== undefined && detail.price < minPrice) return false;
+        if (maxPrice !== undefined && detail.price > maxPrice) return false;
+        if (minYear !== undefined && detail.manufactureYear < minYear)
+          return false;
+        if (maxYear !== undefined && detail.manufactureYear > maxYear)
+          return false;
+        if (
+          available !== undefined &&
+          detail.availability !== (String(available) === 'true')
+        )
+          return false;
+        if (
+          licensePlate &&
+          !detail.licensePlate
+            .toLowerCase()
+            .includes(licensePlate.toLowerCase())
+        )
+          return false;
+        return true;
+      }) ?? car.carDetails[0]
+    );
+  }
+
+  private getBrandName(brandId: string): string {
+    return brandsDB.find((brand) => brand.id === brandId)?.name ?? brandId;
+  }
+
+  private getModelName(modelId: string): string {
+    return modelsDB.find((model) => model.id === modelId)?.name ?? modelId;
   }
 }

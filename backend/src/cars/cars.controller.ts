@@ -31,7 +31,7 @@ export class CarsController {
   constructor(private readonly carsService: CarsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List vehicles with pagination and filters' })
+  @ApiOperation({ summary: 'List vehicles with pagination, filters and sorting' })
   @ApiResponse({ status: 200, description: 'Vehicle catalog returned successfully', type: PaginatedResponseDto })
   getAllCars(@Query() filterDto: GetCarsFilterDto): PaginatedResponseDto<CarSummary> {
     return this.carsService.findAll(filterDto);
