@@ -23,8 +23,7 @@ import { IsManufactureYearValid } from '../validators/is-manufacture-year-valid.
 import { IsUniqueLicensePlate } from '../validators/unique-license-plate.validator';
 
 const licensePlateRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
-const registrationDateRegex =
-  /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)$/;
+const registrationDateRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)$/;
 
 export class CarDetailsDto {
   @ApiProperty({
@@ -36,8 +35,7 @@ export class CarDetailsDto {
   @IsDateString({ strictSeparator: true, strict: true })
   @IsNotEmpty()
   @Matches(registrationDateRegex, {
-    message:
-      'Registration date must be in the format YYYY-MM-DDTHH:MM:SS.mmmZ',
+    message: 'Registration date must be in the format YYYY-MM-DDTHH:MM:SS.mmmZ',
   })
   registrationDate: string;
 

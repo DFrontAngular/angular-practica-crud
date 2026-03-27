@@ -3,10 +3,10 @@ import {
   Controller,
   Delete,
   Get,
-  Header,
   HttpCode,
   HttpStatus,
   Param,
+  ParseFilePipeBuilder,
   ParseUUIDPipe,
   Post,
   Put,
@@ -16,7 +16,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ParseFilePipeBuilder } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
@@ -29,20 +28,20 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Response } from 'express';
+import { UserRole } from '../auth/auth.service';
+import { Roles } from '../common/decorators/roles.decorator';
+import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../auth/auth.service';
 import { CarsService } from './cars.service';
 import {
   CreateCarDto,
   UploadCarDocumentDto,
-  UploadedPracticeFile,
   UploadedCarDocumentResponseDto,
+  UploadedPracticeFile,
 } from './dto';
-import { Car, CarSummary } from './entities';
-import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
+import { Car, CarSummary } from './entities';
 
 @ApiTags('Vehicles')
 @ApiBearerAuth()
@@ -52,30 +51,53 @@ export class CarsController {
   constructor(private readonly carsService: CarsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List vehicles with pagination, filters and sorting' })
-  @ApiResponse({ status: 200, description: 'Vehicle catalog returned successfully', type: PaginatedResponseDto })
-  getAllCars(@Query() filterDto: GetCarsFilterDto): PaginatedResponseDto<CarSummary> {
+  @ApiOperation({
+    summary: 'List vehicles with pagination, filters and sorting',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vehicle catalog returned successfully',
+    type: PaginatedResponseDto,
+  })
+  getAllCars(
+    @Query() filterDto: GetCarsFilterDto,
+  ): PaginatedResponseDto<CarSummary> {
     return this.carsService.findAll(filterDto);
   }
 
   @Get('export/excel')
-  @ApiOperation({ summary: 'Export the filtered vehicle table to an Excel-compatible file' })
+  @ApiOperation({
+    summary: 'Export the filtered vehicle table to an Excel-compatible file',
+  })
   @ApiProduces('application/vnd.ms-excel')
-  @ApiResponse({ status: 200, description: 'Excel-compatible file generated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Excel-compatible file generated successfully',
+  })
   exportCarsToExcel(
     @Query() filterDto: GetCarsFilterDto,
     @Res() response: Response,
   ): void {
     const file = this.carsService.exportCarsToExcel(filterDto);
-    response.setHeader('Content-Type', 'application/vnd.ms-excel; charset=utf-8');
-    response.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.ms-excel; charset=utf-8',
+    );
+    response.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${file.fileName}"`,
+    );
     response.send(file.content);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve a vehicle by identifier' })
   @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
-  @ApiResponse({ status: 200, description: 'Vehicle returned successfully', type: Car })
+  @ApiResponse({
+    status: 200,
+    description: 'Vehicle returned successfully',
+    type: Car,
+  })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   getCarById(@Param('id', ParseUUIDPipe) id: string): Car {
     return this.carsService.findOne(id);
@@ -84,7 +106,11 @@ export class CarsController {
   @Post()
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Create a new vehicle entry (ADMIN only)' })
-  @ApiResponse({ status: 201, description: 'Vehicle created successfully', type: Car })
+  @ApiResponse({
+    status: 201,
+    description: 'Vehicle created successfully',
+    type: Car,
+  })
   @ApiResponse({ status: 400, description: 'Invalid vehicle payload' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   createCar(@Body() createCarDto: CreateCarDto): Car {
@@ -95,7 +121,11 @@ export class CarsController {
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update an existing vehicle entry (ADMIN only)' })
   @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
-  @ApiResponse({ status: 200, description: 'Vehicle updated successfully', type: Car })
+  @ApiResponse({
+    status: 200,
+    description: 'Vehicle updated successfully',
+    type: Car,
+  })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   updateCar(
@@ -109,7 +139,9 @@ export class CarsController {
   @Roles(UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload a practice document for a vehicle (ADMIN only)' })
+  @ApiOperation({
+    summary: 'Upload a practice document for a vehicle (ADMIN only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
   @ApiBody({
     schema: {
@@ -138,7 +170,10 @@ export class CarsController {
     description: 'Document received successfully and processed in memory',
     type: UploadedCarDocumentResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'Invalid multipart payload or unsupported file type' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid multipart payload or unsupported file type',
+  })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   uploadCarDocument(

@@ -15,7 +15,8 @@ export const CARS_SEED: Car[] = [
         manufactureYear: 2020,
         availability: true,
         licensePlate: '1234 BBB',
-        imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
+        imageUrl:
+          'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
       },
       {
         registrationDate: '2021-03-10T08:15:00.000Z',
@@ -25,7 +26,8 @@ export const CARS_SEED: Car[] = [
         manufactureYear: 2019,
         availability: false,
         licensePlate: '5678 DFG',
-        imageUrl: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
+        imageUrl:
+          'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
       },
     ],
   },

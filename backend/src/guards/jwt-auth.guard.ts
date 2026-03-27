@@ -1,4 +1,8 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -9,12 +13,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   canActivate(context: ExecutionContext) {
-    const isAuthEnabled = this.configService.get<string>('AUTH_ENABLED') === 'true';
+    const isAuthEnabled =
+      this.configService.get<string>('AUTH_ENABLED') === 'true';
 
     if (!isAuthEnabled) {
       // Bypass authentication: inject a default admin user into the request
       const request = context.switchToHttp().getRequest();
-      request.user = { userId: 'admin-id', email: 'admin@example.com', role: 'ADMIN' };
+      request.user = {
+        userId: 'admin-id',
+        email: 'admin@example.com',
+        role: 'ADMIN',
+      };
       return true;
     }
 

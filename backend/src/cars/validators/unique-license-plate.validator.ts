@@ -10,7 +10,9 @@ import { CarsService } from '../cars.service';
 
 @ValidatorConstraint({ name: 'UniqueLicensePlate', async: false })
 @Injectable()
-export class UniqueLicensePlateConstraint implements ValidatorConstraintInterface {
+export class UniqueLicensePlateConstraint
+  implements ValidatorConstraintInterface
+{
   constructor(private readonly carsService: CarsService) {}
 
   validate(licensePlate: string, args: ValidationArguments) {

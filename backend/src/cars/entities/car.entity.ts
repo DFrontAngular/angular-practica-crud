@@ -7,8 +7,7 @@ import { CarDetailsDto, CreateCarDto } from '../dto';
  */
 export class CarDetailEntity extends CarDetailsDto {
   @ApiProperty({
-    description:
-      'Vehicle image URL resolved by the backend',
+    description: 'Vehicle image URL resolved by the backend',
     type: String,
     example: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
     readOnly: true,

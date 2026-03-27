@@ -26,7 +26,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Authentication completed successfully. Returns the access token and the user profile.',
+    description:
+      'Authentication completed successfully. Returns the access token and the user profile.',
     type: LoginResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid email or password.' })
@@ -39,7 +40,8 @@ export class AuthController {
   @Get('me')
   @ApiOperation({
     summary: 'Retrieve the current authenticated user profile',
-    description: 'Returns the profile associated with the JWT access token provided in the Authorization header.',
+    description:
+      'Returns the profile associated with the JWT access token provided in the Authorization header.',
   })
   @ApiResponse({
     status: 200,

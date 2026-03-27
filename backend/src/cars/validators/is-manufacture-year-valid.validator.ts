@@ -40,9 +40,7 @@ export class IsManufactureYearValidConstraint
   }
 }
 
-export function IsManufactureYearValid(
-  validationOptions?: ValidationOptions,
-) {
+export function IsManufactureYearValid(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,

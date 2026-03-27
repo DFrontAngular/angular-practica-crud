@@ -12,7 +12,7 @@ export class ModelExistsConstraint implements ValidatorConstraintInterface {
   validate(modelId: string, args: ValidationArguments) {
     const brandId = (args.object as any).brandId;
     if (!brandId) return false;
-    
+
     // Check if model exists and matches the brandId
     return modelsDB.some((m) => m.id === modelId && m.brandId === brandId);
   }

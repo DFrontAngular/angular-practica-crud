@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export const CAR_SORT_FIELDS = [
@@ -28,7 +35,8 @@ export class GetCarsFilterDto extends PaginationDto {
   brandId?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter results to a single model by exact model identifier. Typically combined with brandId.',
+    description:
+      'Filter results to a single model by exact model identifier. Typically combined with brandId.',
     example: 'model-1',
   })
   @IsString()
@@ -36,7 +44,8 @@ export class GetCarsFilterDto extends PaginationDto {
   modelId?: string;
 
   @ApiPropertyOptional({
-    description: 'Return only vehicles whose price is greater than or equal to this value',
+    description:
+      'Return only vehicles whose price is greater than or equal to this value',
     minimum: 0,
     example: 10000,
   })
@@ -47,7 +56,8 @@ export class GetCarsFilterDto extends PaginationDto {
   minPrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Return only vehicles whose price is lower than or equal to this value',
+    description:
+      'Return only vehicles whose price is lower than or equal to this value',
     minimum: 0,
     example: 40000,
   })
@@ -79,7 +89,8 @@ export class GetCarsFilterDto extends PaginationDto {
   maxYear?: number;
 
   @ApiPropertyOptional({
-    description: 'When true, returns only available vehicles. When false, returns only unavailable ones.',
+    description:
+      'When true, returns only available vehicles. When false, returns only unavailable ones.',
     example: true,
   })
   @Type(() => Boolean)

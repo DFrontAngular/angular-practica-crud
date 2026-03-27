@@ -257,9 +257,10 @@ export class CarsService {
     };
   }
 
-  exportCarsToExcel(
-    filterDto: GetCarsFilterDto = { page: 1, limit: 10 },
-  ): { fileName: string; content: Buffer } {
+  exportCarsToExcel(filterDto: GetCarsFilterDto = { page: 1, limit: 10 }): {
+    fileName: string;
+    content: Buffer;
+  } {
     const exportedCars = this.getFilteredCars(filterDto);
     const rows = exportedCars.map((car) => {
       const detail = this.getMatchingCarDetail(car, filterDto);
@@ -351,9 +352,7 @@ export class CarsService {
     );
   }
 
-  private getFilteredCars(
-    filterDto: GetCarsFilterDto,
-  ): Car[] {
+  private getFilteredCars(filterDto: GetCarsFilterDto): Car[] {
     const {
       brandId,
       modelId,

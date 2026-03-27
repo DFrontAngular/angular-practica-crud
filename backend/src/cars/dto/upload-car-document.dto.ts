@@ -113,8 +113,10 @@ export class UploadedCarDocumentResponseDto {
   persisted: boolean;
 
   @ApiProperty({
-    description: 'Explains how the practice upload is handled in this training backend',
-    example: 'The file was received as multipart/form-data and processed in memory, but it was not stored.',
+    description:
+      'Explains how the practice upload is handled in this training backend',
+    example:
+      'The file was received as multipart/form-data and processed in memory, but it was not stored.',
   })
   message: string;
 }

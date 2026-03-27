@@ -10,7 +10,8 @@ export class SeedController {
   @Get()
   @ApiOperation({
     summary: 'Load the predefined catalog dataset',
-    description: 'Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding.',
+    description:
+      'Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding.',
   })
   @ApiResponse({
     status: 200,

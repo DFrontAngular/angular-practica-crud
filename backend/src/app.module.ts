@@ -6,7 +6,13 @@ import { SeedModule } from './seed/seed.module';
 import { BrandsModule } from './brands/brands.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, CarsModule, SeedModule, BrandsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    CarsModule,
+    SeedModule,
+    BrandsModule,
+  ],
   controllers: [],
   providers: [],
   exports: [],
