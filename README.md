@@ -19,7 +19,7 @@ La idea no es solo "hacer un CRUD", sino practicar un flujo mas parecido a proye
 - testing y calidad
 - flujo de trabajo profesional con Git
 
-El backend ya trae bastante trabajo resuelto. El frontend esta bastante vacio a proposito para que la practica fuerte este en Angular y no en maquetar una demo cerrada.
+El backend ya incorpora una base funcional amplia. El frontend se mantiene deliberadamente ligero para que la parte principal de la practica este en Angular y en la integracion con la API.
 
 ## 1. Estado actual del proyecto
 
@@ -28,7 +28,7 @@ El repo esta dividido en dos aplicaciones:
 - `frontend/`: Angular 21
 - `backend/`: NestJS 10
 
-Hoy mismo, el backend ya incluye:
+Actualmente, el backend incluye:
 
 - autenticacion JWT
 - bypass de autenticacion para modo aprendizaje
@@ -130,8 +130,8 @@ Backend disponible en:
 Nota importante:
 
 - el backend no esta configurado para permitir `localhost` arbitrarios por CORS
-- si el frontend ataca directamente a otro origen durante desarrollo, ese choque forma parte de la practica
-- la integracion entre frontend y backend debe plantearse con mentalidad de proyecto real, no de bypass local permisivo
+- si el frontend necesita llamar a otro origen durante desarrollo, esa integracion debe resolverse de forma explicita
+- la integracion entre frontend y backend debe plantearse con criterios de proyecto real, no con configuraciones locales excesivamente permisivas
 
 ### Frontend
 
@@ -291,15 +291,13 @@ Endpoints:
 Comportamiento importante:
 
 - `GET /cars` devuelve paginacion real
-- `GET /cars` devuelve `imageUrl` a nivel resumen para tablas o cards
-- `GET /cars/:id` devuelve el coche con sus `carDetails`, incluyendo `imageUrl` ya resuelta por el backend
-- `GET /cars/export/excel` reutiliza filtros y ordenacion y descarga un `.xls`
+- el backend resuelve `imageUrl`; en `GET /cars` aparece en el resumen y en `GET /cars/:id` dentro de `carDetails`
+- `GET /cars/export/excel` reutiliza filtros y ordenacion y descarga un `.xlsx`
 - `POST /cars/:id/documents` acepta documentos e imagenes y guarda un unico archivo por vehiculo
 - `GET /cars/:id/documents` devuelve los metadatos del documento actual del vehiculo
 - `GET /cars/:id/documents/download` descarga el documento actual del vehiculo
 - `DELETE /cars/:id/documents` elimina el documento actual del vehiculo
-- `POST`, `PUT`, `DELETE` y upload de documentos estan protegidos por rol
-- el backend anade `imageUrl` automaticamente a cada `carDetail`
+- `POST /cars`, `PUT /cars/:id`, `DELETE /cars/:id`, `POST /cars/:id/documents` y `DELETE /cars/:id/documents` estan protegidos por rol
 - la informacion se guarda en memoria
 
 ### Marcas y modelos
@@ -482,7 +480,7 @@ Devuelve:
 
 ## 8. Validaciones que el frontend debe respetar
 
-No construyas el formulario "a ojo". El backend valida de verdad. Swagger y los DTOs deben ser tu fuente de verdad.
+El formulario no deberia construirse por aproximacion. Swagger y los DTOs deben tomarse como fuente de verdad del contrato.
 
 ### Validaciones clave de coche
 
@@ -544,7 +542,7 @@ Resultado avanzado recomendable:
 
 ## 10. Ruta de aprendizaje propuesta
 
-La siguiente secuencia esta pensada para que alguien salga del proyecto con base solida. No es una lista decorativa. Si haces esto bien, has tocado casi todo lo importante en Angular de aplicacion real.
+La siguiente secuencia esta planteada para recorrer los bloques principales de una aplicacion Angular conectada a una API real, con una progresion razonable de complejidad.
 
 ### Bloque 0. Preparacion del entorno
 
@@ -798,7 +796,7 @@ Que deberias aprender:
 
 Objetivo:
 
-- salir del modo "solo funciona en mi maquina"
+- reforzar la calidad y la mantenibilidad del proyecto
 
 Tareas:
 
@@ -855,7 +853,7 @@ Si quieres trabajar como si esto fuera un proyecto real, una secuencia razonable
 - que `manufactureYear` admite decimales
 - que el login es obligatorio desde el minuto 1
 - que el backend guarda imagenes subidas realmente
-- que los documentos subidos se persisten
+- que la persistencia de documentos funciona como en una base de datos
 - que existe base de datos
 - que reiniciar backend conserva cambios
 - que el backend va a resolverte CORS de desarrollo con una whitelist permisiva a `localhost`

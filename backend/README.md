@@ -502,7 +502,7 @@ Recomendación: no hardcodear una lista inventada en el frontend. Revisar Swagge
 
 El backend asigna `imageUrl` automáticamente a cada `carDetail`.
 
-Ahora mismo no hay subida real de ficheros ni almacenamiento de imágenes. El backend resuelve una URL de Unsplash de forma automática.
+No hay subida de imágenes desde cliente. El backend resuelve `imageUrl` a partir de un catálogo local de imágenes estáticas servido desde `public/images`.
 
 ### `GET /cars` usa `items`, no `data`
 
@@ -610,8 +610,8 @@ Authorization: Bearer <token>
 - no hay persistencia entre reinicios
 - no hay refresh token
 - no hay logout de servidor
-- no hay subida real de imágenes
-- los documentos subidos no se persisten; solo se procesan en memoria para practicar `multipart/form-data`
+- no hay subida real de imágenes desde cliente
+- los documentos sí se guardan en disco local, pero su metadata y asociación con cada coche viven en memoria
 - no hay usuarios dinámicos ni registro
 - las credenciales son fijas para práctica
 

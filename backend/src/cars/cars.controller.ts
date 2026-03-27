@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseFilePipeBuilder,
   ParseUUIDPipe,
   Post,
   Put,
@@ -34,6 +33,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
+import { CarDocumentFileValidationPipe } from './pipes/car-document-file-validation.pipe';
 import { CarsService } from './cars.service';
 import {
   CreateCarDto,
@@ -229,25 +229,22 @@ export class CarsController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid multipart payload or unsupported file type',
+    description: 'Invalid multipart payload or missing file',
+  })
+  @ApiResponse({
+    status: 413,
+    description: 'Uploaded file exceeds the 5 MB limit',
+  })
+  @ApiResponse({
+    status: 415,
+    description: 'Unsupported file type',
   })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   uploadCarDocument(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() uploadDocumentDto: UploadCarDocumentDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 })
-        .addFileTypeValidator({
-          fileType:
-            /^(application\/pdf|text\/plain|application\/msword|application\/vnd.openxmlformats-officedocument.wordprocessingml.document|image\/png|image\/jpeg)$/,
-        })
-        .build({
-          fileIsRequired: true,
-          errorHttpStatusCode: 400,
-        }),
-    )
+    @UploadedFile(new CarDocumentFileValidationPipe())
     file: UploadedPracticeFile,
   ): UploadedCarDocumentResponseDto {
     return this.carsService.uploadDocument(id, uploadDocumentDto, file);
