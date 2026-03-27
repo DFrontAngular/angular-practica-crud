@@ -3,9 +3,8 @@ import { v4 as uuid } from 'uuid';
 
 export const CARS_SEED: Car[] = [
   {
-    brand: 'Toyota',
-    model: 'Corolla',
-    total: 2,
+    brandId: 'brand-1',
+    modelId: 'model-1',
     id: uuid(),
     carDetails: [
       {
@@ -16,6 +15,7 @@ export const CARS_SEED: Car[] = [
         manufactureYear: 2020,
         availability: true,
         licensePlate: '1234 ABC',
+        imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
       },
       {
         registrationDate: '2021-03-10T08:15:00.000Z',
@@ -25,6 +25,7 @@ export const CARS_SEED: Car[] = [
         manufactureYear: 2019,
         availability: false,
         licensePlate: '5678 DEF',
+        imageUrl: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
       },
     ],
   },

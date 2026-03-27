@@ -1,26 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { brandsDB, modelsDB } from './data/brand.data';
+import { Brand, brandsDB, Model, modelsDB } from './data/brand.data';
 
 @Injectable()
 export class BrandsService {
-  // Local in-memory data for brands and models
-  brands: string[] = brandsDB;
-  models = modelsDB;
-
   /**
    * Retrieves all car brands from the database.
    * @returns An array of all car brands.
    */
-  getAllBrands(): string[] {
-    return this.brands;
+  getAllBrands(): Brand[] {
+    return brandsDB;
   }
 
   /**
-   * Retrieves all models for a specific brand, given the brand's code.
-   * @param brandCode - The unique code representing the car brand.
+   * Retrieves all models for a specific brand, given the brand's ID.
+   * @param brandId - The unique ID representing the car brand.
    * @returns An array of models for the given brand, or an empty array if no models are found.
    */
-  getModelsByBrand(brandCode: string): string[] {
-    return this.models[brandCode.toUpperCase()] || [];
+  getModelsByBrand(brandId: string): Model[] {
+    return modelsDB.filter((model) => model.brandId === brandId);
   }
 }

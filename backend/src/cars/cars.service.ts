@@ -1,58 +1,169 @@
 import {
-  BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
 
-import { CarDetailsDto, CreateCarDto } from './dto';
-import { Car, CarSummary } from './entities';
+import { CreateCarDto } from './dto';
+import { Car, CarDetailEntity, CarSummary } from './entities';
+
+import { PaginatedResponseDto } from '../common/dto/pagination.dto';
+import { brandsDB, modelsDB } from '../brands/data/brand.data';
+import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
 
 @Injectable()
 export class CarsService {
   // In-memory storage for cars
-  private cars: Car[] = [
-    {
-      brand: 'Toyota',
-      model: 'Corolla',
-      id: uuid(),
-      total: 1,
-      carDetails: [
-        {
-          availability: true,
-          currency: 'USD',
-          licensePlate: '1111 BBB',
-          manufactureYear: new Date().getFullYear(),
-          mileage: 30_000,
-          price: 25_000,
-          registrationDate: new Date().toISOString(),
-        },
-        {
-          availability: false,
-          currency: 'EUR',
-          licensePlate: '2222 CCC',
-          manufactureYear: new Date().getFullYear(),
-          mileage: 0,
-          price: 40_000,
-          registrationDate: new Date().toISOString(),
-        },
-      ],
-    },
-  ];
+  private cars: Car[] = this.generateSeedData(50);
 
   /**
-   * Retrieves all cars, with the added property 'total' which is the count of carDetails.
-   * @returns A list of all cars with the total car details count.
+   * Curated Unsplash car photo IDs. The backend always resolves imageUrl
+   * here so the frontend never has to deal with it.
    */
-  findAll(): CarSummary[] {
-    return this.cars.map((car) => {
+  private readonly carImageUrls: string[] = [
+    'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
+    'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
+    'https://images.unsplash.com/photo-1542362567-b058c03b46cf',
+    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d',
+    'https://images.unsplash.com/photo-1583121274602-3e2820c69888',
+    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7',
+    'https://images.unsplash.com/photo-1555215695-3004980ad54e',
+    'https://images.unsplash.com/photo-1544636331-e26879cd4d9b',
+    'https://images.unsplash.com/photo-1511919884226-fd3cad34687c',
+    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7',
+    'https://images.unsplash.com/photo-1609521263047-f8f205293f24',
+    'https://images.unsplash.com/photo-1525609004556-c46c7d6cf023',
+  ];
+
+  /** Returns a random Unsplash car photo URL. */
+  private getRandomCarImageUrl(): string {
+    return this.carImageUrls[
+      Math.floor(Math.random() * this.carImageUrls.length)
+    ];
+  }
+
+  /**
+   * Retrieves paginated and filtered cars.
+   * @param filterDto - The filter and pagination options.
+   * @returns A paginated response with filtered cars and metadata.
+   */
+  findAll(filterDto: GetCarsFilterDto = { page: 1, limit: 10 }): PaginatedResponseDto<CarSummary> {
+    const { 
+      page = 1, 
+      limit = 10, 
+      brandId, 
+      modelId, 
+      minPrice, 
+      maxPrice, 
+      minYear, 
+      maxYear, 
+      available, 
+      licensePlate 
+    } = filterDto;
+
+    // Apply filters
+    let filteredCars = this.cars.filter((car) => {
+      // Brand filter
+      if (brandId && car.brandId !== brandId) return false;
+      
+      // Model filter
+      if (modelId && car.modelId !== modelId) return false;
+
+      // Deep filters (check if at least one carDetail matches)
+      const hasMatchingDetail = car.carDetails.some((detail) => {
+        if (minPrice !== undefined && detail.price < minPrice) return false;
+        if (maxPrice !== undefined && detail.price > maxPrice) return false;
+        if (minYear !== undefined && detail.manufactureYear < minYear) return false;
+        if (maxYear !== undefined && detail.manufactureYear > maxYear) return false;
+        if (available !== undefined && detail.availability !== (String(available) === 'true')) return false;
+        if (licensePlate && !detail.licensePlate.toLowerCase().includes(licensePlate.toLowerCase())) return false;
+        return true;
+      });
+
+      return hasMatchingDetail;
+    });
+
+    const skip = (page - 1) * limit;
+    const totalItems = filteredCars.length;
+    
+    const paginatedItems = filteredCars.slice(skip, skip + limit).map((car) => {
       const { carDetails, ...carWithoutDetails } = car;
       return {
         ...carWithoutDetails,
         total: carDetails?.length || 0,
       };
     });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      items: paginatedItems,
+      meta: {
+        totalItems,
+        itemCount: paginatedItems.length,
+        itemsPerPage: limit,
+        totalPages,
+        currentPage: page,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  /**
+   * Generates a set of seed data for the dealership.
+   * @param count - The number of cars to generate.
+   * @returns An array of generated cars.
+   */
+  private generateSeedData(count: number): Car[] {
+    const seedCars: Car[] = [];
+    const colors = ['White', 'Black', 'Grey', 'Silver', 'Blue', 'Red'];
+    const descriptions = [
+      'Excellent condition, well maintained.',
+      'Perfect for city driving, very fuel efficient.',
+      'Luxury interior with all extras included.',
+      'One previous owner, smoke-free environment.',
+      'Ready for adventure, off-road capable.',
+      'Sporty look with high performance engine.',
+    ];
+    const carImages = [
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
+      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
+      'https://images.unsplash.com/photo-1542362567-b058c03b46cf',
+      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d',
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888',
+      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7',
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const brand = brandsDB[Math.floor(Math.random() * brandsDB.length)];
+      const brandModels = modelsDB.filter((m) => m.brandId === brand.id);
+      const model = brandModels[Math.floor(Math.random() * brandModels.length)];
+
+      const consonants = 'BCDFGHJKLMNPRSTVWXYZ';
+      const getRandomConsonant = () => consonants[Math.floor(Math.random() * consonants.length)];
+
+      seedCars.push({
+        id: uuid(),
+        brandId: brand.id,
+        modelId: model.id,
+        carDetails: [
+          {
+            availability: Math.random() > 0.3,
+            currency: 'EUR',
+            licensePlate: `${1000 + i} ${getRandomConsonant()}${getRandomConsonant()}${getRandomConsonant()}`,
+            manufactureYear: 2015 + (i % 10),
+            mileage: Math.floor(Math.random() * 100000),
+            price: 15000 + Math.floor(Math.random() * 30000),
+            registrationDate: new Date(2015 + (i % 10), i % 12, (i % 28) + 1).toISOString(),
+            color: colors[i % colors.length],
+            description: descriptions[i % descriptions.length],
+            imageUrl: carImages[i % carImages.length],
+          },
+        ],
+      });
+    }
+    return seedCars;
   }
 
   /**
@@ -73,16 +184,22 @@ export class CarsService {
    * @returns The newly created car object.
    */
   create(createCarDto: CreateCarDto): Car {
-    this.validateCarDetails(
-      createCarDto.carDetails,
-      createCarDto.brand,
-      createCarDto.model,
-    );
+    const { carDetails, ...rest } = createCarDto;
+    
+    // Apply defaults to carDetails and assign a random Unsplash image.
+    // The frontend sends a real file (multipart), but we mock storage
+    // by always resolving to a curated Unsplash URL.
+    const processedDetails: CarDetailEntity[] = carDetails?.map((detail): CarDetailEntity => ({
+      ...detail,
+      availability: detail.availability ?? true,
+      currency: detail.currency ?? 'EUR',
+      imageUrl: this.getRandomCarImageUrl(),
+    })) || [];
 
     const newCar: Car = {
-      ...createCarDto,
-      id: uuid(), // Generates a unique ID for the new car
-      total: this.cars.length + 1, // Set the total car details
+      ...rest,
+      carDetails: processedDetails,
+      id: uuid(),
     };
     this.cars.push(newCar);
     return newCar;
@@ -105,21 +222,24 @@ export class CarsService {
    * @param id - The ID of the car to update.
    * @param carToUpdate - The DTO containing the new data for the car.
    * @returns The updated car object.
-   * @throws NotFoundException if the car with the given ID does not exist.
    */
   update(id: string, carToUpdate: CreateCarDto): Car {
     const carDB = this.findOne(id);
+    const { carDetails, ...rest } = carToUpdate;
 
-    this.validateCarDetails(
-      carToUpdate.carDetails,
-      carToUpdate.brand,
-      carToUpdate.model,
-      id,
-    );
+    // Apply defaults to carDetails if provided.
+    // The client never sends imageUrl; we always assign a random Unsplash URL.
+    const processedDetails = carDetails?.map((detail): CarDetailEntity => ({
+      ...detail,
+      availability: detail.availability ?? true,
+      currency: detail.currency ?? 'EUR',
+      imageUrl: this.getRandomCarImageUrl(),
+    }));
 
     const updatedCar = {
       ...carDB,
-      ...carToUpdate,
+      ...rest,
+      ...(processedDetails && { carDetails: processedDetails }),
       id,
     };
     const carIndex = this.cars.findIndex((car) => car.id === id);
@@ -137,116 +257,16 @@ export class CarsService {
   }
 
   /**
-   * Validates the car details including brand, model, license plate, and manufacture year.
-   * @param carDetails - An array of car details to validate.
-   * @param brand - The brand of the car.
-   * @param model - The model of the car.
-   * @param id - (Optional) The ID of the car to exclude from validation checks.
-   * @throws ConflictException if a duplicate car or license plate is found.
-   * @throws BadRequestException if the manufacture year is later than the registration date.
-   */
-  private validateCarDetails(
-    carDetails: CarDetailsDto[] | undefined,
-    brand: string,
-    model: string,
-    id?: string,
-  ): void {
-    this.validateDuplicateLicensePlateWithinSelfDetail(carDetails);
-    this.validateDuplicateCar(brand, model, id);
-
-    carDetails?.forEach((detail) => {
-      this.validateDuplicateLicensePlate(detail.licensePlate, id);
-      this.validateManufactureYear(
-        detail.manufactureYear,
-        detail.registrationDate,
-        detail.licensePlate,
-      );
-    });
-  }
-
-  /**
-   * Validates if there is already a car with the same brand and model, excluding the current car if ID is provided.
-   * @param brand - The brand of the car.
-   * @param model - The model of the car.
-   * @param id - (Optional) The ID of the car to exclude from the check.
-   * @throws ConflictException if a car with the same brand and model already exists.
-   */
-  private validateDuplicateCar(
-    brand: string,
-    model: string,
-    id?: string,
-  ): void {
-    const existingCar = this.cars.find(
-      (car) => car.id !== id && car.brand === brand && car.model === model,
-    );
-    if (existingCar) {
-      throw new ConflictException(
-        `A car with the same brand (${brand}) and model (${model}) already exists.`,
-      );
-    }
-  }
-
-  /**
-   * Validates if a car with the same license plate already exists, excluding the current car if ID is provided.
+   * Checks if a car with the same license plate already exists.
    * @param licensePlate - The license plate to check for duplicates.
-   * @param id - (Optional) The ID of the car to exclude from the check.
-   * @throws ConflictException if a car with the same license plate already exists.
+   * @param excludeId - (Optional) The ID of the car to exclude from the check.
+   * @returns True if the license plate is already taken, false otherwise.
    */
-  private validateDuplicateLicensePlate(
-    licensePlate: string,
-    id?: string,
-  ): void {
-    const existingCarWithPlate = this.cars.find((car) =>
+  isLicensePlateTaken(licensePlate: string, excludeId?: string): boolean {
+    return this.cars.some((car) =>
       car.carDetails.some(
-        (carDetail) => carDetail.licensePlate === licensePlate && car.id !== id,
+        (carDetail) => carDetail.licensePlate === licensePlate && car.id !== excludeId,
       ),
     );
-
-    if (existingCarWithPlate) {
-      throw new ConflictException(
-        `A car with the license plate ${licensePlate} already exists.`,
-      );
-    }
-  }
-
-  /**
-   * Validates if a car with the same license plate already exists whiting the carDetails object.
-   * @param carDetail - The car details object to check for duplicates.
-   * @throws ConflictException if a car with the same license plate already exists.
-   */
-  private validateDuplicateLicensePlateWithinSelfDetail(
-    carDetail: CarDetailsDto[],
-  ) {
-    const existingCarWithPlate = carDetail.length;
-    const plates = carDetail.map((car) => car.licensePlate);
-    const platesSet = new Set([...plates]);
-
-    if (existingCarWithPlate !== platesSet.size) {
-      throw new ConflictException(
-        `A car with the license plate already exists.`,
-      );
-    }
-  }
-
-  /**
-   * Validates that the car's manufacture year is not later than the registration date.
-   * @param manufactureYear - The manufacture year of the car.
-   * @param registrationDate - The registration date of the car.
-   * @param licensePlate - The license plate of the car (used for error messages).
-   * @throws BadRequestException if the manufacture year is later than the registration date.
-   */
-  private validateManufactureYear(
-    manufactureYear: number,
-    registrationDate: string,
-    licensePlate: string,
-  ): void {
-    const manufactureDate = new Date(manufactureYear, 0, 1);
-    const regDate = new Date(registrationDate);
-
-    if (manufactureDate > regDate) {
-      throw new BadRequestException(
-        `Manufacture year ${manufactureYear} in the car with license plate ${licensePlate} cannot be later than registration date ${registrationDate}.`,
-      );
-    }
   }
 }

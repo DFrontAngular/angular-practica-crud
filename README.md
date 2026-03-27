@@ -1,301 +1,712 @@
-# Proyecto CRUD Angular & Nest.js
+# Angular CRUD + NestJS API
 
-Este proyecto está dividido en dos partes principales:
+Repositorio de práctica para construir una aplicación Angular moderna contra una API real hecha con NestJS.
 
-1. **Backend**: Implementado con Nest.js.
-2. **Frontend**: Implementado con Angular.
+La intención de este proyecto no es solo "hacer un CRUD". Está planteado para que una persona junior, mid o alguien que viene de reciclaje técnico termine habiendo tocado:
 
-## Requisitos previos
+- arquitectura frontend y backend
+- consumo real de APIs
+- routing
+- formularios reactivos
+- validación
+- autenticación JWT
+- guards e interceptors
+- control de errores
+- paginación y filtros
+- roles y autorización
+- testing y calidad
+- flujo de trabajo profesional con Git
 
-Asegúrate de tener instalados los siguientes programas en tu sistema:
+El backend ya trae bastante trabajo resuelto. El frontend está muy vacío a propósito para que la práctica esté en Angular y no en maquetar una demo cerrada.
 
-- [Visual Studio Code](https://code.visualstudio.com/).
-- [Node.js](https://nodejs.org) (versión 22 o superior).
-- [npm](https://www.npmjs.com/) (incluido con Node.js).
-- [Angular CLI](https://angular.dev/tools/cli) (para ejecutar el frontend 21.0.0 o superior).
-- Puedes comprobar la compatibilidad de las versiones de Angular [aquí](https://angular.dev/reference/versions)
+## 1. Estado actual del proyecto
+
+El repo está dividido en dos aplicaciones:
+
+- `frontend/`: Angular 21
+- `backend/`: NestJS 10
+
+Hoy mismo, el backend ya incluye:
+
+- autenticación JWT
+- bypass de autenticación para modo aprendizaje
+- endpoint `POST /auth/login`
+- endpoint `GET /auth/me`
+- CRUD de coches
+- listado paginado y filtrable
+- catálogo de marcas y modelos
+- roles `ADMIN` y `USER`
+- guards de autenticación y autorización
+- validaciones con `class-validator`
+- Swagger en `/api-docs`
+- datos en memoria
+- generación de imágenes automáticas para los coches
+- endpoint de seed
+
+Importante: los datos del backend no se guardan en base de datos. Se mantienen en memoria. Si reinicias el backend, el estado vuelve a generarse.
+
+## 2. Perfil al que va dirigido
+
+Este repositorio está pensado para tres perfiles:
+
+### Junior
+
+Si estás empezando con Angular, puedes centrarte en:
+
+- componentes
+- rutas
+- servicios HTTP
+- tablas
+- formularios reactivos
+- validaciones de formulario
+- detalle, creación, edición y borrado
+
+Puedes trabajar sin login real usando el backend en modo bypass.
+
+### Mid
+
+Si ya dominas lo básico, deberías añadir:
+
+- estructura de carpetas coherente
+- reutilización de componentes
+- gestión de estado local con signals
+- interceptors
+- manejo global de errores
+- loaders
+- paginación y filtros
+- testing
+
+### Senior o preparación real de proyecto
+
+Si quieres llevar esto a un nivel más profesional, deberías resolver además:
+
+- login real
+- persistencia del usuario autenticado
+- control de roles en UI y rutas
+- guards de Angular
+- estrategia de autorización coherente
+- componentes reutilizables y desacoplados
+- cobertura de tests
+- calidad de código y documentación
+
+## 3. Requisitos previos
+
+- Node.js 22 o superior
+- npm
+- Angular CLI 21 o superior
+- Visual Studio Code u otro editor
+
+Instalación de Angular CLI:
 
 ```bash
 npm install -g @angular/cli
 ```
 
-## Pasos para levantar el proyecto
+## 4. Puesta en marcha
 
-### 1. Levantar el Backend (Nest.js)
-
-Navega a la carpeta del backend:
+### Backend
 
 ```bash
 cd backend
-npm i
+npm install
 npm run start:dev
 ```
 
-### 2. Levantar el Frontend (Angular)
+Backend disponible en:
 
-Navega a la carpeta del frontend:
+- API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/api-docs`
+
+Nota importante:
+
+- el backend no está configurado para permitir `localhost` arbitrarios por CORS
+- si el frontend ataca directamente a otro origen durante desarrollo, ese choque forma parte de la práctica
+- la integración entre frontend y backend debe plantearse con mentalidad de proyecto real, no de bypass local permisivo
+
+### Frontend
 
 ```bash
 cd frontend
-npm i
-ng serve
+npm install
+npm start
 ```
 
-### 2. Acceso al proyecto
+Frontend disponible en:
 
-Una vez ambos servicios estén levantados, puedes acceder al proyecto desde tu navegador.
+- App: `http://localhost:4200`
 
-1. **Frontend:** http://localhost:4200
-2. **Backend:** http://localhost:3000
-3. **Backend SWAGGER:** http://localhost:3000/api-docs/
+## 4.1 Decisiones de UI y estilos
 
----
+En esta práctica no queremos imponer una solución cerrada de frontend. Queremos que tomes decisiones técnicas y seas capaz de defenderlas.
 
-### TAREA: CRUD utilizando **Nest.js** como backend en Angular
+Estado actual del proyecto:
 
-#### Objetivo:
+- Tailwind está instalado en el frontend
 
-Desarrollar una aplicación web utilizando **Angular** con funcionalidades CRUD (Crear, Leer, Actualizar, Eliminar) usando **Nest.js** como backend.
+Criterio:
 
-#### Descripción General
+- puedes usar CSS plano, SCSS, Tailwind o una combinación razonable
+- puedes usar librerías de componentes si encajan con tu propuesta
+- también puedes construir tus propios componentes base
 
-Esta aplicación permite gestionar un inventario de coches de forma estructurada y eficiente. Está diseñada para concesionarios, gestores de flotas o cualquier entidad que necesite registrar vehículos con múltiples variantes o unidades asociadas.
+Lo importante no es “usar o no usar una librería”, sino justificar bien la decisión:
 
-#### 🧠 Concepto Principal
+- coste de mantenimiento
+- consistencia visual
+- velocidad de desarrollo
+- flexibilidad
+- accesibilidad
+- tamaño y complejidad de la solución
 
-La aplicación se basa en un modelo jerárquico:
+## 5. Cómo activar o desactivar el login
 
-Coche principal (CreateCar): Representa un modelo de coche con una marca y un modelo.
-Detalles del coche (CarDetails): Cada coche principal puede tener múltiples unidades físicas asociadas, cada una con sus propios datos como matrícula, kilometraje, precio, disponibilidad, etc.
-Esto permite, por ejemplo, registrar un modelo de coche como "Toyota Corolla" y luego añadir varias unidades disponibles en stock, cada una con sus características específicas.
+El backend ya soporta dos modos de trabajo. Se controla desde `backend/.env`.
 
-#### Requerimientos del Proyecto:
+Contenido actual:
 
-1. **Configuración del entorno de desarrollo**:
+```env
+AUTH_ENABLED=true
+JWT_SECRET=super-secret-key-123
+JWT_EXPIRES_IN=3600s
+```
 
-   - Configurar **Prettier** para formateo automático del código.
-   - Configurar **ESLint** para análisis estático de código.
-   - Configurar **Karma** para que sea necesario un 80% de code coverage.
-   - Configurar **GitHub** para aplicar una template a la hora de realizar las pull request.
-   - Configurar **Husky** para hooks pre-commit que aseguren que el código está bien formateado y cumple con las reglas establecidas.
-   - Seguir el flujo de trabajo **GitFlow** para la gestión de ramas y commits.
+### Modo 1: Login real activado
 
-2. **Estilos**:
+Usa:
 
-   - Utilizar estilos propios (css/scss).
-   - No está permitido usar librerías de componentes externos (como Material, PrimeNG, etc.).
-   - No existe un diseño predefinido para la aplicación, siéntete libre de crear la interfaz a tu gusto. Puedes revisar el diseño en la carpeta "diseño ejemplo" pero es orientativo sobre la funcionalidad, no debes replicarlo.
+```env
+AUTH_ENABLED=true
+```
 
-&nbsp;
+Qué implica:
 
-<h1 style="font-size: 30px;">A continuación, ponemos una serie de prácticas sugeridas para realizar el proyecto. Son orientativas, no tienes por qué ir paso a paso con lo indicado si así lo consideras.</h1>
+- `POST /auth/login` devuelve un JWT real
+- el frontend debe guardar el token
+- el frontend debe enviar `Authorization: Bearer <token>`
+- `GET /auth/me` devuelve el usuario autenticado
+- `POST /cars`, `PUT /cars/:id` y `DELETE /cars/:id` requieren rol `ADMIN`
+- si entras con rol `USER`, solo tendrás lectura
 
-### **Práctica 1: Configuración Inicial**
+Credenciales de prueba:
 
-1. Hacer un [fork](https://docs.github.com/es/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) del repositorio.
-2. [Proteger la rama main](https://docs.github.com/es/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule) para que no se pueda realizar commits directamente, solo a partir de Pull Request.
-3. Crear una rama `feat/initial-project` para configurar los proyectos y lanzar una Pull Request.
-4. Crea una plantilla para realizar las Pull Request (diseño libre).
-5. Configurar [Prettier](https://prettier.io/docs/install), [ESLint](https://www.npmjs.com/package/@angular-eslint/eslint-plugin#:~:text=ESLint%20plugin%20for%20Angular%20applications%2C%20following%20https%3A%2F%2Fangular.dev%2Fstyle-guide.%20Latest,in%20your%20project%20by%20running%20%60npm%20i%20%40angular-eslint%2Feslint-plugin%60.) y [Husky](https://typicode.github.io/husky/get-started.html) en el frontend.
-6. Instalar el [CDK de Angular](https://www.npmjs.com/package/@angular/cdk).
+- Admin: `admin@example.com` / `admin123`
+- User: `user@example.com` / `user123`
 
----
+### Modo 2: Login desactivado
 
-### **Práctica 2: Crear un botón reutilizable**
+Usa:
 
-Deberemos crear una [directiva](https://angular.dev/guide/directives/attribute-directives) que se usará sobre los botones/links con el objetivo de que mantengan un estilo uniforme sobre toda la aplicación.
+```env
+AUTH_ENABLED=false
+```
 
-Podemos utilizar la directiva de la forma que la usa Angular Material con el componente [button](https://material.angular.io/components/button/overview).
+Qué implica:
 
---
+- el backend hace bypass de autenticación
+- no necesitas pantalla de login para avanzar
+- el guard inyecta un usuario ficticio con rol `ADMIN`
+- puedes centrarte primero en el CRUD y en la integración Angular
 
-### **Práctica 3: Crear la Estructura de la Tabla**
+### Recomendación de trabajo
 
-1. Crear una nueva rama `feat/home-page`.
-2. Crear el [componente](https://angular.dev/guide/components) inicial `HomeComponent` y configurar como la [ruta inicial](https://angular.dev/guide/routing).
-3. Crear un componente `TableComponent` con la siguiente estructura:
+Para una persona junior o alguien que está aprendiendo Angular desde cero:
 
-   > (Opcional) Breadcrumb en la parte superior para manejar la navegación (ver práctica 6).
+1. empieza con `AUTH_ENABLED=false`
+2. construye el CRUD completo
+3. cuando la app funcione, activa `AUTH_ENABLED=true`
+4. implementa login, interceptor y control de roles
 
-   - **Botón en la parte superior** dirige a la vista de Creación.
-   - **Campo ID**. Tendrá un link que redirige a la vista de detalle.
-   - **Campo Marca**
-   - **Campo Modelo**
-   - **Campo Total**
-   - **Campo Acciones**:
-     <br> Se compone de dos acciones:
+Ese orden es mejor que intentar hacer todo a la vez.
 
-     > Editar: Abre una vista con un formulario.
-     > &nbsp;
+## 6. Backend revisado: qué hay realmente
 
-     > Eliminar: Muestra una ventana modal de confirmación.
+### Módulos
 
-     - (Opcional) Utilizar un menu contextual para mostrar las opciones.
-       Tienes la opción de utilizar el [Menu](https://material.angular.io/cdk/menu/examples) del cdk de Angular o crear tu propio componente.
+- `AuthModule`
+- `CarsModule`
+- `BrandsModule`
+- `SeedModule`
 
-4. Subir los cambios y abrir una Pull Request.
+### Autenticación
 
----
+El backend usa JWT y estrategia `passport-jwt`.
 
-### **Práctica 4 (Opcional): Implementar breadcrumb para la navegación**
+Endpoints:
 
-1. Crear una nueva rama `feat/breadcrumb`.
-2. Crear un componente breadcrumb que reciba:
-   - url.
-   - label.
-3. Manejar la funcionalidad de la navegación.
-4. Subir los cambios y abrir una Pull Request.
+- `POST /auth/login`
+- `GET /auth/me`
 
-<strong> Si decides no utilizar un breadcrumb deberás manejar la navegación para volver a la tabla desde el detalle de la forma que veas mas adecuada. </strong>
+Roles disponibles:
 
----
+- `ADMIN`
+- `USER`
 
-### **Práctica 5: Conexión Angular y Nest.js**
+### Coches
 
-Para que la API funcione correctamente, es necesario almacenar en el `localStorage` un token de autenticación (ya que no vamos a desarrollar un login, porque se sale del objetivo de la práctica).  
-Este token debe utilizarse en cada petición como un **Bearer Token** en la cabecera `Authorization`.
+Endpoints:
 
-### **Instrucciones:**
+- `GET /cars`
+- `GET /cars/:id`
+- `POST /cars`
+- `PUT /cars/:id`
+- `DELETE /cars/:id`
 
-1. Abre la consola del navegador (`F12`) y accede a la pestaña **Application**.
-2. En la sección **Local Storage**, selecciona el dominio de la aplicación.
-3. Añade una nueva clave con el siguiente formato:
+Comportamiento importante:
 
-   - **Clave:** `auth-token`
-   - **Valor:** `"mock-token"`
+- `GET /cars` devuelve paginación real
+- `POST`, `PUT` y `DELETE` están protegidos por rol
+- el backend añade `imageUrl` automáticamente a cada `carDetail`
+- la información se guarda en memoria
 
-   También puedes hacerlo mediante la consola ejecutando:
+### Marcas y modelos
 
-   ```javascript
-   localStorage.setItem("auth-token", "mock-token");
-   ```
+Endpoints:
 
-4. Crear una nueva rama `feat/api-integration`.
-5. Configurar en el frontend un [servicio](https://angular.dev/tutorials/first-app/09-services) Angular (`CarsService`) para manejar las peticiones al backend:
-   - `getCars`: Llama al endpoint `GET /cars`.
-   - `getCarById`: Llama al endpoint `GET /cars/:id`.
-   - `createCar`: Llama al endpoint `POST /cars`.
-   - `updateCar`: Llama al endpoint `PUT /cars/:id`.
-   - `deleteCar`: Llama al endpoint `DELETE /cars/:id`.
-6. Configurar en el frontend un servicio Angular (`BrandsService`) para manejar las peticiones al backend:
-   - `getBrands`: Llama al endpoint `GET /brands`.
-   - `getModelByBrand`: Llama al endpoint `GET /brands/:brandId/models`.
-7. Actualizar el componente `TableComponent` para obtener los datos de los servicios y mostrarlos en la tabla.
-8. Ten en cuenta el [swagger](http://localhost:3000/api-docs/) que tenemos a la hora de validar los datos antes de enviarlo al backend.
-9. Subir los cambios y abrir una Pull Request.
+- `GET /brands`
+- `GET /brands/:brandId/models`
 
----
+### Seed
 
-### **Práctica 6: Crear HTTP Interceptor**
+Endpoint:
 
-#### **Requisitos previos**
+- `GET /seed`
 
-Antes de comenzar, asegúrate de haber completado la **Práctica 4** y de que el token de autenticación está almacenado en el `localStorage`.
+Sirve para cargar un dataset fijo de ejemplo.
 
-Implementa un [interceptor](https://angular.dev/guide/http/interceptors) para añadir el token en cada petición realizada al backend.
+## 7. Contrato actual de la API
 
----
+### `GET /cars`
 
-### **Práctica 7: Crear Pantallas de Detalle, Edición y Nuevo Item**
+No devuelve un array plano. Devuelve un objeto paginado con esta estructura:
 
-1. Crear una nueva rama `feat/car-details`.
-2. **Pantalla de Detalle**:
+```ts
+{
+  items: CarSummary[],
+  meta: {
+    totalItems: number,
+    itemCount: number,
+    itemsPerPage: number,
+    totalPages: number,
+    currentPage: number,
+    hasNextPage: boolean,
+    hasPreviousPage: boolean
+  }
+}
+```
 
-   - Crear un componente `CarDetailsComponent`.
-   - Configurar una ruta dinámica como para leer el id desde la ruta `cars/:id`.
-   - Mostrar los datos del coche obtenidos del backend.
-   - Cuando se muestre el campo mileage usaremos un pipe para ver 2 decimales.
-   - Crear un [pipe personalizado](https://angular.dev/tutorials/learn-angular/24-create-a-pipe), y junto al campo de mileage controlaremos 3 estados: Nuevo / Kilómetro 0 / Ocasión.
+### Filtros soportados en `GET /cars`
 
-     - Si el mileage es 0, mostraremos un tag verde que ponga "Nuevo"
-     - Si es mileage menor a 100km, mostraremos un tag azul que ponga "Km 0"
-     - El resto, mostraremos un tag amarillo que ponga "Ocasión"
+- `page`
+- `limit`
+- `brandId`
+- `modelId`
+- `minPrice`
+- `maxPrice`
+- `minYear`
+- `maxYear`
+- `available`
+- `licensePlate`
 
-   - Cuando se muestre el campo de price usaremos el pipe currency.
+### `GET /brands`
 
----
+Devuelve marcas con forma:
 
-### **Práctica 8: Crear Pantalla Nuevo Item**
+```ts
+{ id: string, name: string }
+```
 
-1. Crear una nueva rama `feat/create-car`.
-2. **Pantalla de Creación**:
+### `GET /brands/:brandId/models`
 
-   - Configurar una ruta como `cars/create`.
-   - Implementar un formulario reactivo para crear nuevos coches (se necesitará el uso de FormArray para el carDetails).
-   - Para las brands y model deberás rellenar la información con sus endpoint correspondientes (recuerda que ambos `select` están relacionados, por lo que deberás controlarlo correctamente).
-   - El `select` de las monedas deberá ser con un formato válido para el backend (no es un campo libre).
-   - Documentación [formularios reactivos](https://angular.dev/guide/forms/reactive-forms). Es una documentación muy extensa, se recomienda leerlo tranquilamente antes de comenzar a realizar el formulario. Conocer conceptos como los `formControl`, `formGroup`, `formArray`, `validaciones`, etc. antes de comenzar a crear el formulario.
+Devuelve modelos con forma:
 
----
+```ts
+{ id: string, name: string, brandId: string }
+```
 
-<h1 style="color: red;">**Debes tener en cuenta todas las validaciones del backend**</h1>
+### `POST /auth/login`
 
-- manufactureYear debe ser como máximo el año actual y como mínimo el año 1900.
-- registrationDate no puede ser anterior a manufactureYear.
-- Respetar el formato de licensePlate.
-- Respetar los valores posibles de currency (comprobar los valores en el swagger).
-- No olvides revisar el swagger para comprobar el resto de validaciones (requeridos, valores máximos, etc.).
-- Si te encuentras algún error no indicado aquí, revisa el mensaje de error del endpoint correspondiente.
+Devuelve:
 
----
+```ts
+{
+  access_token: string,
+  user: {
+    email: string,
+    name: string,
+    role: 'ADMIN' | 'USER'
+  }
+}
+```
 
-### **Práctica 9: Crear Pantalla Edit Item**
+## 8. Validaciones que el frontend debe respetar
 
-1. Crear una nueva rama `feat/edit-car`.
-2. **Pantalla de Edición**:
-   - Configurar una ruta dinámica como `cars/edit/:id`.
-   - Usar el formulario reactivo con datos pre cargados del backend.
-   - Recuerda que debe funcionar igual que la creación (se recomienda usar el mismo formulario que hiciste para la creación).
+No construyas el formulario "a ojo". El backend valida de verdad. Swagger y los DTOs deben ser tu fuente de verdad.
 
----
+### Validaciones clave de coche
 
-### **Práctica 10: Implementar Funcionalidad de Eliminar con Modal**
+- `brandId` debe existir
+- `modelId` debe existir y pertenecer a la marca seleccionada
+- `carDetails` es un array
+- `registrationDate` debe ir en formato ISO UTC completo
+- `mileage` debe ser `>= 0`
+- `price` debe ser `> 0`
+- `manufactureYear` debe estar entre `1900` y el año actual
+- `manufactureYear` no puede ser posterior al año de `registrationDate`
+- `currency` debe ser un código ISO 4217 permitido
+- `availability` es booleano
+- `licensePlate` debe cumplir formato de matrícula española
+- `licensePlate` debe ser única
 
-1. Crear una nueva rama `feat/delete-car`.
-2. Crear un componente modal reutilizable (o utilizar el [Dialog](https://material.angular.io/cdk/dialog/overview) del cdk de Angular).
-3. Conectar el modal al botón "Eliminar" en la tabla para que realize la llamada a su servicio correspondiente.
-4. Subir los cambios y abrir una Pull Request.
+Formato de matrícula aceptado:
 
----
+```txt
+1234 BBB
+```
 
-### **Práctica 11: Manejo de Errores y Mensajes**
+Expresión esperada:
 
-1. Crear una nueva rama `feat/error-handling`.
-2. Crear un servicio Angular para mostrar [notificaciones](https://material.angular.io/cdk/overlay/overview) utilizando el CDK:
-   - Definir métodos para mostrar mensajes de éxito, error e información.
-3. Manejar errores en todas las operaciones de los servicio (siéntete libre de utilizar la estrategia que veas más correcta y escalable).
-4. Mostrar notificaciones con mensajes claros para cada tipo de error.
-5. Subir los cambios y abrir una Pull Request.
+```txt
+4 dígitos + espacio opcional + 3 consonantes
+```
 
----
+## 9. Qué debería construir el frontend
 
-### **Práctica 12: Loaders**
+El frontend actual está prácticamente base. La práctica consiste en levantar una aplicación Angular completa apoyándote en la API existente.
 
-1. Crear una nueva rama `feat/loader`.
-2. Crear un componente loader (diseño libre):
-3. Manejar la implementación y ver la mejor forma de utilizarlo (como si fuera un overlay, en cada componente, ...).
-4. (Opcional): Puedes realizarlo a traves de un interceptor
-5. Subir los cambios y abrir una Pull Request.
+Resultado mínimo recomendable:
 
----
+- pantalla inicial con listado
+- tabla de coches
+- detalle de coche
+- formulario de creación
+- formulario de edición
+- borrado con confirmación
+- consumo real de marcas y modelos
+- validaciones visibles en UI
+- navegación entre pantallas
 
-### **Práctica 13: Finalización y Documentación**
+Resultado avanzado recomendable:
 
-1. Crear una nueva rama `feat/documentation`.
-2. Crear un archivo `CONTRIBUTING.md` con normas de contribución (puedes investigar proyectos públicos para organizarte):
-   - Flujo de trabajo GitFlow.
-   - Convenciones de commits (feat, fix, refactor, etc.).
-   - Proceso de revisión de código (Pull Requests).
-3. Subir los cambios y abrir una Pull Request.
+- login
+- interceptor JWT
+- perfil autenticado
+- guards de Angular
+- ocultación de acciones según rol
+- filtros y paginación
+- manejo de errores
+- notificaciones
+- loaders
 
----
+## 10. Ruta de aprendizaje propuesta
 
-### Todos los nombres de componentes, métodos, variables, etc. deberán estar en ingles.
+La siguiente secuencia está pensada para que alguien salga del proyecto con base sólida. No es una lista decorativa. Si haces esto bien, has tocado casi todo lo importante en Angular de aplicación real.
 
-### Documenta todo lo que que consideres necesario y aporte valor. Evita describir lo que hace el código línea a línea. Busca que sea un código auto explicativo, orienta la documentación utilizando formato [JSDoc](https://jsdoc.app/).
+### Bloque 0. Preparación del entorno
 
-### Se trata de un proyecto en versión 21, por lo que se valorará la elección de las últimas funcionalidades (standalone components, nuevo template flow, signals, etc.) pero no es requisito obligatorio.
+Objetivo:
 
-### BONUS: Conseguir un 80% de code coverage.
+- entender la estructura del repo
+- arrancar backend y frontend
+- abrir Swagger
+- revisar la forma real de las respuestas
 
-### Recomendamos seguir el [coding style guide](https://angular.dev/style-guide) propuesto por Angular para el desarrollo de este proyecto.
+Tareas:
+
+1. haz fork del repositorio
+2. arranca backend y frontend
+3. visita `/api-docs`
+4. prueba `GET /cars`, `GET /brands` y `GET /brands/:brandId/models`
+5. decide si vas a empezar con login activado o desactivado
+
+Qué deberías aprender:
+
+- cómo leer una API existente
+- cómo validar requisitos antes de escribir Angular
+
+### Bloque 1. Base Angular
+
+Objetivo:
+
+- crear una estructura limpia desde el principio
+
+Tareas:
+
+1. define el routing base
+2. crea la página Home
+3. crea layout general
+4. organiza carpetas por `core`, `shared`, `features`
+5. define modelos TypeScript para las respuestas del backend
+
+Qué deberías aprender:
+
+- arquitectura básica de frontend
+- separación entre features y piezas compartidas
+
+### Bloque 2. Tabla de listado
+
+Objetivo:
+
+- mostrar datos reales del backend
+
+Tareas:
+
+1. crea `CarsService`
+2. conecta `GET /cars`
+3. adapta la tabla a la respuesta paginada
+4. muestra marca, modelo, total y acciones
+5. añade navegación a detalle, edición y creación
+
+Qué deberías aprender:
+
+- HttpClient
+- tipado de respuestas
+- renderizado de listas
+- estados de carga vacíos y de error
+
+### Bloque 3. Catálogos y dependencias
+
+Objetivo:
+
+- trabajar con datos dependientes
+
+Tareas:
+
+1. crea `BrandsService`
+2. consume `GET /brands`
+3. consume `GET /brands/:brandId/models`
+4. recarga modelos al cambiar la marca
+5. usa `id` como valor y `name` como etiqueta
+
+Qué deberías aprender:
+
+- selects dependientes
+- composición de formularios con datos remotos
+
+### Bloque 4. Formularios reactivos
+
+Objetivo:
+
+- crear y editar coches respetando el backend
+
+Tareas:
+
+1. crea formulario reactivo de coche
+2. usa `FormArray` para `carDetails`
+3. añade validaciones equivalentes a las del backend
+4. implementa `POST /cars`
+5. implementa `PUT /cars/:id`
+6. reutiliza el formulario para crear y editar
+
+Qué deberías aprender:
+
+- `FormGroup`
+- `FormControl`
+- `FormArray`
+- validación custom
+- reutilización de formularios
+
+### Bloque 5. Detalle y experiencia de usuario
+
+Objetivo:
+
+- trabajar con rutas dinámicas y presentación de datos
+
+Tareas:
+
+1. crea detalle `cars/:id`
+2. consume `GET /cars/:id`
+3. muestra estados de kilometraje con un pipe o helper presentacional
+4. aplica `currency` y formateos útiles
+5. facilita la vuelta al listado
+
+Qué deberías aprender:
+
+- rutas con parámetros
+- composición de vistas
+- pipes
+
+### Bloque 6. Eliminación y feedback
+
+Objetivo:
+
+- cerrar el CRUD real
+
+Tareas:
+
+1. crea modal de confirmación
+2. conecta `DELETE /cars/:id`
+3. muestra notificaciones de éxito y error
+4. refresca el listado sin romper la UX
+
+Qué deberías aprender:
+
+- confirmaciones
+- side effects de operaciones mutables
+- feedback al usuario
+
+### Bloque 7. Manejo de errores y loaders
+
+Objetivo:
+
+- evitar una app frágil
+
+Tareas:
+
+1. centraliza errores HTTP
+2. normaliza mensajes para el usuario
+3. crea loader o overlay
+4. decide si el loader vive por componente o por interceptor
+
+Qué deberías aprender:
+
+- interceptors
+- manejo global vs local de errores
+- diseño de estados de carga
+
+### Bloque 8. Login real
+
+Objetivo:
+
+- integrar autenticación completa
+
+Precondición:
+
+- cambia `AUTH_ENABLED=true`
+
+Tareas:
+
+1. crea pantalla de login
+2. llama a `POST /auth/login`
+3. persiste el token
+4. crea interceptor para enviar el bearer token
+5. consulta `GET /auth/me`
+6. reconstruye sesión al recargar la app
+
+Qué deberías aprender:
+
+- autenticación real
+- persistencia de sesión
+- seguridad de frontend
+
+### Bloque 9. Roles y autorización
+
+Objetivo:
+
+- adaptar la interfaz al perfil autenticado
+
+Tareas:
+
+1. oculta botones de editar y eliminar para `USER`
+2. deja visibles esas acciones para `ADMIN`
+3. protege rutas con guards de Angular
+4. bloquea navegación no autorizada
+
+Qué deberías aprender:
+
+- diferencia entre autenticación y autorización
+- guards
+- control de permisos en UI
+
+### Bloque 10. Paginación y filtros
+
+Objetivo:
+
+- trabajar como en una app profesional
+
+Tareas:
+
+1. conecta `page` y `limit`
+2. pinta metadatos de paginación
+3. añade filtros por marca, modelo, disponibilidad, año, precio y matrícula
+4. sincroniza filtros con la URL si quieres subir el nivel
+
+Qué deberías aprender:
+
+- query params
+- tablas con estado
+- UX de filtrado
+
+### Bloque 11. Calidad profesional
+
+Objetivo:
+
+- salir del modo "solo funciona en mi máquina"
+
+Tareas:
+
+1. configura ESLint y Prettier si no lo has hecho ya
+2. añade hooks con Husky
+3. documenta decisiones de arquitectura
+4. escribe tests unitarios y de componentes
+5. define criterio mínimo de cobertura
+6. crea plantilla de Pull Request
+7. usa ramas con naming consistente
+
+Qué deberías aprender:
+
+- calidad de código
+- revisión de cambios
+- disciplina de equipo
+
+## 11. Propuesta de roadmap por ramas
+
+Si quieres trabajar como si esto fuera un proyecto real, una secuencia razonable sería:
+
+1. `feat/project-setup`
+2. `feat/app-routing-layout`
+3. `feat/cars-list`
+4. `feat/car-details`
+5. `feat/car-form-create`
+6. `feat/car-form-edit`
+7. `feat/car-delete-modal`
+8. `feat/brands-models-integration`
+9. `feat/error-handling-and-loader`
+10. `feat/auth-login`
+11. `feat/auth-interceptor-and-session`
+12. `feat/roles-and-route-guards`
+13. `feat/pagination-and-filters`
+14. `docs/project-documentation`
+
+## 12. Recomendaciones técnicas
+
+- usa nombres en inglés para componentes, servicios, métodos, variables y tipos
+- no copies validaciones del backend sin entenderlas
+- revisa Swagger antes de modelar el frontend
+- no hardcodees marcas, modelos ni monedas en la UI
+- reutiliza el formulario de crear y editar
+- tipa todas las respuestas HTTP
+- evita lógica de negocio compleja en templates
+- si usas Angular 21, aprovecha standalone components y señales cuando tengan sentido
+- si usas una librería de componentes o Tailwind, que sea una decisión arquitectónica consciente y no solo una forma rápida de salir del paso
+
+## 13. Qué no deberías asumir
+
+- que `GET /cars` devuelve un array simple
+- que siempre puedes editar o borrar
+- que el login es obligatorio desde el minuto 1
+- que el backend guarda imágenes subidas realmente
+- que existe base de datos
+- que reiniciar backend conserva cambios
+- que el backend va a resolverte CORS de desarrollo con una whitelist permisiva a `localhost`
+
+## 14. Criterio de éxito
+
+Se puede considerar que la práctica está bien resuelta cuando:
+
+- la aplicación arranca sin fricción
+- el listado consume el backend real
+- crear, editar, ver y borrar funcionan
+- el formulario respeta las validaciones del backend
+- la UX maneja carga, errores y confirmaciones
+- la aplicación soporta trabajar con login desactivado y activado
+- el rol del usuario afecta a la interfaz y a la navegación
+- el código está ordenado, tipado y defendible en una revisión
+
+## 15. Referencias rápidas
+
+- Swagger backend: `http://localhost:3000/api-docs`
+- Frontend: `http://localhost:4200`
+- Backend: `http://localhost:3000`
+- Archivo de configuración auth: `backend/.env`
+
+Si tienes dudas sobre cómo modelar una petición o una respuesta, abre Swagger antes de escribir código. En este proyecto, el backend es la fuente de verdad.

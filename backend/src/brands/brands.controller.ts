@@ -1,9 +1,13 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BrandsService } from './brands.service';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { Brand, Model } from './data/brand.data';
 
-@ApiTags('brands') // Tag to group all routes related to brands
+@ApiTags('brands')
+@ApiBearerAuth()
 @Controller('brands')
+@UseGuards(JwtAuthGuard)
 export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}
 
@@ -12,9 +16,9 @@ export class BrandsController {
   @ApiResponse({
     status: 200,
     description: 'List of car brands',
-    type: [String],
+    type: [Object],
   })
-  getAllBrands() {
+  getAllBrands(): Brand[] {
     return this.brandsService.getAllBrands();
   }
 
@@ -23,9 +27,9 @@ export class BrandsController {
   @ApiResponse({
     status: 200,
     description: 'List of models for the specified brand',
-    type: [String],
+    type: [Object],
   })
-  getModelsByBrand(@Param('brandId') brandId: string) {
+  getModelsByBrand(@Param('brandId') brandId: string): Model[] {
     return this.brandsService.getModelsByBrand(brandId);
   }
 }

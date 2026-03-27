@@ -1,85 +1,497 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend API - Angular CRUD Practice
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend de práctica construido con NestJS para dar soporte a una aplicación Angular de gestión de coches.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+No es un starter vacío. Este backend ya incorpora autenticación JWT, roles, validaciones, Swagger, seed, catálogo de marcas y modelos, y un CRUD completo de coches con paginación y filtros.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- NestJS 10
+- TypeScript
+- `class-validator`
+- `class-transformer`
+- `@nestjs/swagger`
+- JWT con `passport-jwt`
 
-## Project setup
+## Objetivo de este backend
+
+Este backend está pensado para que el frontend practique contra una API realista sin tener que construir también toda la parte servidor desde cero.
+
+Permite trabajar en dos niveles:
+
+- nivel base: consumo de API, tablas, detalle, formularios, validaciones, CRUD
+- nivel avanzado: login real, interceptor JWT, guards de Angular, control por roles, paginación y filtros
+
+## Puesta en marcha
 
 ```bash
-$ npm install
+cd backend
+npm install
+npm run start:dev
 ```
 
-## Compile and run the project
+Servidor disponible en:
+
+- API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/api-docs`
+
+## Scripts disponibles
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start
+npm run start:dev
+npm run start:debug
+npm run start:prod
+npm run build
+npm run lint
+npm run test
+npm run test:watch
+npm run test:cov
+npm run test:e2e
 ```
 
-## Run tests
+## Configuración por entorno
 
-```bash
-# unit tests
-$ npm run test
+El archivo actual es `backend/.env`.
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```env
+AUTH_ENABLED=true
+JWT_SECRET=super-secret-key-123
+JWT_EXPIRES_IN=3600s
 ```
 
-## Resources
+### `AUTH_ENABLED`
 
-Check out a few resources that may come in handy when working with NestJS:
+Controla si el backend exige autenticación real o si entra en modo bypass.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+#### `AUTH_ENABLED=true`
 
-## Support
+Modo autenticado real:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- hay que hacer login contra `POST /auth/login`
+- hay que enviar `Authorization: Bearer <token>`
+- `GET /auth/me` devuelve el usuario autenticado
+- crear, editar y borrar coches requiere rol `ADMIN`
 
-## Stay in touch
+#### `AUTH_ENABLED=false`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Modo aprendizaje o bypass:
 
-## License
+- el backend no exige token real
+- el guard inyecta un usuario ficticio con rol `ADMIN`
+- se puede trabajar primero el CRUD sin implementar login en Angular
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Esto está pensado para que perfiles junior o en reciclaje puedan empezar por integración y formularios, y dejar autenticación para una segunda fase.
+
+### `JWT_SECRET`
+
+Se usa para firmar y validar tokens JWT.
+
+### `JWT_EXPIRES_IN`
+
+Tiempo de expiración del token. El valor actual es `3600s`.
+
+## Arquitectura actual
+
+Módulos cargados en `AppModule`:
+
+- `AuthModule`
+- `CarsModule`
+- `BrandsModule`
+- `SeedModule`
+
+## Comportamiento general de la API
+
+### Datos en memoria
+
+No hay base de datos. Los coches se almacenan en memoria dentro del servicio.
+
+Esto implica:
+
+- si reinicias el backend, se pierde el estado anterior
+- al arrancar, se generan coches de ejemplo automáticamente
+- el endpoint de seed puede sobrescribir el estado con un dataset fijo
+
+### Swagger
+
+El backend expone documentación interactiva en:
+
+```txt
+http://localhost:3000/api-docs
+```
+
+Además, al arrancar genera `swagger.json` en la carpeta `backend/`.
+
+### CORS
+
+Este backend no expone una whitelist permisiva para `localhost` en desarrollo.
+
+Eso es intencional.
+
+Objetivo:
+
+- evitar una integración artificial basada en abrir CORS por comodidad
+- forzar que el frontend se configure con un enfoque más cercano a un proyecto real
+
+Consecuencia práctica:
+
+- si el frontend intenta atacar la API como origen distinto sin preparar correctamente su integración, aparecerán problemas de CORS
+
+El README no da una receta cerrada para resolverlo a propósito. Esa parte forma parte del trabajo de integración frontend.
+
+## Autenticación y autorización
+
+### Login
+
+Endpoint:
+
+```http
+POST /auth/login
+```
+
+Credenciales de prueba:
+
+- `admin@example.com` / `admin123`
+- `user@example.com` / `user123`
+
+Respuesta:
+
+```json
+{
+  "access_token": "jwt-token",
+  "user": {
+    "email": "admin@example.com",
+    "name": "Admin User",
+    "role": "ADMIN"
+  }
+}
+```
+
+### Perfil autenticado
+
+Endpoint:
+
+```http
+GET /auth/me
+```
+
+Requiere token JWT válido si `AUTH_ENABLED=true`.
+
+### Roles
+
+Roles disponibles:
+
+- `ADMIN`
+- `USER`
+
+Permisos actuales:
+
+- `ADMIN`: lectura, creación, edición y borrado
+- `USER`: solo lectura
+
+Endpoints restringidos a `ADMIN`:
+
+- `POST /cars`
+- `PUT /cars/:id`
+- `DELETE /cars/:id`
+
+## Endpoints disponibles
+
+### Auth
+
+- `POST /auth/login`
+- `GET /auth/me`
+
+### Cars
+
+- `GET /cars`
+- `GET /cars/:id`
+- `POST /cars`
+- `PUT /cars/:id`
+- `DELETE /cars/:id`
+
+### Brands
+
+- `GET /brands`
+- `GET /brands/:brandId/models`
+
+### Seed
+
+- `GET /seed`
+
+## Contrato de datos
+
+### `GET /cars`
+
+No devuelve un array plano. Devuelve un objeto paginado:
+
+```json
+{
+  "items": [],
+  "meta": {
+    "totalItems": 50,
+    "itemCount": 10,
+    "itemsPerPage": 10,
+    "totalPages": 5,
+    "currentPage": 1,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  }
+}
+```
+
+Cada elemento de `items` es un `CarSummary`, es decir, una versión resumida del coche sin `carDetails` pero con `total`.
+
+### `GET /cars/:id`
+
+Devuelve el coche completo:
+
+```json
+{
+  "id": "uuid",
+  "brandId": "brand-1",
+  "modelId": "model-1",
+  "carDetails": [
+    {
+      "registrationDate": "2024-10-30T10:01:35.288Z",
+      "mileage": 15000,
+      "currency": "EUR",
+      "price": 20000,
+      "manufactureYear": 2020,
+      "availability": true,
+      "color": "Midnight Blue",
+      "description": "Excellent condition",
+      "licensePlate": "1234 ABC",
+      "imageUrl": "https://images.unsplash.com/..."
+    }
+  ],
+  "total": 1
+}
+```
+
+### `GET /brands`
+
+Respuesta:
+
+```json
+[
+  { "id": "brand-1", "name": "Toyota" },
+  { "id": "brand-2", "name": "Ford" }
+]
+```
+
+### `GET /brands/:brandId/models`
+
+Respuesta:
+
+```json
+[
+  { "id": "model-1", "name": "Corolla", "brandId": "brand-1" }
+]
+```
+
+## Filtros y paginación en coches
+
+`GET /cars` soporta los siguientes query params:
+
+- `page`
+- `limit`
+- `brandId`
+- `modelId`
+- `minPrice`
+- `maxPrice`
+- `minYear`
+- `maxYear`
+- `available`
+- `licensePlate`
+
+Ejemplo:
+
+```http
+GET /cars?page=1&limit=10&brandId=brand-1&minYear=2020&available=true
+```
+
+## Validaciones importantes
+
+El backend usa `ValidationPipe` global con:
+
+- `whitelist: true`
+- `forbidNonWhitelisted: true`
+- `transform: true`
+
+Eso significa:
+
+- las propiedades no permitidas se rechazan
+- los DTOs son la fuente de verdad
+- el frontend debe enviar exactamente el shape esperado
+
+### Reglas de `CreateCarDto`
+
+- `brandId` es obligatorio
+- `brandId` debe existir en el catálogo
+- `modelId` es obligatorio
+- `modelId` debe existir y pertenecer a la marca elegida
+- `carDetails` es opcional, pero si existe debe ser un array válido
+
+### Reglas de cada `carDetail`
+
+- `registrationDate` obligatorio
+- `registrationDate` debe estar en formato ISO UTC completo
+- `mileage` obligatorio y `>= 0`
+- `price` obligatorio y `> 0`
+- `manufactureYear` obligatorio
+- `manufactureYear >= 1900`
+- `manufactureYear <= año actual`
+- `manufactureYear <= año de registrationDate`
+- `currency` opcional, pero si se manda debe ser un ISO 4217 permitido
+- `availability` opcional y booleana
+- `color` opcional
+- `description` opcional
+- `licensePlate` obligatoria
+- `licensePlate` debe cumplir formato de matrícula española
+- `licensePlate` debe ser única
+
+### Formato de matrícula
+
+Formato esperado:
+
+```txt
+1234 ABC
+```
+
+Patrón admitido:
+
+```txt
+4 dígitos + espacio opcional + 3 consonantes
+```
+
+### Moneda
+
+La moneda debe pertenecer a la lista soportada de códigos ISO 4217 definida en el backend.
+
+Recomendación: no hardcodear una lista inventada en el frontend. Revisar Swagger y modelar exactamente lo que expone la API.
+
+## Comportamientos no obvios que el frontend debe conocer
+
+### `imageUrl` no lo envía el cliente
+
+El backend asigna `imageUrl` automáticamente a cada `carDetail`.
+
+Ahora mismo no hay subida real de ficheros ni almacenamiento de imágenes. El backend resuelve una URL de Unsplash de forma automática.
+
+### `GET /cars` usa `items`, no `data`
+
+La respuesta paginada actual devuelve:
+
+- `items`
+- `meta`
+
+No devuelve `data`.
+
+### Update usa el mismo contrato que create
+
+Aunque existe `UpdateCarDto`, el controlador usa `CreateCarDto` en `PUT /cars/:id`.
+
+Prácticamente, para frontend significa que crear y editar comparten la misma forma de payload.
+
+### Seed
+
+`GET /seed` rellena el almacenamiento en memoria con un dataset fijo definido en `src/seed/data/cars.seed.ts`.
+
+## Flujo recomendado para el frontend
+
+Si el equipo o estudiante es junior:
+
+1. poner `AUTH_ENABLED=false`
+2. construir listado, detalle, crear, editar y borrar
+3. consumir marcas y modelos
+4. validar formularios
+5. manejar errores y loaders
+6. activar luego el login real
+
+Si el equipo ya tiene más nivel:
+
+1. trabajar directamente con `AUTH_ENABLED=true`
+2. implementar login desde el inicio
+3. añadir interceptor JWT
+4. consumir `GET /auth/me`
+5. restringir UI según rol
+
+## Ejemplos útiles
+
+### Login
+
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+```
+
+### Crear coche
+
+```http
+POST /cars
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "brandId": "brand-1",
+  "modelId": "model-1",
+  "carDetails": [
+    {
+      "registrationDate": "2024-10-30T10:01:35.288Z",
+      "mileage": 15000,
+      "currency": "EUR",
+      "price": 20000,
+      "manufactureYear": 2020,
+      "availability": true,
+      "color": "Blue",
+      "description": "Excellent condition",
+      "licensePlate": "4321 BCD"
+    }
+  ]
+}
+```
+
+### Obtener perfil
+
+```http
+GET /auth/me
+Authorization: Bearer <token>
+```
+
+## Limitaciones actuales
+
+- no hay base de datos
+- no hay persistencia entre reinicios
+- no hay refresh token
+- no hay logout de servidor
+- no hay subida real de imágenes
+- no hay usuarios dinámicos ni registro
+- las credenciales son fijas para práctica
+
+## Qué debería revisar siempre el frontend antes de integrar
+
+- Swagger
+- DTOs de `src/cars/dto`
+- guards y roles
+- shape real de paginación
+- validaciones de formularios
+
+## Resumen
+
+Este backend ya cubre prácticamente todo lo necesario para una práctica seria de Angular conectada a una API:
+
+- autenticación opcional
+- autorización por roles
+- CRUD realista
+- validación fuerte
+- paginación y filtros
+- catálogos dependientes
+- documentación Swagger
+
+Si vas a usarlo como base para la práctica, toma Swagger y los DTOs como fuente de verdad. No modeles el frontend por intuición.

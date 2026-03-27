@@ -1,26 +1,204 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/cars": {
-      "get": {
-        "operationId": "CarsController_getAllCars",
+    "/auth/login": {
+      "post": {
+        "description": "Authenticate with email and password. Returns a JWT token to include in subsequent requests as `Authorization: Bearer <token>`.\n\n**Test credentials:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
+        "operationId": "AuthController_login",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "List of cars",
+            "description": "Authentication successful. Returns the JWT token and user profile.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CarSummary"
-                  }
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid email or password."
+          }
+        },
+        "summary": "Login and obtain a JWT token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "description": "Returns the profile of the user whose JWT token is provided in the Authorization header.",
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile of the currently authenticated user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT token."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the current authenticated user profile",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/cars": {
+      "get": {
+        "operationId": "CarsController_getAllCars",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number to retrieve (1-indexed)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items to return per page",
+            "schema": {
+              "minimum": 1,
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "brandId",
+            "required": false,
+            "in": "query",
+            "description": "Filter results to a single brand (exact match on brand ID)",
+            "schema": {
+              "example": "brand-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "modelId",
+            "required": false,
+            "in": "query",
+            "description": "Filter results to a single model (exact match on model ID). Should be combined with brandId.",
+            "schema": {
+              "example": "model-1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minPrice",
+            "required": false,
+            "in": "query",
+            "description": "Return only cars whose price is ≥ this value (in the currency stored on each record)",
+            "schema": {
+              "minimum": 0,
+              "example": 10000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "required": false,
+            "in": "query",
+            "description": "Return only cars whose price is ≤ this value. Combine with minPrice for a range.",
+            "schema": {
+              "minimum": 0,
+              "example": 40000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "minYear",
+            "required": false,
+            "in": "query",
+            "description": "Return only cars manufactured in or after this year",
+            "schema": {
+              "minimum": 1900,
+              "example": 2018,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxYear",
+            "required": false,
+            "in": "query",
+            "description": "Return only cars manufactured in or before this year",
+            "schema": {
+              "maximum": 2026,
+              "example": 2024,
+              "type": "number"
+            }
+          },
+          {
+            "name": "available",
+            "required": false,
+            "in": "query",
+            "description": "When true, returns only available cars. When false, returns only unavailable ones.",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "licensePlate",
+            "required": false,
+            "in": "query",
+            "description": "Partial, case-insensitive search on the license plate field (e.g. \"ABC\" matches \"1234 ABC\")",
+            "schema": {
+              "example": "1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of cars",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponseDto"
                 }
               }
             }
           }
         },
-        "summary": "Get all cars",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all cars (paginated & filtered)",
         "tags": [
           "cars"
         ]
@@ -51,9 +229,17 @@
           },
           "400": {
             "description": "Error creating car"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         },
-        "summary": "Create a new car",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new car (ADMIN only)",
         "tags": [
           "cars"
         ]
@@ -88,6 +274,11 @@
             "description": "Car not found"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get a car by ID",
         "tags": [
           "cars"
@@ -127,11 +318,19 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Car not found"
           }
         },
-        "summary": "Update a car",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a car (ADMIN only)",
         "tags": [
           "cars"
         ]
@@ -150,14 +349,22 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Car deleted"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Car not found"
           }
         },
-        "summary": "Delete a car",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a car (ADMIN only)",
         "tags": [
           "cars"
         ]
@@ -194,13 +401,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "object"
                   }
                 }
               }
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get all car brands",
         "tags": [
           "brands"
@@ -228,13 +440,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "object"
                   }
                 }
               }
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get models by car brand",
         "tags": [
           "brands"
@@ -243,8 +460,8 @@
     }
   },
   "info": {
-    "title": "Angular CRUD Project API",
-    "description": "API for managing car and brand endpoints",
+    "title": "NTT Demo Vehicle Catalog API",
+    "description": "Backend API for the NTT Angular practice: authentication, vehicle catalog, brands, models, pagination and role-based access.",
     "version": "1.0",
     "contact": {}
   },
@@ -253,59 +470,179 @@
   "components": {
     "securitySchemes": {
       "bearer": {
+        "type": "http",
         "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "type": "http"
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
-      "CarSummary": {
+      "LoginDto": {
         "type": "object",
         "properties": {
-          "brand": {
+          "email": {
             "type": "string",
-            "description": "Car brand",
-            "maxLength": 50,
-            "example": "Toyota"
+            "description": "User email",
+            "example": "admin@example.com"
           },
-          "model": {
+          "password": {
             "type": "string",
-            "description": "Car model",
-            "maxLength": 50,
-            "example": "Corolla"
-          },
-          "id": {
-            "type": "string",
-            "description": "Car ID"
-          },
-          "total": {
-            "type": "number",
-            "description": "Total number of cars"
+            "description": "User password",
+            "example": "admin123"
           }
         },
         "required": [
-          "brand",
-          "model",
-          "id",
-          "total"
+          "email",
+          "password"
         ]
       },
-      "CarDetailsDto": {
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique user ID",
+            "example": "1"
+          },
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "admin@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the user",
+            "example": "Admin User"
+          },
+          "role": {
+            "type": "string",
+            "description": "Role assigned to the user. ADMIN can create, update and delete cars. USER has read-only access.",
+            "enum": [
+              "ADMIN",
+              "USER"
+            ],
+            "example": "ADMIN"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "role"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT Bearer token. Include it in the Authorization header as: Bearer <token>",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "description": "Basic profile of the authenticated user",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserProfileDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "access_token",
+          "user"
+        ]
+      },
+      "PaginatedMetaDto": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "number",
+            "description": "Total number of items matching the query (across all pages)",
+            "example": 50
+          },
+          "itemCount": {
+            "type": "number",
+            "description": "Number of items returned in the current page",
+            "example": 10
+          },
+          "itemsPerPage": {
+            "type": "number",
+            "description": "Maximum items per page as requested",
+            "example": 10
+          },
+          "totalPages": {
+            "type": "number",
+            "description": "Total number of pages given the current limit",
+            "example": 5
+          },
+          "currentPage": {
+            "type": "number",
+            "description": "Current page number (1-indexed)",
+            "example": 1
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "True if there is a page after the current one",
+            "example": true
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "description": "True if there is a page before the current one",
+            "example": false
+          }
+        },
+        "required": [
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage",
+          "hasNextPage",
+          "hasPreviousPage"
+        ]
+      },
+      "PaginatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Array of items for the current page",
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          },
+          "meta": {
+            "description": "Pagination metadata",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaginatedMetaDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ]
+      },
+      "CarDetailEntity": {
         "type": "object",
         "properties": {
           "registrationDate": {
             "type": "string",
-            "description": "Car registration date",
-            "example": "2024-10-30T10:01:35.288Z"
+            "description": "Official registration date of the car (ISO 8601 UTC format)",
+            "example": "2024-10-30T10:01:35.288Z",
+            "pattern": "YYYY-MM-DDTHH:MM:SS.mmmZ"
           },
           "mileage": {
             "type": "number",
-            "description": "Car mileage",
-            "example": 15000
+            "description": "Current mileage of the car in kilometres",
+            "example": 15000,
+            "minimum": 0
           },
           "currency": {
             "type": "string",
-            "description": "Currency of the price",
+            "description": "Currency of the price as an ISO 4217 code. Defaults to EUR when not provided.",
             "enum": [
               "EUR",
               "GBP",
@@ -350,95 +687,232 @@
               "KES",
               "GHS"
             ],
-            "example": "USD"
+            "example": "EUR",
+            "default": "EUR"
           },
           "price": {
             "type": "number",
-            "description": "Price of the car",
-            "example": 20000
+            "description": "Asking price of the car (must be a positive number)",
+            "example": 20000,
+            "minimum": 1
           },
           "manufactureYear": {
             "type": "number",
-            "description": "Year of manufacture of the car",
-            "example": 2020
+            "description": "Year the car was manufactured. Must be between 1900 and the current year (2026).\nAlso must be ≤ the year in registrationDate.",
+            "example": 2020,
+            "minimum": 1900,
+            "maximum": 2026
           },
           "availability": {
             "type": "boolean",
-            "description": "Indicates if the car is available for sale",
-            "example": true
+            "description": "Whether the car is currently available for sale. Defaults to true when not provided.",
+            "example": true,
+            "default": true
+          },
+          "color": {
+            "type": "string",
+            "description": "Exterior colour of the car",
+            "example": "Midnight Blue"
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-text description highlighting condition, extras, or any relevant details",
+            "example": "Excellent condition, single owner, full service history."
           },
           "licensePlate": {
             "type": "string",
-            "description": "Car license plate",
-            "example": "1234 ABC"
+            "description": "Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 ABC). Must be unique across all cars.",
+            "example": "1234 ABC",
+            "pattern": "^[0-9]{4}\\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Car image URL resolved by the backend (random Unsplash photo)",
+            "example": "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
+            "readOnly": true
           }
         },
         "required": [
           "registrationDate",
           "mileage",
-          "currency",
           "price",
           "manufactureYear",
-          "availability",
-          "licensePlate"
+          "licensePlate",
+          "imageUrl"
         ]
       },
       "Car": {
         "type": "object",
         "properties": {
-          "brand": {
+          "brandId": {
             "type": "string",
-            "description": "Car brand",
-            "maxLength": 50,
-            "example": "Toyota"
+            "description": "ID of the car brand. Must reference an existing brand (e.g. brand-1, brand-2).",
+            "example": "brand-1"
           },
-          "model": {
+          "modelId": {
             "type": "string",
-            "description": "Car model",
-            "maxLength": 50,
-            "example": "Corolla"
-          },
-          "carDetails": {
-            "description": "Car details",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CarDetailsDto"
-            }
+            "description": "ID of the car model. Must reference a model that belongs to the selected brand.",
+            "example": "model-1"
           },
           "id": {
             "type": "string",
             "description": "Car ID"
           },
+          "carDetails": {
+            "description": "Car details entries",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CarDetailEntity"
+            }
+          },
           "total": {
             "type": "number",
-            "description": "Total number of cars"
+            "description": "Total number of car detail entries"
           }
         },
         "required": [
-          "brand",
-          "model",
-          "carDetails",
-          "id",
-          "total"
+          "brandId",
+          "modelId",
+          "id"
+        ]
+      },
+      "CarDetailsDto": {
+        "type": "object",
+        "properties": {
+          "registrationDate": {
+            "type": "string",
+            "description": "Official registration date of the car (ISO 8601 UTC format)",
+            "example": "2024-10-30T10:01:35.288Z",
+            "pattern": "YYYY-MM-DDTHH:MM:SS.mmmZ"
+          },
+          "mileage": {
+            "type": "number",
+            "description": "Current mileage of the car in kilometres",
+            "example": 15000,
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency of the price as an ISO 4217 code. Defaults to EUR when not provided.",
+            "enum": [
+              "EUR",
+              "GBP",
+              "CHF",
+              "SEK",
+              "NOK",
+              "DKK",
+              "PLN",
+              "CZK",
+              "HUF",
+              "RON",
+              "BGN",
+              "HRK",
+              "ARS",
+              "BRL",
+              "CLP",
+              "COP",
+              "PEN",
+              "UYU",
+              "PYG",
+              "BOB",
+              "VES",
+              "USD",
+              "CAD",
+              "MXN",
+              "JPY",
+              "CNY",
+              "INR",
+              "KRW",
+              "SGD",
+              "HKD",
+              "MYR",
+              "IDR",
+              "THB",
+              "VND",
+              "PKR",
+              "AUD",
+              "NZD",
+              "ZAR",
+              "EGP",
+              "NGN",
+              "KES",
+              "GHS"
+            ],
+            "example": "EUR",
+            "default": "EUR"
+          },
+          "price": {
+            "type": "number",
+            "description": "Asking price of the car (must be a positive number)",
+            "example": 20000,
+            "minimum": 1
+          },
+          "manufactureYear": {
+            "type": "number",
+            "description": "Year the car was manufactured. Must be between 1900 and the current year (2026).\nAlso must be ≤ the year in registrationDate.",
+            "example": 2020,
+            "minimum": 1900,
+            "maximum": 2026
+          },
+          "availability": {
+            "type": "boolean",
+            "description": "Whether the car is currently available for sale. Defaults to true when not provided.",
+            "example": true,
+            "default": true
+          },
+          "color": {
+            "type": "string",
+            "description": "Exterior colour of the car",
+            "example": "Midnight Blue"
+          },
+          "description": {
+            "type": "string",
+            "description": "Free-text description highlighting condition, extras, or any relevant details",
+            "example": "Excellent condition, single owner, full service history."
+          },
+          "licensePlate": {
+            "type": "string",
+            "description": "Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 ABC). Must be unique across all cars.",
+            "example": "1234 ABC",
+            "pattern": "^[0-9]{4}\\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$"
+          }
+        },
+        "required": [
+          "registrationDate",
+          "mileage",
+          "price",
+          "manufactureYear",
+          "licensePlate"
         ]
       },
       "CreateCarDto": {
         "type": "object",
         "properties": {
-          "brand": {
+          "brandId": {
             "type": "string",
-            "description": "Car brand",
-            "maxLength": 50,
-            "example": "Toyota"
+            "description": "ID of the car brand. Must reference an existing brand (e.g. brand-1, brand-2).",
+            "example": "brand-1"
           },
-          "model": {
+          "modelId": {
             "type": "string",
-            "description": "Car model",
-            "maxLength": 50,
-            "example": "Corolla"
+            "description": "ID of the car model. Must reference a model that belongs to the selected brand.",
+            "example": "model-1"
           },
           "carDetails": {
-            "description": "Car details",
+            "description": "List of car detail entries (one per listing or unit). Can be omitted to create a car without details.",
+            "example": [
+              {
+                "registrationDate": "2024-10-30T10:01:35.288Z",
+                "mileage": 15000,
+                "price": 20000,
+                "manufactureYear": 2020,
+                "currency": "EUR",
+                "availability": true,
+                "color": "Midnight Blue",
+                "description": "Excellent condition, single owner.",
+                "licensePlate": "1234 ABC"
+              }
+            ],
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CarDetailsDto"
@@ -446,9 +920,8 @@
           }
         },
         "required": [
-          "brand",
-          "model",
-          "carDetails"
+          "brandId",
+          "modelId"
         ]
       }
     }
