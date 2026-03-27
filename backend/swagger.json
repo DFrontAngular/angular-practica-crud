@@ -3,7 +3,7 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "description": "Authenticate with email and password. Returns a JWT token to include in subsequent requests as `Authorization: Bearer <token>`.\n\n**Test credentials:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
+        "description": "Authenticates a user with email and password and returns a JWT access token to be included in subsequent requests as `Authorization: Bearer <token>`.\n\n**Available credentials for the practice environment:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
         "operationId": "AuthController_login",
         "parameters": [],
         "requestBody": {
@@ -18,7 +18,7 @@
         },
         "responses": {
           "200": {
-            "description": "Authentication successful. Returns the JWT token and user profile.",
+            "description": "Authentication completed successfully. Returns the access token and the user profile.",
             "content": {
               "application/json": {
                 "schema": {
@@ -31,20 +31,20 @@
             "description": "Invalid email or password."
           }
         },
-        "summary": "Login and obtain a JWT token",
+        "summary": "Authenticate and issue an access token",
         "tags": [
-          "Authentication"
+          "Access Management"
         ]
       }
     },
     "/auth/me": {
       "get": {
-        "description": "Returns the profile of the user whose JWT token is provided in the Authorization header.",
+        "description": "Returns the profile associated with the JWT access token provided in the Authorization header.",
         "operationId": "AuthController_getProfile",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Profile of the currently authenticated user.",
+            "description": "Authenticated user profile returned successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -62,9 +62,9 @@
             "bearer": []
           }
         ],
-        "summary": "Get the current authenticated user profile",
+        "summary": "Retrieve the current authenticated user profile",
         "tags": [
-          "Authentication"
+          "Access Management"
         ]
       }
     },
@@ -88,7 +88,7 @@
             "name": "limit",
             "required": false,
             "in": "query",
-            "description": "Number of items to return per page",
+            "description": "Maximum number of items to return per page",
             "schema": {
               "minimum": 1,
               "default": 10,
@@ -100,7 +100,7 @@
             "name": "brandId",
             "required": false,
             "in": "query",
-            "description": "Filter results to a single brand (exact match on brand ID)",
+            "description": "Filter results to a single brand by exact brand identifier",
             "schema": {
               "example": "brand-1",
               "type": "string"
@@ -110,7 +110,7 @@
             "name": "modelId",
             "required": false,
             "in": "query",
-            "description": "Filter results to a single model (exact match on model ID). Should be combined with brandId.",
+            "description": "Filter results to a single model by exact model identifier. Typically combined with brandId.",
             "schema": {
               "example": "model-1",
               "type": "string"
@@ -120,7 +120,7 @@
             "name": "minPrice",
             "required": false,
             "in": "query",
-            "description": "Return only cars whose price is ≥ this value (in the currency stored on each record)",
+            "description": "Return only vehicles whose price is greater than or equal to this value",
             "schema": {
               "minimum": 0,
               "example": 10000,
@@ -131,7 +131,7 @@
             "name": "maxPrice",
             "required": false,
             "in": "query",
-            "description": "Return only cars whose price is ≤ this value. Combine with minPrice for a range.",
+            "description": "Return only vehicles whose price is lower than or equal to this value",
             "schema": {
               "minimum": 0,
               "example": 40000,
@@ -142,7 +142,7 @@
             "name": "minYear",
             "required": false,
             "in": "query",
-            "description": "Return only cars manufactured in or after this year",
+            "description": "Return only vehicles manufactured in or after this year",
             "schema": {
               "minimum": 1900,
               "example": 2018,
@@ -153,7 +153,7 @@
             "name": "maxYear",
             "required": false,
             "in": "query",
-            "description": "Return only cars manufactured in or before this year",
+            "description": "Return only vehicles manufactured in or before this year",
             "schema": {
               "maximum": 2026,
               "example": 2024,
@@ -164,7 +164,7 @@
             "name": "available",
             "required": false,
             "in": "query",
-            "description": "When true, returns only available cars. When false, returns only unavailable ones.",
+            "description": "When true, returns only available vehicles. When false, returns only unavailable ones.",
             "schema": {
               "example": true,
               "type": "boolean"
@@ -174,7 +174,7 @@
             "name": "licensePlate",
             "required": false,
             "in": "query",
-            "description": "Partial, case-insensitive search on the license plate field (e.g. \"ABC\" matches \"1234 ABC\")",
+            "description": "Partial, case-insensitive search on the license plate field",
             "schema": {
               "example": "1234",
               "type": "string"
@@ -183,7 +183,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of cars",
+            "description": "Vehicle catalog returned successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -198,9 +198,9 @@
             "bearer": []
           }
         ],
-        "summary": "Get all cars (paginated & filtered)",
+        "summary": "List vehicles with pagination and filters",
         "tags": [
-          "cars"
+          "Vehicles"
         ]
       },
       "post": {
@@ -218,7 +218,7 @@
         },
         "responses": {
           "201": {
-            "description": "Car created",
+            "description": "Vehicle created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -228,7 +228,7 @@
             }
           },
           "400": {
-            "description": "Error creating car"
+            "description": "Invalid vehicle payload"
           },
           "403": {
             "description": "Forbidden"
@@ -239,9 +239,9 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new car (ADMIN only)",
+        "summary": "Create a new vehicle entry (ADMIN only)",
         "tags": [
-          "cars"
+          "Vehicles"
         ]
       }
     },
@@ -253,7 +253,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Car ID",
+            "description": "Vehicle identifier",
             "schema": {
               "type": "string"
             }
@@ -261,7 +261,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Car found",
+            "description": "Vehicle returned successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -271,7 +271,7 @@
             }
           },
           "404": {
-            "description": "Car not found"
+            "description": "Vehicle not found"
           }
         },
         "security": [
@@ -279,9 +279,9 @@
             "bearer": []
           }
         ],
-        "summary": "Get a car by ID",
+        "summary": "Retrieve a vehicle by identifier",
         "tags": [
-          "cars"
+          "Vehicles"
         ]
       },
       "put": {
@@ -291,7 +291,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Car ID",
+            "description": "Vehicle identifier",
             "schema": {
               "type": "string"
             }
@@ -309,7 +309,7 @@
         },
         "responses": {
           "200": {
-            "description": "Car updated",
+            "description": "Vehicle updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -322,7 +322,7 @@
             "description": "Forbidden"
           },
           "404": {
-            "description": "Car not found"
+            "description": "Vehicle not found"
           }
         },
         "security": [
@@ -330,9 +330,9 @@
             "bearer": []
           }
         ],
-        "summary": "Update a car (ADMIN only)",
+        "summary": "Update an existing vehicle entry (ADMIN only)",
         "tags": [
-          "cars"
+          "Vehicles"
         ]
       },
       "delete": {
@@ -342,7 +342,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Car ID",
+            "description": "Vehicle identifier",
             "schema": {
               "type": "string"
             }
@@ -350,13 +350,13 @@
         ],
         "responses": {
           "204": {
-            "description": "Car deleted"
+            "description": "Vehicle deleted successfully"
           },
           "403": {
             "description": "Forbidden"
           },
           "404": {
-            "description": "Car not found"
+            "description": "Vehicle not found"
           }
         },
         "security": [
@@ -364,28 +364,28 @@
             "bearer": []
           }
         ],
-        "summary": "Delete a car (ADMIN only)",
+        "summary": "Delete a vehicle entry (ADMIN only)",
         "tags": [
-          "cars"
+          "Vehicles"
         ]
       }
     },
     "/seed": {
       "get": {
-        "description": "Triggers the seeding of the database with predefined data.",
+        "description": "Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding.",
         "operationId": "SeedController_populateDB",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Database populated successfully"
+            "description": "Catalog dataset loaded successfully"
           },
           "500": {
-            "description": "Error while populating the database"
+            "description": "Unexpected error while loading the catalog dataset"
           }
         },
-        "summary": "Populate the database with initial data",
+        "summary": "Load the predefined catalog dataset",
         "tags": [
-          "seed"
+          "Catalog Administration"
         ]
       }
     },
@@ -395,7 +395,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of car brands",
+            "description": "Vehicle brand catalog returned successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -413,9 +413,9 @@
             "bearer": []
           }
         ],
-        "summary": "Get all car brands",
+        "summary": "List available vehicle brands",
         "tags": [
-          "brands"
+          "Catalog"
         ]
       }
     },
@@ -434,7 +434,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of models for the specified brand",
+            "description": "Model catalog for the requested brand returned successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -452,9 +452,9 @@
             "bearer": []
           }
         ],
-        "summary": "Get models by car brand",
+        "summary": "List models for a specific brand",
         "tags": [
-          "brands"
+          "Catalog"
         ]
       }
     }
@@ -481,12 +481,12 @@
         "properties": {
           "email": {
             "type": "string",
-            "description": "User email",
+            "description": "Account email address",
             "example": "admin@example.com"
           },
           "password": {
             "type": "string",
-            "description": "User password",
+            "description": "Account password",
             "example": "admin123"
           }
         },
@@ -500,7 +500,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Unique user ID",
+            "description": "Unique user identifier",
             "example": "1"
           },
           "email": {
@@ -510,12 +510,12 @@
           },
           "name": {
             "type": "string",
-            "description": "Display name of the user",
+            "description": "Display name associated with the account",
             "example": "Admin User"
           },
           "role": {
             "type": "string",
-            "description": "Role assigned to the user. ADMIN can create, update and delete cars. USER has read-only access.",
+            "description": "Role assigned to the account. ADMIN can create, update and delete vehicles. USER has read-only access.",
             "enum": [
               "ADMIN",
               "USER"
@@ -535,11 +535,11 @@
         "properties": {
           "access_token": {
             "type": "string",
-            "description": "JWT Bearer token. Include it in the Authorization header as: Bearer <token>",
+            "description": "JWT bearer token. Include it in the Authorization header as: Bearer <token>",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           },
           "user": {
-            "description": "Basic profile of the authenticated user",
+            "description": "Profile of the authenticated user",
             "allOf": [
               {
                 "$ref": "#/components/schemas/UserProfileDto"
@@ -557,22 +557,22 @@
         "properties": {
           "totalItems": {
             "type": "number",
-            "description": "Total number of items matching the query (across all pages)",
+            "description": "Total number of records matching the current query",
             "example": 50
           },
           "itemCount": {
             "type": "number",
-            "description": "Number of items returned in the current page",
+            "description": "Number of records returned in the current page",
             "example": 10
           },
           "itemsPerPage": {
             "type": "number",
-            "description": "Maximum items per page as requested",
+            "description": "Maximum records per page requested by the client",
             "example": 10
           },
           "totalPages": {
             "type": "number",
-            "description": "Total number of pages given the current limit",
+            "description": "Total number of pages for the current query and limit",
             "example": 5
           },
           "currentPage": {
@@ -582,12 +582,12 @@
           },
           "hasNextPage": {
             "type": "boolean",
-            "description": "True if there is a page after the current one",
+            "description": "Indicates whether another page exists after the current one",
             "example": true
           },
           "hasPreviousPage": {
             "type": "boolean",
-            "description": "True if there is a page before the current one",
+            "description": "Indicates whether a page exists before the current one",
             "example": false
           }
         },
@@ -605,14 +605,14 @@
         "type": "object",
         "properties": {
           "items": {
-            "description": "Array of items for the current page",
+            "description": "Collection of records returned for the current page",
             "type": "array",
             "items": {
               "type": "array"
             }
           },
           "meta": {
-            "description": "Pagination metadata",
+            "description": "Pagination metadata for the current query",
             "allOf": [
               {
                 "$ref": "#/components/schemas/PaginatedMetaDto"
@@ -721,13 +721,13 @@
           },
           "licensePlate": {
             "type": "string",
-            "description": "Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 ABC). Must be unique across all cars.",
-            "example": "1234 ABC",
+            "description": "Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 BBB). Must be unique across all cars.",
+            "example": "1234 BBB",
             "pattern": "^[0-9]{4}\\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$"
           },
           "imageUrl": {
             "type": "string",
-            "description": "Car image URL resolved by the backend (random Unsplash photo)",
+            "description": "Vehicle image URL resolved by the backend",
             "example": "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
             "readOnly": true
           }
@@ -756,10 +756,10 @@
           },
           "id": {
             "type": "string",
-            "description": "Car ID"
+            "description": "Vehicle identifier"
           },
           "carDetails": {
-            "description": "Car details entries",
+            "description": "Vehicle detail entries",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CarDetailEntity"
@@ -767,7 +767,7 @@
           },
           "total": {
             "type": "number",
-            "description": "Total number of car detail entries"
+            "description": "Total number of vehicle detail entries"
           }
         },
         "required": [
@@ -872,8 +872,8 @@
           },
           "licensePlate": {
             "type": "string",
-            "description": "Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 ABC). Must be unique across all cars.",
-            "example": "1234 ABC",
+            "description": "Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 BBB). Must be unique across all cars.",
+            "example": "1234 BBB",
             "pattern": "^[0-9]{4}\\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$"
           }
         },
@@ -910,7 +910,7 @@
                 "availability": true,
                 "color": "Midnight Blue",
                 "description": "Excellent condition, single owner.",
-                "licensePlate": "1234 ABC"
+                "licensePlate": "1234 BBB"
               }
             ],
             "type": "array",

@@ -5,7 +5,7 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class GetCarsFilterDto extends PaginationDto {
   @ApiPropertyOptional({
-    description: 'Filter results to a single brand (exact match on brand ID)',
+    description: 'Filter results to a single brand by exact brand identifier',
     example: 'brand-1',
   })
   @IsString()
@@ -13,7 +13,7 @@ export class GetCarsFilterDto extends PaginationDto {
   brandId?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter results to a single model (exact match on model ID). Should be combined with brandId.',
+    description: 'Filter results to a single model by exact model identifier. Typically combined with brandId.',
     example: 'model-1',
   })
   @IsString()
@@ -21,7 +21,7 @@ export class GetCarsFilterDto extends PaginationDto {
   modelId?: string;
 
   @ApiPropertyOptional({
-    description: 'Return only cars whose price is ≥ this value (in the currency stored on each record)',
+    description: 'Return only vehicles whose price is greater than or equal to this value',
     minimum: 0,
     example: 10000,
   })
@@ -32,7 +32,7 @@ export class GetCarsFilterDto extends PaginationDto {
   minPrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Return only cars whose price is ≤ this value. Combine with minPrice for a range.',
+    description: 'Return only vehicles whose price is lower than or equal to this value',
     minimum: 0,
     example: 40000,
   })
@@ -43,7 +43,7 @@ export class GetCarsFilterDto extends PaginationDto {
   maxPrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Return only cars manufactured in or after this year',
+    description: 'Return only vehicles manufactured in or after this year',
     minimum: 1900,
     example: 2018,
   })
@@ -54,7 +54,7 @@ export class GetCarsFilterDto extends PaginationDto {
   minYear?: number;
 
   @ApiPropertyOptional({
-    description: 'Return only cars manufactured in or before this year',
+    description: 'Return only vehicles manufactured in or before this year',
     maximum: new Date().getFullYear(),
     example: 2024,
   })
@@ -64,7 +64,7 @@ export class GetCarsFilterDto extends PaginationDto {
   maxYear?: number;
 
   @ApiPropertyOptional({
-    description: 'When true, returns only available cars. When false, returns only unavailable ones.',
+    description: 'When true, returns only available vehicles. When false, returns only unavailable ones.',
     example: true,
   })
   @Type(() => Boolean)
@@ -73,7 +73,7 @@ export class GetCarsFilterDto extends PaginationDto {
   available?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Partial, case-insensitive search on the license plate field (e.g. "ABC" matches "1234 ABC")',
+    description: 'Partial, case-insensitive search on the license plate field',
     example: '1234',
   })
   @IsString()

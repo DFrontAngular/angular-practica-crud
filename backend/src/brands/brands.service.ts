@@ -4,17 +4,17 @@ import { Brand, brandsDB, Model, modelsDB } from './data/brand.data';
 @Injectable()
 export class BrandsService {
   /**
-   * Retrieves all car brands from the database.
-   * @returns An array of all car brands.
+   * Returns the full vehicle brand catalog.
+   * @returns List of available vehicle brands.
    */
   getAllBrands(): Brand[] {
     return brandsDB;
   }
 
   /**
-   * Retrieves all models for a specific brand, given the brand's ID.
-   * @param brandId - The unique ID representing the car brand.
-   * @returns An array of models for the given brand, or an empty array if no models are found.
+   * Returns all models associated with a specific vehicle brand.
+   * @param brandId - Identifier of the selected brand.
+   * @returns List of models linked to the requested brand.
    */
   getModelsByBrand(brandId: string): Model[] {
     return modelsDB.filter((model) => model.brandId === brandId);

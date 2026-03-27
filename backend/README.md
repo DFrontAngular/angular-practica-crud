@@ -2,7 +2,7 @@
 
 Backend de práctica construido con NestJS para dar soporte a una aplicación Angular de gestión de coches.
 
-No es un starter vacío. Este backend ya incorpora autenticación JWT, roles, validaciones, Swagger, seed, catálogo de marcas y modelos, y un CRUD completo de coches con paginación y filtros.
+Este backend ya incorpora autenticación JWT, roles, validaciones, Swagger, carga de dataset, catálogo de marcas y modelos, y un CRUD completo de coches con paginación y filtros.
 
 ## Stack
 
@@ -261,7 +261,7 @@ Devuelve el coche completo:
       "availability": true,
       "color": "Midnight Blue",
       "description": "Excellent condition",
-      "licensePlate": "1234 ABC",
+      "licensePlate": "1234 BBB",
       "imageUrl": "https://images.unsplash.com/..."
     }
   ],
@@ -356,7 +356,7 @@ Eso significa:
 Formato esperado:
 
 ```txt
-1234 ABC
+1234 BBB
 ```
 
 Patrón admitido:

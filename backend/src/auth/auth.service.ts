@@ -25,7 +25,7 @@ export class AuthService {
     {
       id: '2',
       email: 'user@example.com',
-      name: 'Regular User',
+      name: 'Standard User',
       role: UserRole.USER,
     },
   ];
@@ -33,7 +33,6 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   async login(email: string, password: string) {
-    // For a simple demo, any password works if email exists
     const user = this.users.find((u) => u.email === email);
     if (!user || (password !== 'admin123' && password !== 'user123')) {
       throw new UnauthorizedException('Invalid credentials');

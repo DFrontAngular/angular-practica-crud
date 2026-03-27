@@ -2,23 +2,23 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SeedService } from './seed.service';
 
-@ApiTags('seed') // This tag is used to group endpoints related to seeding.
+@ApiTags('Catalog Administration')
 @Controller('seed')
 export class SeedController {
   constructor(private readonly seedService: SeedService) {}
 
   @Get()
   @ApiOperation({
-    summary: 'Populate the database with initial data',
-    description: 'Triggers the seeding of the database with predefined data.',
+    summary: 'Load the predefined catalog dataset',
+    description: 'Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Database populated successfully',
+    description: 'Catalog dataset loaded successfully',
   })
   @ApiResponse({
     status: 500,
-    description: 'Error while populating the database',
+    description: 'Unexpected error while loading the catalog dataset',
   })
   populateDB() {
     return this.seedService.populateDB();

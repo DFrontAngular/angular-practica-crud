@@ -23,7 +23,7 @@ import { Car, CarSummary } from './entities';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
 
-@ApiTags('cars')
+@ApiTags('Vehicles')
 @ApiBearerAuth()
 @Controller('cars')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -31,26 +31,26 @@ export class CarsController {
   constructor(private readonly carsService: CarsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all cars (paginated & filtered)' })
-  @ApiResponse({ status: 200, description: 'Paginated list of cars', type: PaginatedResponseDto })
+  @ApiOperation({ summary: 'List vehicles with pagination and filters' })
+  @ApiResponse({ status: 200, description: 'Vehicle catalog returned successfully', type: PaginatedResponseDto })
   getAllCars(@Query() filterDto: GetCarsFilterDto): PaginatedResponseDto<CarSummary> {
     return this.carsService.findAll(filterDto);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a car by ID' })
-  @ApiParam({ name: 'id', type: String, description: 'Car ID' })
-  @ApiResponse({ status: 200, description: 'Car found', type: Car })
-  @ApiResponse({ status: 404, description: 'Car not found' })
+  @ApiOperation({ summary: 'Retrieve a vehicle by identifier' })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiResponse({ status: 200, description: 'Vehicle returned successfully', type: Car })
+  @ApiResponse({ status: 404, description: 'Vehicle not found' })
   getCarById(@Param('id', ParseUUIDPipe) id: string): Car {
     return this.carsService.findOne(id);
   }
 
   @Post()
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Create a new car (ADMIN only)' })
-  @ApiResponse({ status: 201, description: 'Car created', type: Car })
-  @ApiResponse({ status: 400, description: 'Error creating car' })
+  @ApiOperation({ summary: 'Create a new vehicle entry (ADMIN only)' })
+  @ApiResponse({ status: 201, description: 'Vehicle created successfully', type: Car })
+  @ApiResponse({ status: 400, description: 'Invalid vehicle payload' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   createCar(@Body() createCarDto: CreateCarDto): Car {
     return this.carsService.create(createCarDto);
@@ -58,10 +58,10 @@ export class CarsController {
 
   @Put(':id')
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Update a car (ADMIN only)' })
-  @ApiParam({ name: 'id', type: String, description: 'Car ID' })
-  @ApiResponse({ status: 200, description: 'Car updated', type: Car })
-  @ApiResponse({ status: 404, description: 'Car not found' })
+  @ApiOperation({ summary: 'Update an existing vehicle entry (ADMIN only)' })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiResponse({ status: 200, description: 'Vehicle updated successfully', type: Car })
+  @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   updateCar(
     @Body() carToUpdate: CreateCarDto,
@@ -73,10 +73,10 @@ export class CarsController {
   @Delete(':id')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a car (ADMIN only)' })
-  @ApiParam({ name: 'id', type: String, description: 'Car ID' })
-  @ApiResponse({ status: 204, description: 'Car deleted' })
-  @ApiResponse({ status: 404, description: 'Car not found' })
+  @ApiOperation({ summary: 'Delete a vehicle entry (ADMIN only)' })
+  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiResponse({ status: 204, description: 'Vehicle deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   deleteCar(@Param('id', ParseUUIDPipe) id: string): void {
     this.carsService.remove(id);

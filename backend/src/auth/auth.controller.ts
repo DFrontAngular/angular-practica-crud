@@ -10,23 +10,23 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto, UserProfileDto } from './dto/auth-response.dto';
 
-@ApiTags('Authentication')
+@ApiTags('Access Management')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @ApiOperation({
-    summary: 'Login and obtain a JWT token',
+    summary: 'Authenticate and issue an access token',
     description:
-      'Authenticate with email and password. Returns a JWT token to include in subsequent requests as `Authorization: Bearer <token>`.\n\n' +
-      '**Test credentials:**\n' +
+      'Authenticates a user with email and password and returns a JWT access token to be included in subsequent requests as `Authorization: Bearer <token>`.\n\n' +
+      '**Available credentials for the practice environment:**\n' +
       '- Admin: `admin@example.com` / `admin123`\n' +
       '- User: `user@example.com` / `user123`',
   })
   @ApiResponse({
     status: 200,
-    description: 'Authentication successful. Returns the JWT token and user profile.',
+    description: 'Authentication completed successfully. Returns the access token and the user profile.',
     type: LoginResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid email or password.' })
@@ -38,12 +38,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiOperation({
-    summary: 'Get the current authenticated user profile',
-    description: 'Returns the profile of the user whose JWT token is provided in the Authorization header.',
+    summary: 'Retrieve the current authenticated user profile',
+    description: 'Returns the profile associated with the JWT access token provided in the Authorization header.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Profile of the currently authenticated user.',
+    description: 'Authenticated user profile returned successfully.',
     type: UserProfileDto,
   })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token.' })

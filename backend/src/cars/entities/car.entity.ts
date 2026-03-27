@@ -8,7 +8,7 @@ import { CarDetailsDto, CreateCarDto } from '../dto';
 export class CarDetailEntity extends CarDetailsDto {
   @ApiProperty({
     description:
-      'Car image URL resolved by the backend (random Unsplash photo)',
+      'Vehicle image URL resolved by the backend',
     type: String,
     example: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70',
     readOnly: true,
@@ -17,18 +17,18 @@ export class CarDetailEntity extends CarDetailsDto {
 }
 
 export class Car extends OmitType(CreateCarDto, ['carDetails'] as const) {
-  @ApiProperty({ description: 'Car ID', type: String })
+  @ApiProperty({ description: 'Vehicle identifier', type: String })
   id: string;
 
   @ApiProperty({
-    description: 'Car details entries',
+    description: 'Vehicle detail entries',
     type: [CarDetailEntity],
     required: false,
   })
   carDetails?: CarDetailEntity[];
 
   @ApiProperty({
-    description: 'Total number of car detail entries',
+    description: 'Total number of vehicle detail entries',
     type: Number,
     required: false,
   })

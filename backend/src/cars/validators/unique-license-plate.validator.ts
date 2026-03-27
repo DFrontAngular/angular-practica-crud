@@ -15,12 +15,10 @@ export class UniqueLicensePlateConstraint implements ValidatorConstraintInterfac
 
   validate(licensePlate: string, args: ValidationArguments) {
     if (!licensePlate) return true;
-    
-    // We need the car ID for updates (to exclude itself)
-    // In a real app, this might come from the request params.
-    // For this simple CRUD, we'll assume it's an update if the ID is present in the object (though not standard for all apps)
+
+    // Exclude the current entity during update scenarios when an identifier is available.
     const entityId = (args.object as any).id || (args.object as any).carId;
-    
+
     return !this.carsService.isLicensePlateTaken(licensePlate, entityId);
   }
 

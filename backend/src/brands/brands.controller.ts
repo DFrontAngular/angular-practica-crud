@@ -4,7 +4,7 @@ import { BrandsService } from './brands.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Brand, Model } from './data/brand.data';
 
-@ApiTags('brands')
+@ApiTags('Catalog')
 @ApiBearerAuth()
 @Controller('brands')
 @UseGuards(JwtAuthGuard)
@@ -12,10 +12,10 @@ export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all car brands' })
+  @ApiOperation({ summary: 'List available vehicle brands' })
   @ApiResponse({
     status: 200,
-    description: 'List of car brands',
+    description: 'Vehicle brand catalog returned successfully',
     type: [Object],
   })
   getAllBrands(): Brand[] {
@@ -23,10 +23,10 @@ export class BrandsController {
   }
 
   @Get(':brandId/models')
-  @ApiOperation({ summary: 'Get models by car brand' })
+  @ApiOperation({ summary: 'List models for a specific brand' })
   @ApiResponse({
     status: 200,
-    description: 'List of models for the specified brand',
+    description: 'Model catalog for the requested brand returned successfully',
     type: [Object],
   })
   getModelsByBrand(@Param('brandId') brandId: string): Model[] {

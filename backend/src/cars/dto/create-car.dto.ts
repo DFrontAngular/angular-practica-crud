@@ -126,14 +126,14 @@ Also must be ≤ the year in registrationDate.`,
 
   @ApiProperty({
     description:
-      'Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 ABC). Must be unique across all cars.',
+      'Spanish license plate. Format: 4 digits + optional space + 3 consonants (e.g. 1234 BBB). Must be unique across all cars.',
     type: String,
-    example: '1234 ABC',
+    example: '1234 BBB',
     pattern: '^[0-9]{4}\\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$',
   })
   @IsString()
   @Matches(licensePlateRegex, {
-    message: 'Car license plate must be a valid Spanish license plate, e.g. 1234 ABC.',
+    message: 'Car license plate must be a valid Spanish license plate, e.g. 1234 BBB.',
   })
   @IsNotEmpty()
   @IsUniqueLicensePlate()
@@ -178,7 +178,7 @@ export class CreateCarDto {
         availability: true,
         color: 'Midnight Blue',
         description: 'Excellent condition, single owner.',
-        licensePlate: '1234 ABC',
+        licensePlate: '1234 BBB',
       },
     ],
   })

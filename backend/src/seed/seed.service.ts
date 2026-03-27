@@ -8,6 +8,6 @@ export class SeedService {
 
   populateDB() {
     this.carsService.fillSeedData(CARS_SEED);
-    return { message: `Seed executed` };
+    return { message: 'Catalog dataset loaded successfully' };
   }
 }
