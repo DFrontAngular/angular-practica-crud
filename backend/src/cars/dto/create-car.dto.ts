@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsDateString,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -18,11 +19,12 @@ import {
 import { ISO_CURRENCIES_CODE } from '../data/iso-currencies.data';
 import { IsBrandValid } from '../validators/brand-exists.validator';
 import { IsModelValid } from '../validators/model-exists.validator';
-import { IsBeforeField } from '../validators/is-before-field.validator';
+import { IsManufactureYearValid } from '../validators/is-manufacture-year-valid.validator';
 import { IsUniqueLicensePlate } from '../validators/unique-license-plate.validator';
 
 const licensePlateRegex = /^[0-9]{4}\s?[BCDFGHJKLMNPRSTVWXYZ]{3}$/;
-const registrationDateRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)$/;
+const registrationDateRegex =
+  /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)$/;
 
 export class CarDetailsDto {
   @ApiProperty({
@@ -34,7 +36,8 @@ export class CarDetailsDto {
   @IsDateString({ strictSeparator: true, strict: true })
   @IsNotEmpty()
   @Matches(registrationDateRegex, {
-    message: 'Registration date must be in the format YYYY-MM-DDTHH:MM:SS.mmmZ',
+    message:
+      'Registration date must be in the format YYYY-MM-DDTHH:MM:SS.mmmZ',
   })
   registrationDate: string;
 
@@ -76,20 +79,22 @@ export class CarDetailsDto {
   price: number;
 
   @ApiProperty({
-    description: `Year the car was manufactured. Must be between 1900 and the current year (${new Date().getFullYear()}).
-Also must be ≤ the year in registrationDate.`,
+    description: `Year the car was manufactured. Must be an integer between 1900 and the current year (${new Date().getFullYear()}).
+Also must be less than or equal to the year in registrationDate.`,
     type: Number,
     example: 2020,
     minimum: 1900,
     maximum: new Date().getFullYear(),
   })
-  @IsNumber()
+  @IsInt({ message: 'Manufacture year must be an integer without decimals' })
   @IsNotEmpty()
-  @Min(1900, { message: 'Manufacture year must be greater than or equal to 1900' })
+  @Min(1900, {
+    message: 'Manufacture year must be greater than or equal to 1900',
+  })
   @Max(new Date().getFullYear(), {
     message: `Manufacture year cannot be greater than the current year`,
   })
-  @IsBeforeField('registrationDate')
+  @IsManufactureYearValid()
   manufactureYear: number;
 
   @ApiProperty({
@@ -115,7 +120,8 @@ Also must be ≤ the year in registrationDate.`,
   color?: string;
 
   @ApiProperty({
-    description: 'Free-text description highlighting condition, extras, or any relevant details',
+    description:
+      'Free-text description highlighting condition, extras, or any relevant details',
     type: String,
     example: 'Excellent condition, single owner, full service history.',
     required: false,
@@ -133,7 +139,8 @@ Also must be ≤ the year in registrationDate.`,
   })
   @IsString()
   @Matches(licensePlateRegex, {
-    message: 'Car license plate must be a valid Spanish license plate, e.g. 1234 BBB.',
+    message:
+      'Car license plate must be a valid Spanish license plate, e.g. 1234 BBB.',
   })
   @IsNotEmpty()
   @IsUniqueLicensePlate()
