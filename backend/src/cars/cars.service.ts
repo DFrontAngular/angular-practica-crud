@@ -56,60 +56,8 @@ export class CarsService {
   findAll(
     filterDto: GetCarsFilterDto = { page: 1, limit: 10 },
   ): PaginatedResponseDto<CarSummary> {
-    const {
-      page = 1,
-      limit = 10,
-      brandId,
-      modelId,
-      minPrice,
-      maxPrice,
-      minYear,
-      maxYear,
-      available,
-      licensePlate,
-      sortBy,
-      sortOrder = 'asc',
-    } = filterDto;
-
-    // Apply filters
-    let filteredCars = this.cars.filter((car) => {
-      // Brand filter
-      if (brandId && car.brandId !== brandId) return false;
-
-      // Model filter
-      if (modelId && car.modelId !== modelId) return false;
-
-      // Deep filters (check if at least one carDetail matches)
-      const hasMatchingDetail = car.carDetails.some((detail) => {
-        if (minPrice !== undefined && detail.price < minPrice) return false;
-        if (maxPrice !== undefined && detail.price > maxPrice) return false;
-        if (minYear !== undefined && detail.manufactureYear < minYear)
-          return false;
-        if (maxYear !== undefined && detail.manufactureYear > maxYear)
-          return false;
-        if (
-          available !== undefined &&
-          detail.availability !== (String(available) === 'true')
-        )
-          return false;
-        if (
-          licensePlate &&
-          !detail.licensePlate
-            .toLowerCase()
-            .includes(licensePlate.toLowerCase())
-        )
-          return false;
-        return true;
-      });
-
-      return hasMatchingDetail;
-    });
-
-    if (sortBy) {
-      filteredCars = [...filteredCars].sort((leftCar, rightCar) =>
-        this.compareCars(leftCar, rightCar, sortBy, sortOrder, filterDto),
-      );
-    }
+    const { page = 1, limit = 10 } = filterDto;
+    const filteredCars = this.getFilteredCars(filterDto);
 
     const skip = (page - 1) * limit;
     const totalItems = filteredCars.length;
@@ -309,6 +257,77 @@ export class CarsService {
     };
   }
 
+  exportCarsToExcel(
+    filterDto: GetCarsFilterDto = { page: 1, limit: 10 },
+  ): { fileName: string; content: Buffer } {
+    const exportedCars = this.getFilteredCars(filterDto);
+    const rows = exportedCars.map((car) => {
+      const detail = this.getMatchingCarDetail(car, filterDto);
+
+      return [
+        this.getBrandName(car.brandId),
+        this.getModelName(car.modelId),
+        detail?.licensePlate ?? '',
+        detail?.manufactureYear?.toString() ?? '',
+        detail?.registrationDate ?? '',
+        detail?.price?.toString() ?? '',
+        detail?.currency ?? '',
+        detail?.mileage?.toString() ?? '',
+        detail?.availability ? 'Yes' : 'No',
+        detail?.color ?? '',
+        detail?.description ?? '',
+        (car.carDetails?.length ?? 0).toString(),
+      ];
+    });
+
+    const worksheetRows = [
+      [
+        'Brand',
+        'Model',
+        'License Plate',
+        'Manufacture Year',
+        'Registration Date',
+        'Price',
+        'Currency',
+        'Mileage',
+        'Available',
+        'Color',
+        'Description',
+        'Total Details',
+      ],
+      ...rows,
+    ]
+      .map(
+        (row) =>
+          `<Row>${row
+            .map(
+              (cell) =>
+                `<Cell><Data ss:Type="String">${this.escapeExcelXml(cell)}</Data></Cell>`,
+            )
+            .join('')}</Row>`,
+      )
+      .join('');
+
+    const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+  <Worksheet ss:Name="Cars">
+    <Table>
+      ${worksheetRows}
+    </Table>
+  </Worksheet>
+</Workbook>`;
+
+    return {
+      fileName: `cars-export-${new Date().toISOString().slice(0, 10)}.xls`,
+      content: Buffer.from(xml, 'utf-8'),
+    };
+  }
+
   /**
    * Populates the car storage with an array of car objects (used for seeding data).
    * @param car - The array of car objects to fill the storage.
@@ -330,6 +349,58 @@ export class CarsService {
           carDetail.licensePlate === licensePlate && car.id !== excludeId,
       ),
     );
+  }
+
+  private getFilteredCars(
+    filterDto: GetCarsFilterDto,
+  ): Car[] {
+    const {
+      brandId,
+      modelId,
+      minPrice,
+      maxPrice,
+      minYear,
+      maxYear,
+      available,
+      licensePlate,
+      sortBy,
+      sortOrder = 'asc',
+    } = filterDto;
+
+    let filteredCars = this.cars.filter((car) => {
+      if (brandId && car.brandId !== brandId) return false;
+      if (modelId && car.modelId !== modelId) return false;
+
+      return car.carDetails.some((detail) => {
+        if (minPrice !== undefined && detail.price < minPrice) return false;
+        if (maxPrice !== undefined && detail.price > maxPrice) return false;
+        if (minYear !== undefined && detail.manufactureYear < minYear)
+          return false;
+        if (maxYear !== undefined && detail.manufactureYear > maxYear)
+          return false;
+        if (
+          available !== undefined &&
+          detail.availability !== (String(available) === 'true')
+        )
+          return false;
+        if (
+          licensePlate &&
+          !detail.licensePlate
+            .toLowerCase()
+            .includes(licensePlate.toLowerCase())
+        )
+          return false;
+        return true;
+      });
+    });
+
+    if (sortBy) {
+      filteredCars = [...filteredCars].sort((leftCar, rightCar) =>
+        this.compareCars(leftCar, rightCar, sortBy, sortOrder, filterDto),
+      );
+    }
+
+    return filteredCars;
   }
 
   private compareCars(
@@ -434,5 +505,14 @@ export class CarsService {
 
   private getModelName(modelId: string): string {
     return modelsDB.find((model) => model.id === modelId)?.name ?? modelId;
+  }
+
+  private escapeExcelXml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
   }
 }

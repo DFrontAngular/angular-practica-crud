@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,6 +11,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -22,9 +24,11 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiProduces,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -52,6 +56,20 @@ export class CarsController {
   @ApiResponse({ status: 200, description: 'Vehicle catalog returned successfully', type: PaginatedResponseDto })
   getAllCars(@Query() filterDto: GetCarsFilterDto): PaginatedResponseDto<CarSummary> {
     return this.carsService.findAll(filterDto);
+  }
+
+  @Get('export/excel')
+  @ApiOperation({ summary: 'Export the filtered vehicle table to an Excel-compatible file' })
+  @ApiProduces('application/vnd.ms-excel')
+  @ApiResponse({ status: 200, description: 'Excel-compatible file generated successfully' })
+  exportCarsToExcel(
+    @Query() filterDto: GetCarsFilterDto,
+    @Res() response: Response,
+  ): void {
+    const file = this.carsService.exportCarsToExcel(filterDto);
+    response.setHeader('Content-Type', 'application/vnd.ms-excel; charset=utf-8');
+    response.setHeader('Content-Disposition', `attachment; filename="${file.fileName}"`);
+    response.send(file.content);
   }
 
   @Get(':id')

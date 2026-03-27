@@ -205,6 +205,7 @@ Endpoints restringidos a `ADMIN`:
 ### Cars
 
 - `GET /cars`
+- `GET /cars/export/excel`
 - `GET /cars/:id`
 - `POST /cars`
 - `POST /cars/:id/documents`
@@ -242,6 +243,38 @@ No devuelve un array plano. Devuelve un objeto paginado:
 ```
 
 Cada elemento de `items` es un `CarSummary`, es decir, una versión resumida del coche sin `carDetails` pero con `total`.
+
+### `GET /cars/export/excel`
+
+Exporta el contenido filtrado de la tabla a un fichero Excel-compatible.
+
+Características:
+
+- reutiliza los mismos filtros que `GET /cars`
+- reutiliza la misma ordenación (`sortBy` y `sortOrder`)
+- no aplica paginación al fichero exportado
+- devuelve una descarga con nombre `cars-export-YYYY-MM-DD.xls`
+
+Columnas incluidas:
+
+- marca
+- modelo
+- matrícula
+- año de fabricación
+- fecha de matriculación
+- precio
+- moneda
+- kilometraje
+- disponible
+- color
+- descripción
+- total de detalles
+
+Ejemplo:
+
+```http
+GET /cars/export/excel?brandId=brand-1&available=true&sortBy=price&sortOrder=desc
+```
 
 ### `GET /cars/:id`
 
@@ -383,6 +416,12 @@ Ejemplo con ordenación:
 
 ```http
 GET /cars?page=1&limit=10&sortBy=price&sortOrder=desc
+```
+
+Ejemplo de exportación con los mismos filtros:
+
+```http
+GET /cars/export/excel?minYear=2020&available=true&sortBy=registrationDate&sortOrder=desc
 ```
 
 ## Validaciones importantes
@@ -581,6 +620,7 @@ Este backend ya cubre prácticamente todo lo necesario para una práctica seria 
 - CRUD realista
 - validación fuerte
 - paginación y filtros
+- exportación Excel-compatible del listado filtrado
 - catálogos dependientes
 - documentación Swagger
 
