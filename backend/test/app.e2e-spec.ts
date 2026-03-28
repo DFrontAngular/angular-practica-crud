@@ -18,7 +18,6 @@ describe('Backend hardening (e2e)', () => {
   const createApp = async (authEnabled: AuthMode): Promise<INestApplication> => {
     process.env.AUTH_ENABLED = authEnabled;
     process.env.JWT_SECRET = 'test-secret-key';
-    process.env.JWT_EXPIRES_IN = '3600s';
     process.env.API_DELAY_ENABLED = 'false';
 
     const moduleFixture: TestingModule = await Test.createTestingModule({

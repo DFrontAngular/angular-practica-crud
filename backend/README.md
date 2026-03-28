@@ -19,7 +19,7 @@ Este backend está pensado para que el frontend practique contra una API realist
 
 Permite trabajar en dos niveles:
 
-- nivel base: consumo de API, tablas, detalle, formularios, validaciones, CRUD
+- nivel base: consumo de API, tablas, detalle, formularios, validaciones y CRUD
 - nivel avanzado: login real, interceptor JWT, guards de Angular, control por roles, paginación y filtros
 
 ## Puesta en marcha
@@ -57,7 +57,9 @@ El archivo actual es `backend/.env`.
 ```env
 AUTH_ENABLED=true
 JWT_SECRET=super-secret-key-123
-JWT_EXPIRES_IN=3600s
+API_DELAY_ENABLED=true
+API_DELAY_MIN_MS=200
+API_DELAY_MAX_MS=900
 ```
 
 ### `AUTH_ENABLED`
@@ -87,9 +89,7 @@ Esto está pensado para que perfiles junior o en reciclaje puedan empezar por in
 
 Se usa para firmar y validar tokens JWT.
 
-### `JWT_EXPIRES_IN`
-
-Tiempo de expiración del token. El valor actual es `3600s`.
+En esta práctica el access token no caduca automáticamente. De este modo se mantiene el foco en login, guards, interceptor JWT y control por roles, sin añadir la complejidad de refresh tokens.
 
 ## Arquitectura actual
 
@@ -195,6 +195,8 @@ Endpoints restringidos a `ADMIN`:
 - `POST /cars`
 - `PUT /cars/:id`
 - `DELETE /cars/:id`
+- `POST /cars/:id/documents`
+- `DELETE /cars/:id/documents`
 
 ## Endpoints disponibles
 
@@ -212,6 +214,7 @@ Endpoints restringidos a `ADMIN`:
 - `GET /cars/:id/documents/download`
 - `POST /cars`
 - `POST /cars/:id/documents`
+- `DELETE /cars/:id/documents`
 - `PUT /cars/:id`
 - `DELETE /cars/:id`
 
@@ -316,7 +319,7 @@ El backend:
 - valida tipo y tamaño
 - guarda el binario en disco local
 - devuelve metadatos del upload
-- permite un solo documento por vehiculo
+- permite un solo documento por vehículo
 - si subes uno nuevo para el mismo coche, reemplaza el anterior
 
 Tipos admitidos:
@@ -349,7 +352,7 @@ Respuesta de ejemplo:
   "mimeType": "application/pdf",
   "size": 184532,
   "documentType": "inspection",
-  "title": "Ficha tecnica ITV",
+  "title": "Ficha técnica ITV",
   "description": "Documento de prueba para practicar subida con FormData",
   "uploadedAt": "2026-03-27T10:15:00.000Z",
   "persisted": true,
@@ -360,11 +363,15 @@ Respuesta de ejemplo:
 
 ### `GET /cars/:id/documents`
 
-Devuelve los metadatos del unico documento asociado al coche.
+Devuelve los metadatos del único documento asociado al coche.
 
 ### `GET /cars/:id/documents/download`
 
-Descarga el unico documento asociado al coche usando el `id` del vehiculo.
+Descarga el único documento asociado al coche usando el `id` del vehículo.
+
+### `DELETE /cars/:id/documents`
+
+Elimina el único documento asociado al coche usando el `id` del vehículo.
 
 ### `GET /brands`
 
@@ -526,7 +533,7 @@ Prácticamente, para frontend significa que crear y editar comparten la misma fo
 
 ## Flujo recomendado para el frontend
 
-Si el equipo o estudiante es junior:
+Si el equipo o la persona participante tiene un perfil junior:
 
 1. poner `AUTH_ENABLED=false`
 2. construir listado, detalle, crear, editar y borrar
@@ -594,7 +601,7 @@ Content-Type: multipart/form-data
 Ejemplo conceptual desde frontend:
 
 - campo `file`: un `File` real seleccionado por el usuario
-- campo `title`: `Ficha tecnica ITV`
+- campo `title`: `Ficha técnica ITV`
 - campo `documentType`: `inspection`
 - campo `description`: `Documento de prueba`
 

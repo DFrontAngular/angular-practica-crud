@@ -1,50 +1,50 @@
 # Angular CRUD + NestJS API
 
-Repositorio de practica para construir una aplicacion Angular moderna contra una API real hecha con NestJS.
+Repositorio de práctica para construir una aplicación Angular moderna contra una API real hecha con NestJS.
 
-La idea no es solo "hacer un CRUD", sino practicar un flujo mas parecido a proyecto real:
+El objetivo de este proyecto es trabajar con un flujo cercano a un entorno profesional:
 
 - arquitectura frontend y backend
 - consumo real de APIs
 - routing
 - formularios reactivos
-- validacion
-- autenticacion JWT
-- guards e interceptors
+- validación
+- autenticación JWT
 - control de errores
-- paginacion, filtros y ordenacion
-- roles y autorizacion
+- paginación, filtros y ordenación
+- roles y autorización
 - subida de archivos
-- exportacion de datos
+- exportación de datos
 - testing y calidad
-- flujo de trabajo profesional con Git
 
-El backend ya incorpora una base funcional amplia. El frontend se mantiene deliberadamente ligero para que la parte principal de la practica este en Angular y en la integracion con la API.
+El backend ya incorpora una base funcional amplia. El frontend se mantiene deliberadamente ligero para que la parte principal de la práctica esté en Angular y en la integración con la API.
 
-## 1. Estado actual del proyecto
+## Estructura del repositorio
 
-El repo esta dividido en dos aplicaciones:
+El repositorio está dividido en dos aplicaciones:
 
 - `frontend/`: Angular 21
 - `backend/`: NestJS 10
 
+## Qué incluye el backend
+
 Actualmente, el backend incluye:
 
-- autenticacion JWT
-- bypass de autenticacion para modo aprendizaje
+- autenticación JWT
+- bypass de autenticación para modo aprendizaje
 - endpoint `POST /auth/login`
 - endpoint `GET /auth/me`
 - CRUD de coches
 - listado paginado, filtrable y ordenable
-- exportacion Excel del listado filtrado
-- subida de documentos de practica con `multipart/form-data`
-- catalogo de marcas y modelos
+- exportación Excel del listado filtrado
+- subida de documentos con `multipart/form-data`
+- catálogo de marcas y modelos
 - roles `ADMIN` y `USER`
-- guards de autenticacion y autorizacion
+- guards de autenticación y autorización
 - validaciones con `class-validator`
 - Swagger en `/api-docs`
 - datos en memoria
-- generacion automatica de `imageUrl` para los coches
+- generación automática de `imageUrl` para los coches
 - endpoint de seed
 
 Importante:
@@ -53,66 +53,20 @@ Importante:
 - los datos viven en memoria
 - si reinicias el backend, el estado vuelve a generarse
 
-## 2. Perfil al que va dirigido
-
-Este repositorio esta pensado para tres perfiles.
-
-### Junior
-
-Si estas empezando con Angular, puedes centrarte en:
-
-- componentes
-- rutas
-- servicios HTTP
-- tablas
-- formularios reactivos
-- validaciones de formulario
-- detalle, creacion, edicion y borrado
-
-Puedes trabajar sin login real usando el backend en modo bypass.
-
-### Mid
-
-Si ya dominas lo basico, deberias anadir:
-
-- estructura de carpetas coherente
-- reutilizacion de componentes
-- gestion de estado local con signals
-- interceptors
-- manejo global de errores
-- loaders
-- paginacion, filtros y ordenacion
-- testing
-
-### Senior o preparacion real de proyecto
-
-Si quieres llevar esto a un nivel mas profesional, deberias resolver ademas:
-
-- login real
-- persistencia del usuario autenticado
-- control de roles en UI y rutas
-- guards de Angular
-- estrategia de autorizacion coherente
-- componentes reutilizables y desacoplados
-- subida de ficheros con UX cuidada
-- exportacion de datos
-- cobertura de tests
-- calidad de codigo y documentacion
-
-## 3. Requisitos previos
+## Requisitos previos
 
 - Node.js 22 o superior
 - npm
 - Angular CLI 21 o superior
 - Visual Studio Code u otro editor
 
-Instalacion de Angular CLI:
+Instalación de Angular CLI:
 
 ```bash
 npm install -g @angular/cli
 ```
 
-## 4. Puesta en marcha
+## Puesta en marcha
 
 ### Backend
 
@@ -122,16 +76,10 @@ npm install
 npm run start:dev
 ```
 
-Backend disponible en:
+Disponible en:
 
 - API: `http://localhost:3000`
 - Swagger: `http://localhost:3000/api-docs`
-
-Nota importante:
-
-- el backend no esta configurado para permitir `localhost` arbitrarios por CORS
-- si el frontend necesita llamar a otro origen durante desarrollo, esa integracion debe resolverse de forma explicita
-- la integracion entre frontend y backend debe plantearse con criterios de proyecto real, no con configuraciones locales excesivamente permisivas
 
 ### Frontend
 
@@ -141,744 +89,99 @@ npm install
 npm start
 ```
 
-Frontend disponible en:
+Disponible en:
 
 - App: `http://localhost:4200`
 
-## 4.1 Decisiones de UI y estilos
+## Autenticación y modos de trabajo
 
-En esta practica no queremos imponer una solucion cerrada de frontend. Queremos que tomes decisiones tecnicas y seas capaz de defenderlas.
+El backend soporta dos modos controlados desde `backend/.env`.
 
-Estado actual del proyecto:
-
-- Tailwind esta instalado en el frontend
-
-Criterio:
-
-- puedes usar CSS plano, SCSS, Tailwind o una combinacion razonable
-- puedes usar librerias de componentes si encajan con tu propuesta
-- tambien puedes construir tus propios componentes base
-
-Lo importante no es "usar o no usar una libreria", sino justificar bien la decision:
-
-- coste de mantenimiento
-- consistencia visual
-- velocidad de desarrollo
-- flexibilidad
-- accesibilidad
-- tamano y complejidad de la solucion
-
-## 5. Como activar o desactivar el login
-
-El backend ya soporta dos modos de trabajo. Se controla desde `backend/.env`.
-
-Contenido actual:
+Configuración actual:
 
 ```env
 AUTH_ENABLED=true
 JWT_SECRET=super-secret-key-123
-JWT_EXPIRES_IN=3600s
 API_DELAY_ENABLED=true
 API_DELAY_MIN_MS=200
 API_DELAY_MAX_MS=900
 ```
 
-### Modo 1: Login real activado
+### `AUTH_ENABLED=true`
 
-Usa:
+Implica:
 
-```env
-AUTH_ENABLED=true
-```
-
-Que implica:
-
-- `POST /auth/login` devuelve un JWT real
-- el frontend debe guardar el token
-- el frontend debe enviar `Authorization: Bearer <token>`
-- `GET /auth/me` devuelve el usuario autenticado
-- `POST /cars`, `PUT /cars/:id`, `DELETE /cars/:id` y `POST /cars/:id/documents` requieren rol `ADMIN`
-- si entras con rol `USER`, solo tendras lectura
+- login real mediante `POST /auth/login`
+- uso de `Authorization: Bearer <token>`
+- acceso a `GET /auth/me`
+- restricciones por rol en operaciones protegidas
+- token sin expiración automática en esta práctica
 
 Credenciales de prueba:
 
 - Admin: `admin@example.com` / `admin123`
 - User: `user@example.com` / `user123`
 
-### Modo 2: Login desactivado
+### `AUTH_ENABLED=false`
 
-Usa:
+Implica:
 
-```env
-AUTH_ENABLED=false
-```
+- bypass de autenticación
+- inyección de un usuario ficticio con rol `ADMIN`
+- posibilidad de trabajar primero el CRUD sin implementar login
 
-Que implica:
+## UI y estilos
 
-- el backend hace bypass de autenticacion
-- no necesitas pantalla de login para avanzar
-- el guard inyecta un usuario ficticio con rol `ADMIN`
-- puedes centrarte primero en el CRUD y en la integracion Angular
+En esta práctica no se proporciona un diseño cerrado.
 
-### Recomendacion de trabajo
+En el contexto habitual del equipo, los desarrollos frontend suelen trabajar sobre diseños definidos por perfiles especializados de UX/UI. En esta práctica se omite esa capa de forma intencionada para priorizar la resolución funcional de la interfaz, la claridad estructural y la toma de decisiones básicas de frontend.
 
-Para una persona junior o alguien que esta aprendiendo Angular desde cero:
+No se busca evaluar diseño visual experto, sino una interfaz coherente, funcional y defendible.
 
-1. empieza con `AUTH_ENABLED=false`
-2. construye el CRUD completo
-3. cuando la app funcione, activa `AUTH_ENABLED=true`
-4. implementa login, interceptor y control de roles
+Estado actual del frontend:
 
-Ese orden es mejor que intentar hacer todo a la vez.
+- Tailwind está instalado
 
-## 5.1 Latencia simulada para desarrollo
+Se puede utilizar:
 
-El backend puede introducir una latencia artificial aleatoria para que el frontend se comporte como si hablara con una API real y no con respuestas instantaneas de `localhost`.
+- CSS plano
+- SCSS
+- Tailwind
+- una combinación razonable de las opciones anteriores
+- librerías de componentes, si se justifican con criterio
 
-Se controla tambien desde `backend/.env`:
+## Notas técnicas importantes
 
-```env
-API_DELAY_ENABLED=true
-API_DELAY_MIN_MS=200
-API_DELAY_MAX_MS=900
-```
+- el backend no está configurado con una política permisiva de CORS para `localhost`
+- el contrato real debe tomarse desde Swagger y los DTOs
+- `GET /cars` devuelve un objeto paginado con `items` y `meta`
+- `imageUrl` la resuelve el backend
+- el backend permite trabajar con subida de documentos y exportación
 
-Que implica:
+## Documentación de apoyo
 
-- todas las respuestas del backend pueden tardar entre `200` y `900` ms
-- sirve para probar loaders, estados vacios, feedback visual y UX realista
-- puedes desactivarlo poniendo `API_DELAY_ENABLED=false`
-- puedes ajustar el rango si quieres una sensacion mas rapida o mas exigente
+Además de este README, el repositorio incluye documentación complementaria para dar soporte al uso del proyecto como producto formativo:
 
-## 6. Backend revisado: que hay realmente
+- índice de documentación: [docs/README.md](docs/README.md)
 
-### Modulos
+- guía principal de formación: [training-guide.md](docs/training-guide.md)
+- itinerario de aprendizaje: [learning-path.md](docs/learning-path.md)
+- guía del mentor: [mentor-guide.md](docs/mentor-guide.md)
+- rúbrica de evaluación: [rubric.md](docs/rubric.md)
+- guía de entrega: [submission-guide.md](docs/submission-guide.md)
+- FAQ de la formación: [faq.md](docs/faq.md)
+- modelo de soporte: [support-model.md](docs/support-model.md)
+- guía de incidencias: [issues-guide.md](docs/issues-guide.md)
+- política de IA y seguridad: [ai-and-security-policy.md](docs/ai-and-security-policy.md)
+- decisiones del programa formativo: [training-decisions.md](docs/training-decisions.md)
+- gobernanza del programa: [program-governance.md](docs/program-governance.md)
+- política de solución de referencia: [reference-solution-policy.md](docs/reference-solution-policy.md)
 
-- `AuthModule`
-- `CarsModule`
-- `BrandsModule`
-- `SeedModule`
-
-### Autenticacion
-
-El backend usa JWT y estrategia `passport-jwt`.
-
-Endpoints:
-
-- `POST /auth/login`
-- `GET /auth/me`
-
-Roles disponibles:
-
-- `ADMIN`
-- `USER`
-
-### Coches
-
-Endpoints:
-
-- `GET /cars`
-- `GET /cars/export/excel`
-- `GET /cars/:id`
-- `GET /cars/:id/documents`
-- `GET /cars/:id/documents/download`
-- `POST /cars`
-- `POST /cars/:id/documents`
-- `DELETE /cars/:id/documents`
-- `PUT /cars/:id`
-- `DELETE /cars/:id`
-
-Comportamiento importante:
-
-- `GET /cars` devuelve paginacion real
-- el backend resuelve `imageUrl`; en `GET /cars` aparece en el resumen y en `GET /cars/:id` dentro de `carDetails`
-- `GET /cars/export/excel` reutiliza filtros y ordenacion y descarga un `.xlsx`
-- `POST /cars/:id/documents` acepta documentos e imagenes y guarda un unico archivo por vehiculo
-- `GET /cars/:id/documents` devuelve los metadatos del documento actual del vehiculo
-- `GET /cars/:id/documents/download` descarga el documento actual del vehiculo
-- `DELETE /cars/:id/documents` elimina el documento actual del vehiculo
-- `POST /cars`, `PUT /cars/:id`, `DELETE /cars/:id`, `POST /cars/:id/documents` y `DELETE /cars/:id/documents` estan protegidos por rol
-- la informacion se guarda en memoria
-
-### Marcas y modelos
-
-Endpoints:
-
-- `GET /brands`
-- `GET /brands/:brandId/models`
-
-### Seed
-
-Endpoint:
-
-- `POST /seed`
-
-Sirve para cargar un dataset fijo de ejemplo. Requiere rol `ADMIN`.
-
-## 7. Contrato actual de la API
-
-### `GET /cars`
-
-No devuelve un array plano. Devuelve un objeto paginado con esta estructura:
-
-```ts
-{
-  items: CarSummary[],
-  meta: {
-    totalItems: number,
-    itemCount: number,
-    itemsPerPage: number,
-    totalPages: number,
-    currentPage: number,
-    hasNextPage: boolean,
-    hasPreviousPage: boolean
-  }
-}
-```
-
-Nota:
-
-- cada item resumido contiene `total` e `imageUrl`, pero no incluye `carDetails`
-- para obtener el detalle completo de un coche, el frontend debe consumir `GET /cars/:id`
-- en ese detalle, cada `carDetail` ya incluye `imageUrl` resuelta por el backend y lista para mostrarse en UI
-
-### Filtros soportados en `GET /cars`
-
-- `page`
-- `limit`
-- `brandId`
-- `modelId`
-- `minPrice`
-- `maxPrice`
-- `minYear`
-- `maxYear`
-- `available`
-- `licensePlate`
-- `sortBy`
-- `sortOrder`
-
-Valores permitidos para `sortBy`:
-
-- `brandId`
-- `modelId`
-- `total`
-- `price`
-- `manufactureYear`
-- `registrationDate`
-- `mileage`
-- `licensePlate`
-- `availability`
-
-Valores permitidos para `sortOrder`:
-
-- `asc`
-- `desc`
-
-### `GET /brands`
-
-Devuelve marcas con forma:
-
-```ts
-{ id: string, name: string }
-```
-
-### `GET /brands/:brandId/models`
-
-Devuelve modelos con forma:
-
-```ts
-{ id: string, name: string, brandId: string }
-```
-
-### `GET /cars/export/excel`
-
-Devuelve una descarga Excel-compatible con el mismo conjunto filtrado y ordenado que `GET /cars`, pero sin paginacion.
-
-### `GET /cars/:id`
-
-Devuelve un coche completo con esta idea de estructura:
-
-```ts
-{
-  id: string,
-  brandId: string,
-  modelId: string,
-  carDetails: [
-    {
-      registrationDate: string,
-      mileage: number,
-      currency: string,
-      price: number,
-      manufactureYear: number,
-      availability?: boolean,
-      color?: string,
-      description?: string,
-      licensePlate: string,
-      imageUrl: string
-    }
-  ],
-  total: number
-}
-```
-
-Importante:
-
-- `imageUrl` no la envia el cliente en `POST` ni en `PUT`
-- `imageUrl` la resuelve siempre el backend
-- el frontend puede usar esa URL directamente para pintar la imagen del coche
-
-### `POST /cars/:id/documents`
-
-Acepta `multipart/form-data` para subir un unico documento por vehiculo. El backend valida tipo y tamano, guarda el archivo en disco local y, si ya existia uno para ese coche, lo reemplaza.
-
-Tipos admitidos:
-
-- `application/pdf`
-- `text/plain`
-- `application/msword`
-- `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
-- `image/png`
-- `image/jpeg`
-
-Tamano maximo:
-
-- `5 MB`
-
-Campos posibles:
-
-- `file` obligatorio
-- `title` opcional
-- `documentType` opcional: `invoice`, `inspection`, `insurance`, `registration`, `other`
-- `description` opcional
-
-### `GET /cars/:id/documents`
-
-Devuelve los metadatos del documento actualmente asociado al vehiculo.
-
-### `GET /cars/:id/documents/download`
-
-Descarga el documento actualmente asociado al vehiculo.
-
-### `DELETE /cars/:id/documents`
-
-Elimina el documento actualmente asociado al vehiculo.
-
-### `POST /auth/login`
-
-Devuelve:
-
-```ts
-{
-  access_token: string,
-  user: {
-    id: string,
-    email: string,
-    name: string,
-    role: 'ADMIN' | 'USER'
-  }
-}
-```
-
-## 8. Validaciones que el frontend debe respetar
-
-El formulario no deberia construirse por aproximacion. Swagger y los DTOs deben tomarse como fuente de verdad del contrato.
-
-### Validaciones clave de coche
-
-- `brandId` debe existir
-- `modelId` debe existir y pertenecer a la marca seleccionada
-- `carDetails` es un array
-- `registrationDate` debe ir en formato ISO UTC completo
-- `mileage` debe ser `>= 0`
-- `price` debe ser `> 0`
-- `manufactureYear` debe ser un numero entero sin decimales
-- `manufactureYear` debe estar entre `1900` y el ano actual
-- `manufactureYear` no puede ser posterior al ano de `registrationDate`
-- `currency` debe ser un codigo ISO 4217 permitido
-- `availability` es booleano
-- `licensePlate` debe cumplir formato de matricula espanola
-- `licensePlate` debe ser unica
-
-Formato de matricula aceptado:
-
-```txt
-1234 BBB
-```
-
-Expresion esperada:
-
-```txt
-4 digitos + espacio opcional + 3 consonantes
-```
-
-## 9. Que deberia construir el frontend
-
-El frontend actual esta practicamente base. La practica consiste en levantar una aplicacion Angular completa apoyandote en la API existente.
-
-Resultado minimo recomendable:
-
-- pantalla inicial con listado
-- tabla de coches
-- detalle de coche
-- formulario de creacion
-- formulario de edicion
-- borrado con confirmacion
-- consumo real de marcas y modelos
-- validaciones visibles en UI
-- navegacion entre pantallas
-
-Resultado avanzado recomendable:
-
-- login
-- interceptor JWT
-- perfil autenticado
-- guards de Angular
-- ocultacion de acciones segun rol
-- filtros, paginacion y ordenacion
-- exportacion Excel
-- subida de documentos con `FormData`
-- manejo de errores
-- notificaciones
-- loaders
-
-## 10. Ruta de aprendizaje propuesta
-
-La siguiente secuencia esta planteada para recorrer los bloques principales de una aplicacion Angular conectada a una API real, con una progresion razonable de complejidad.
-
-### Bloque 0. Preparacion del entorno
-
-Objetivo:
-
-- entender la estructura del repo
-- arrancar backend y frontend
-- abrir Swagger
-- revisar la forma real de las respuestas
-
-Tareas:
-
-1. haz fork del repositorio
-2. arranca backend y frontend
-3. visita `/api-docs`
-4. prueba `GET /cars`, `GET /brands` y `GET /brands/:brandId/models`
-5. decide si vas a empezar con login activado o desactivado
-
-Que deberias aprender:
-
-- como leer una API existente
-- como validar requisitos antes de escribir Angular
-
-### Bloque 1. Base Angular
-
-Objetivo:
-
-- crear una estructura limpia desde el principio
-
-Tareas:
-
-1. define el routing base
-2. crea la pagina Home
-3. crea layout general
-4. organiza carpetas por `core`, `shared`, `features`
-5. define modelos TypeScript para las respuestas del backend
-
-Que deberias aprender:
-
-- arquitectura basica de frontend
-- separacion entre features y piezas compartidas
-
-### Bloque 2. Tabla de listado
-
-Objetivo:
-
-- mostrar datos reales del backend
-
-Tareas:
-
-1. crea `CarsService`
-2. conecta `GET /cars`
-3. adapta la tabla a la respuesta paginada
-4. muestra marca, modelo, total y acciones
-5. anade navegacion a detalle, edicion y creacion
-
-Que deberias aprender:
-
-- `HttpClient`
-- tipado de respuestas
-- renderizado de listas
-- estados de carga, vacios y de error
-
-### Bloque 3. Catalogos y dependencias
-
-Objetivo:
-
-- trabajar con datos dependientes
-
-Tareas:
-
-1. crea `BrandsService`
-2. consume `GET /brands`
-3. consume `GET /brands/:brandId/models`
-4. recarga modelos al cambiar la marca
-5. usa `id` como valor y `name` como etiqueta
-
-Que deberias aprender:
-
-- selects dependientes
-- composicion de formularios con datos remotos
-
-### Bloque 4. Formularios reactivos
-
-Objetivo:
-
-- crear y editar coches respetando el backend
-
-Tareas:
-
-1. crea formulario reactivo de coche
-2. usa `FormArray` para `carDetails`
-3. anade validaciones equivalentes a las del backend
-4. trata `manufactureYear` como entero y relacionelo con `registrationDate`
-5. implementa `POST /cars`
-6. implementa `PUT /cars/:id`
-7. reutiliza el formulario para crear y editar
-
-Que deberias aprender:
-
-- `FormGroup`
-- `FormControl`
-- `FormArray`
-- validacion custom
-- reutilizacion de formularios
-
-### Bloque 4.1. Upload de documentos
-
-Objetivo:
-
-- practicar `multipart/form-data` y subida real de archivos desde Angular
-
-Tareas:
-
-1. crea un formulario o accion secundaria para adjuntar documento a un coche
-2. construye `FormData` con `file` y metadatos opcionales
-3. conecta `POST /cars/:id/documents`
-4. muestra errores de tamano o tipo no permitido
-5. presenta la respuesta de metadatos devuelta por el backend
-
-Que deberias aprender:
-
-- `FormData`
-- manejo de archivos en Angular
-- validacion de uploads
-
-### Bloque 5. Detalle y experiencia de usuario
-
-Objetivo:
-
-- trabajar con rutas dinamicas y presentacion de datos
-
-Tareas:
-
-1. crea detalle `cars/:id`
-2. consume `GET /cars/:id`
-3. muestra estados de kilometraje con un pipe o helper presentacional
-4. aplica `currency` y formateos utiles
-5. facilita la vuelta al listado
-
-Que deberias aprender:
-
-- rutas con parametros
-- composicion de vistas
-- pipes
-
-### Bloque 6. Eliminacion y feedback
-
-Objetivo:
-
-- cerrar el CRUD real
-
-Tareas:
-
-1. crea modal de confirmacion
-2. conecta `DELETE /cars/:id`
-3. muestra notificaciones de exito y error
-4. refresca el listado sin romper la UX
-
-Que deberias aprender:
-
-- confirmaciones
-- side effects de operaciones mutables
-- feedback al usuario
-
-### Bloque 7. Manejo de errores y loaders
-
-Objetivo:
-
-- evitar una app fragil
-
-Tareas:
-
-1. centraliza errores HTTP
-2. normaliza mensajes para el usuario
-3. crea loader o overlay
-4. decide si el loader vive por componente o por interceptor
-
-Que deberias aprender:
-
-- interceptors
-- manejo global vs local de errores
-- diseno de estados de carga
-
-### Bloque 8. Login real
-
-Objetivo:
-
-- integrar autenticacion completa
-
-Precondicion:
-
-- cambia `AUTH_ENABLED=true`
-
-Tareas:
-
-1. crea pantalla de login
-2. llama a `POST /auth/login`
-3. persiste el token
-4. crea interceptor para enviar el bearer token
-5. consulta `GET /auth/me`
-6. reconstruye sesion al recargar la app
-
-Que deberias aprender:
-
-- autenticacion real
-- persistencia de sesion
-- seguridad de frontend
-
-### Bloque 9. Roles y autorizacion
-
-Objetivo:
-
-- adaptar la interfaz al perfil autenticado
-
-Tareas:
-
-1. oculta botones de editar y eliminar para `USER`
-2. deja visibles esas acciones para `ADMIN`
-3. protege rutas con guards de Angular
-4. bloquea navegacion no autorizada
-
-Que deberias aprender:
-
-- diferencia entre autenticacion y autorizacion
-- guards
-- control de permisos en UI
-
-### Bloque 10. Paginacion, filtros y ordenacion
-
-Objetivo:
-
-- trabajar como en una app profesional
-
-Tareas:
-
-1. conecta `page` y `limit`
-2. pinta metadatos de paginacion
-3. anade filtros por marca, modelo, disponibilidad, ano, precio y matricula
-4. anade ordenacion por columnas o controles de sort
-5. implementa exportacion con `GET /cars/export/excel`
-6. sincroniza filtros con la URL si quieres subir el nivel
-
-Que deberias aprender:
-
-- query params
-- tablas con estado
-- UX de filtrado
-
-### Bloque 11. Calidad profesional
-
-Objetivo:
-
-- reforzar la calidad y la mantenibilidad del proyecto
-
-Tareas:
-
-1. configura ESLint y Prettier si no lo has hecho ya
-2. anade hooks con Husky
-3. documenta decisiones de arquitectura
-4. escribe tests unitarios y de componentes
-5. define criterio minimo de cobertura
-6. crea plantilla de Pull Request
-7. usa ramas con naming consistente
-
-Que deberias aprender:
-
-- calidad de codigo
-- revision de cambios
-- disciplina de equipo
-
-## 11. Propuesta de roadmap por ramas
-
-Si quieres trabajar como si esto fuera un proyecto real, una secuencia razonable seria:
-
-1. `feat/project-setup`
-2. `feat/app-routing-layout`
-3. `feat/cars-list`
-4. `feat/car-details`
-5. `feat/car-form-create`
-6. `feat/car-form-edit`
-7. `feat/car-delete-modal`
-8. `feat/brands-models-integration`
-9. `feat/error-handling-and-loader`
-10. `feat/auth-login`
-11. `feat/auth-interceptor-and-session`
-12. `feat/roles-and-route-guards`
-13. `feat/pagination-and-filters`
-14. `feat/document-upload`
-15. `docs/project-documentation`
-
-## 12. Recomendaciones tecnicas
-
-- usa nombres en ingles para componentes, servicios, metodos, variables y tipos
-- no copies validaciones del backend sin entenderlas
-- revisa Swagger antes de modelar el frontend
-- no hardcodees marcas, modelos ni monedas en la UI
-- reutiliza el formulario de crear y editar
-- tipa todas las respuestas HTTP
-- evita logica de negocio compleja en templates
-- si usas Angular 21, aprovecha standalone components y senales cuando tengan sentido
-- si usas una libreria de componentes o Tailwind, que sea una decision arquitectonica consciente y no solo una forma rapida de salir del paso
-
-## 13. Que no deberias asumir
-
-- que `GET /cars` devuelve un array simple
-- que siempre puedes editar o borrar
-- que `manufactureYear` admite decimales
-- que el login es obligatorio desde el minuto 1
-- que el backend guarda imagenes subidas realmente
-- que la persistencia de documentos funciona como en una base de datos
-- que existe base de datos
-- que reiniciar backend conserva cambios
-- que el backend va a resolverte CORS de desarrollo con una whitelist permisiva a `localhost`
-
-## 14. Criterio de exito
-
-Se puede considerar que la practica esta bien resuelta cuando:
-
-- la aplicacion arranca sin friccion
-- el listado consume el backend real
-- crear, editar, ver y borrar funcionan
-- el formulario respeta las validaciones del backend
-- la UX maneja carga, errores y confirmaciones
-- la aplicacion soporta trabajar con login desactivado y activado
-- el rol del usuario afecta a la interfaz y a la navegacion
-- la subida de documentos funciona con `FormData`
-- la exportacion refleja filtros y ordenacion
-- el codigo esta ordenado, tipado y defendible en una revision
-
-## 15. Referencias rapidas
+## Referencias rápidas
 
 - Swagger backend: `http://localhost:3000/api-docs`
 - Frontend: `http://localhost:4200`
 - Backend: `http://localhost:3000`
-- Archivo de configuracion auth: `backend/.env`
+- Archivo de configuración auth: `backend/.env`
 
-Si tienes dudas sobre como modelar una peticion o una respuesta, abre Swagger antes de escribir codigo. En este proyecto, el backend es la fuente de verdad.
+Si tienes dudas sobre cómo modelar una petición o una respuesta, revisa Swagger antes de escribir código. En este proyecto, el backend es la fuente de verdad.
