@@ -1,10 +1,18 @@
-import { Car } from '../../cars/entities/car.entity';
+import { StoredCar } from '../../cars/entities/car.entity';
 import { v4 as uuid } from 'uuid';
 
-export const CARS_SEED: Car[] = [
+export const CARS_SEED: StoredCar[] = [
   {
     brandId: 'brand-1',
     modelId: 'model-1',
+    brand: {
+      id: 'brand-1',
+      name: 'Toyota',
+    },
+    model: {
+      id: 'model-1',
+      name: 'Corolla',
+    },
     id: uuid(),
     carDetails: [
       {

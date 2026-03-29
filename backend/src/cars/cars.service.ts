@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import { join, extname } from 'path';
@@ -10,7 +14,7 @@ import {
   UploadedPracticeFile,
   UploadedCarDocumentResponseDto,
 } from './dto';
-import { Car, CarDetailEntity, CarSummary } from './entities';
+import { Car, CarDetailEntity, CarSummary, StoredCar } from './entities';
 
 import { brandsDB, modelsDB } from '../brands/data/brand.data';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
@@ -27,7 +31,7 @@ interface StoredCarDocument extends UploadedCarDocumentResponseDto {
 @Injectable()
 export class CarsService {
   // In-memory storage for cars
-  private cars: Car[];
+  private cars: StoredCar[];
   private readonly carDocuments = new Map<string, StoredCarDocument>();
 
   /**
@@ -103,6 +107,18 @@ export class CarsService {
   }
 
   /**
+   * Builds an ISO UTC string while preserving the intended calendar date.
+   * This avoids local timezone shifts turning Jan 1 into Dec 31 in the seed.
+   */
+  private buildUtcRegistrationDateIso(
+    year: number,
+    monthIndex: number,
+    day: number,
+  ): string {
+    return new Date(Date.UTC(year, monthIndex, day, 0, 0, 0, 0)).toISOString();
+  }
+
+  /**
    * Retrieves paginated and filtered cars.
    * @param filterDto - The filter and pagination options.
    * @returns A paginated response with filtered cars and metadata.
@@ -117,13 +133,14 @@ export class CarsService {
     const totalItems = filteredCars.length;
 
     const paginatedItems = filteredCars.slice(skip, skip + limit).map((car) => {
-      const { carDetails, ...carWithoutDetails } = car;
-      const matchingDetail = this.getMatchingCarDetail(car, filterDto);
-      return {
-        ...carWithoutDetails,
-        imageUrl: matchingDetail?.imageUrl,
-        total: carDetails?.length || 0,
-      };
+      const matchingDetail = this.getMatchingCarDetail(car);
+      return this.toCarSummary(
+        car,
+        {
+          imageUrl: matchingDetail?.imageUrl,
+          total: car.carDetails?.length || 0,
+        },
+      );
     });
 
     const totalPages = Math.ceil(totalItems / limit);
@@ -147,8 +164,8 @@ export class CarsService {
    * @param count - The number of cars to generate.
    * @returns An array of generated cars.
    */
-  private generateSeedData(count: number): Car[] {
-    const seedCars: Car[] = [];
+  private generateSeedData(count: number): StoredCar[] {
+    const seedCars: StoredCar[] = [];
     const colors = ['White', 'Black', 'Grey', 'Silver', 'Blue', 'Red'];
     const descriptions = [
       'Excellent condition, well maintained.',
@@ -158,11 +175,19 @@ export class CarsService {
       'Ready for adventure, off-road capable.',
       'Sporty look with high performance engine.',
     ];
+    const shuffledModels = [...modelsDB]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, Math.min(count, modelsDB.length));
 
-    for (let i = 0; i < count; i++) {
-      const brand = brandsDB[Math.floor(Math.random() * brandsDB.length)];
-      const brandModels = modelsDB.filter((m) => m.brandId === brand.id);
-      const model = brandModels[Math.floor(Math.random() * brandModels.length)];
+    for (let i = 0; i < shuffledModels.length; i++) {
+      const model = shuffledModels[i];
+      const brand = brandsDB.find((entry) => entry.id === model.brandId);
+
+      if (!brand) {
+        throw new NotFoundException(
+          `Brand with id ${model.brandId} not found for model ${model.id}`,
+        );
+      }
 
       const consonants = 'BCDFGHJKLMNPRSTVWXYZ';
       const getRandomConsonant = () =>
@@ -172,6 +197,14 @@ export class CarsService {
         id: uuid(),
         brandId: brand.id,
         modelId: model.id,
+        brand: {
+          id: brand.id,
+          name: brand.name,
+        },
+        model: {
+          id: model.id,
+          name: model.name,
+        },
         carDetails: [
           {
             availability: Math.random() > 0.3,
@@ -180,11 +213,11 @@ export class CarsService {
             manufactureYear: 2015 + (i % 10),
             mileage: Math.floor(Math.random() * 100000),
             price: 15000 + Math.floor(Math.random() * 30000),
-            registrationDate: new Date(
+            registrationDate: this.buildUtcRegistrationDateIso(
               2015 + (i % 10),
               i % 12,
               (i % 28) + 1,
-            ).toISOString(),
+            ),
             color: colors[i % colors.length],
             description: descriptions[i % descriptions.length],
             imageUrl: this.getImageUrlForCar(model.id, brand.id),
@@ -204,7 +237,7 @@ export class CarsService {
   findOne(id: string): Car {
     const car = this.cars.find((car) => car.id === id);
     if (!car) throw new NotFoundException(`Car with id ${id} not found`);
-    return { ...car, total: car.carDetails.length || 0 };
+    return this.toCar(car, { total: car.carDetails.length || 0 });
   }
 
   /**
@@ -227,15 +260,18 @@ export class CarsService {
         }),
       ) || [];
 
-    const newCar: Car = {
+    const newCar: StoredCar = {
       ...rest,
+      brand: this.getBrandSummary(rest.brandId),
+      model: this.getModelSummary(rest.modelId),
       carDetails: processedDetails,
       id: uuid(),
     };
 
+    this.ensureBrandModelCombinationIsUnique(rest.brandId, rest.modelId);
     this.ensureLicensePlatesAreUnique(processedDetails);
     this.cars.push(newCar);
-    return newCar;
+    return this.toCar(newCar);
   }
 
   /**
@@ -258,7 +294,7 @@ export class CarsService {
    * @returns The updated car object.
    */
   update(id: string, carToUpdate: CreateCarDto): Car {
-    const carDB = this.findOne(id);
+    const carDB = this.getStoredCarById(id);
     const { carDetails, ...rest } = carToUpdate;
 
     // Keep image resolution backend-owned and based on the selected model.
@@ -271,18 +307,21 @@ export class CarsService {
       }),
     );
 
-    const updatedCar = {
+    const updatedCar: StoredCar = {
       ...carDB,
       ...rest,
+      brand: this.getBrandSummary(rest.brandId),
+      model: this.getModelSummary(rest.modelId),
       ...(processedDetails && { carDetails: processedDetails }),
       id,
     };
 
+    this.ensureBrandModelCombinationIsUnique(rest.brandId, rest.modelId, id);
     this.ensureLicensePlatesAreUnique(updatedCar.carDetails ?? [], id);
     const carIndex = this.cars.findIndex((car) => car.id === id);
     this.cars[carIndex] = updatedCar;
 
-    return updatedCar;
+    return this.toCar(updatedCar);
   }
 
   uploadDocument(
@@ -347,11 +386,11 @@ export class CarsService {
   }> {
     const exportedCars = this.getFilteredCars(filterDto);
     const rows = exportedCars.map((car) => {
-      const detail = this.getMatchingCarDetail(car, filterDto);
+      const detail = this.getMatchingCarDetail(car);
 
       return {
-        brand: this.getBrandName(car.brandId),
-        model: this.getModelName(car.modelId),
+        brand: car.brand.name,
+        model: car.model.name,
         licensePlate: detail?.licensePlate ?? '',
         manufactureYear: detail?.manufactureYear ?? '',
         registrationDate: detail?.registrationDate ?? '',
@@ -418,8 +457,14 @@ export class CarsService {
    * Populates the car storage with an array of car objects (used for seeding data).
    * @param car - The array of car objects to fill the storage.
    */
-  fillSeedData(car: Car[]): void {
-    this.cars = car;
+  fillSeedData(car: StoredCar[]): void {
+    this.ensureSeedCarsUseUniqueBrandModelCombinations(car);
+
+    this.cars = car.map((entry) => ({
+      ...entry,
+      brand: entry.brand ?? this.getBrandSummary(entry.brandId),
+      model: entry.model ?? this.getModelSummary(entry.modelId),
+    }));
   }
 
   /**
@@ -440,49 +485,35 @@ export class CarsService {
     );
   }
 
-  private getFilteredCars(filterDto: GetCarsFilterDto): Car[] {
-    const {
-      brandId,
-      modelId,
-      minPrice,
-      maxPrice,
-      minYear,
-      maxYear,
-      available,
-      licensePlate,
-      sortBy,
-      sortOrder = 'asc',
-    } = filterDto;
+  private getFilteredCars(filterDto: GetCarsFilterDto): StoredCar[] {
+    const { available, brandId, licensePlate, modelId, sortBy, sortOrder = 'asc' } =
+      filterDto;
 
     let filteredCars = this.cars.filter((car) => {
+      const matchingDetail = this.getMatchingCarDetail(car);
+
       if (brandId && car.brandId !== brandId) return false;
       if (modelId && car.modelId !== modelId) return false;
-
-      return car.carDetails.some((detail) => {
-        if (minPrice !== undefined && detail.price < minPrice) return false;
-        if (maxPrice !== undefined && detail.price > maxPrice) return false;
-        if (minYear !== undefined && detail.manufactureYear < minYear)
-          return false;
-        if (maxYear !== undefined && detail.manufactureYear > maxYear)
-          return false;
-        if (
-          available !== undefined && detail.availability !== available
-        )
-          return false;
-        if (
-          licensePlate &&
-          !detail.licensePlate
-            .toLowerCase()
-            .includes(licensePlate.toLowerCase())
-        )
-          return false;
-        return true;
-      });
+      if (
+        typeof available === 'boolean' &&
+        matchingDetail?.availability !== available
+      ) {
+        return false;
+      }
+      if (
+        licensePlate &&
+        !matchingDetail?.licensePlate
+          .toUpperCase()
+          .includes(licensePlate.trim().toUpperCase())
+      ) {
+        return false;
+      }
+      return true;
     });
 
     if (sortBy) {
       filteredCars = [...filteredCars].sort((leftCar, rightCar) =>
-        this.compareCars(leftCar, rightCar, sortBy, sortOrder, filterDto),
+        this.compareCars(leftCar, rightCar, sortBy, sortOrder),
       );
     }
 
@@ -490,15 +521,14 @@ export class CarsService {
   }
 
   private compareCars(
-    leftCar: Car,
-    rightCar: Car,
+    leftCar: StoredCar,
+    rightCar: StoredCar,
     sortBy: CarSortField,
     sortOrder: SortOrder,
-    filterDto: GetCarsFilterDto,
   ): number {
     const direction = sortOrder === 'desc' ? -1 : 1;
-    const leftValue = this.getSortableValue(leftCar, sortBy, filterDto);
-    const rightValue = this.getSortableValue(rightCar, sortBy, filterDto);
+    const leftValue = this.getSortableValue(leftCar, sortBy);
+    const rightValue = this.getSortableValue(rightCar, sortBy);
 
     if (leftValue === rightValue) {
       return leftCar.id.localeCompare(rightCar.id) * direction;
@@ -523,17 +553,16 @@ export class CarsService {
   }
 
   private getSortableValue(
-    car: Car,
+    car: StoredCar,
     sortBy: CarSortField,
-    filterDto: GetCarsFilterDto,
   ): string | number | boolean | undefined {
-    const matchingDetail = this.getMatchingCarDetail(car, filterDto);
+    const matchingDetail = this.getMatchingCarDetail(car);
 
     switch (sortBy) {
       case 'brandId':
-        return this.getBrandName(car.brandId);
+        return car.brand.name;
       case 'modelId':
-        return this.getModelName(car.modelId);
+        return car.model.name;
       case 'total':
         return car.carDetails?.length ?? 0;
       case 'price':
@@ -554,42 +583,33 @@ export class CarsService {
   }
 
   private getMatchingCarDetail(
-    car: Car,
-    filterDto: GetCarsFilterDto,
+    car: StoredCar,
   ): CarDetailEntity | undefined {
-    const { minPrice, maxPrice, minYear, maxYear, available, licensePlate } =
-      filterDto;
-
-    return (
-      car.carDetails.find((detail) => {
-        if (minPrice !== undefined && detail.price < minPrice) return false;
-        if (maxPrice !== undefined && detail.price > maxPrice) return false;
-        if (minYear !== undefined && detail.manufactureYear < minYear)
-          return false;
-        if (maxYear !== undefined && detail.manufactureYear > maxYear)
-          return false;
-        if (
-          available !== undefined && detail.availability !== available
-        )
-          return false;
-        if (
-          licensePlate &&
-          !detail.licensePlate
-            .toLowerCase()
-            .includes(licensePlate.toLowerCase())
-        )
-          return false;
-        return true;
-      }) ?? car.carDetails[0]
-    );
+    return car.carDetails[0];
   }
 
-  private getBrandName(brandId: string): string {
-    return brandsDB.find((brand) => brand.id === brandId)?.name ?? brandId;
+  private getBrandSummary(brandId: string): Car['brand'] {
+    const brand = brandsDB.find((entry) => entry.id === brandId);
+    if (!brand) {
+      throw new NotFoundException(`Brand with id ${brandId} not found`);
+    }
+
+    return {
+      id: brand.id,
+      name: brand.name,
+    };
   }
 
-  private getModelName(modelId: string): string {
-    return modelsDB.find((model) => model.id === modelId)?.name ?? modelId;
+  private getModelSummary(modelId: string): Car['model'] {
+    const model = modelsDB.find((entry) => entry.id === modelId);
+    if (!model) {
+      throw new NotFoundException(`Model with id ${modelId} not found`);
+    }
+
+    return {
+      id: model.id,
+      name: model.name,
+    };
   }
 
   private ensureLicensePlatesAreUnique(
@@ -604,13 +624,13 @@ export class CarsService {
       );
 
       if (seenLicensePlates.has(normalizedLicensePlate)) {
-        throw new BadRequestException(
+        throw new ConflictException(
           `Duplicate license plate "${detail.licensePlate}" found in the same request.`,
         );
       }
 
       if (this.isLicensePlateTaken(detail.licensePlate, excludeCarId)) {
-        throw new BadRequestException(
+        throw new ConflictException(
           `The license plate ${detail.licensePlate} is already registered to another car.`,
         );
       }
@@ -619,8 +639,81 @@ export class CarsService {
     }
   }
 
+  private ensureBrandModelCombinationIsUnique(
+    brandId: string,
+    modelId: string,
+    excludeCarId?: string,
+  ): void {
+    const duplicatedCar = this.cars.find(
+      (car) =>
+        car.brandId === brandId &&
+        car.modelId === modelId &&
+        car.id !== excludeCarId,
+    );
+
+    if (duplicatedCar) {
+      const brandName = duplicatedCar.brand?.name ?? brandId;
+      const modelName = duplicatedCar.model?.name ?? modelId;
+
+      throw new ConflictException(
+        `There is already a car registered for ${brandName} ${modelName}. Only one car per brand and model is allowed.`,
+      );
+    }
+  }
+
+  private ensureSeedCarsUseUniqueBrandModelCombinations(cars: StoredCar[]): void {
+    const seenCombinations = new Set<string>();
+
+    for (const car of cars) {
+      const normalizedKey = `${car.brandId}::${car.modelId}`;
+
+      if (seenCombinations.has(normalizedKey)) {
+        throw new ConflictException(
+          `Seed data contains a duplicated brand/model combination: ${car.brandId} + ${car.modelId}.`,
+        );
+      }
+
+      seenCombinations.add(normalizedKey);
+    }
+  }
+
   private normalizeLicensePlate(licensePlate: string): string {
     return licensePlate.replace(/\s+/g, '').trim().toUpperCase();
+  }
+
+  private getStoredCarById(id: string): StoredCar {
+    const car = this.cars.find((entry) => entry.id === id);
+    if (!car) {
+      throw new NotFoundException(`Car with id ${id} not found`);
+    }
+
+    return car;
+  }
+
+  private toCar(
+    car: StoredCar,
+    overrides?: Partial<Pick<Car, 'carDetails' | 'total'>>,
+  ): Car {
+    return {
+      id: car.id,
+      brand: car.brand,
+      model: car.model,
+      carDetails: overrides?.carDetails ?? car.carDetails,
+      total: overrides?.total ?? car.total,
+    };
+  }
+
+  private toCarSummary(
+    car: StoredCar,
+    overrides?: Partial<Pick<CarSummary, 'imageUrl' | 'total'>>,
+  ): CarSummary {
+    return {
+      id: car.id,
+      brand: car.brand,
+      model: car.model,
+      total: overrides?.total ?? car.total,
+      imageUrl: overrides?.imageUrl,
+    };
   }
 
   private getExistingStoredDocument(id: string): StoredCarDocument {

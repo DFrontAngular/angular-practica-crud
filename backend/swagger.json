@@ -97,6 +97,26 @@
             }
           },
           {
+            "name": "licensePlate",
+            "required": false,
+            "in": "query",
+            "description": "Filter results by a partial license plate match, ignoring spaces and case",
+            "schema": {
+              "example": "1234",
+              "type": "string"
+            }
+          },
+          {
+            "name": "available",
+            "required": false,
+            "in": "query",
+            "description": "Filter results by availability status",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
             "name": "brandId",
             "required": false,
             "in": "query",
@@ -113,70 +133,6 @@
             "description": "Filter results to a single model by exact model identifier. Typically combined with brandId.",
             "schema": {
               "example": "model-1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "minPrice",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles whose price is greater than or equal to this value",
-            "schema": {
-              "minimum": 0,
-              "example": 10000,
-              "type": "number"
-            }
-          },
-          {
-            "name": "maxPrice",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles whose price is lower than or equal to this value",
-            "schema": {
-              "minimum": 0,
-              "example": 40000,
-              "type": "number"
-            }
-          },
-          {
-            "name": "minYear",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles manufactured in or after this year",
-            "schema": {
-              "minimum": 1900,
-              "example": 2018,
-              "type": "number"
-            }
-          },
-          {
-            "name": "maxYear",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles manufactured in or before this year",
-            "schema": {
-              "maximum": 2026,
-              "example": 2024,
-              "type": "number"
-            }
-          },
-          {
-            "name": "available",
-            "required": false,
-            "in": "query",
-            "description": "When true, returns only available vehicles. When false, returns only unavailable ones.",
-            "schema": {
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "licensePlate",
-            "required": false,
-            "in": "query",
-            "description": "Partial, case-insensitive search on the license plate field",
-            "schema": {
-              "example": "1234",
               "type": "string"
             }
           },
@@ -282,6 +238,9 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "409": {
+            "description": "Vehicle conflicts with an existing license plate or brand/model combination"
           }
         },
         "security": [
@@ -324,6 +283,26 @@
             }
           },
           {
+            "name": "licensePlate",
+            "required": false,
+            "in": "query",
+            "description": "Filter results by a partial license plate match, ignoring spaces and case",
+            "schema": {
+              "example": "1234",
+              "type": "string"
+            }
+          },
+          {
+            "name": "available",
+            "required": false,
+            "in": "query",
+            "description": "Filter results by availability status",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
             "name": "brandId",
             "required": false,
             "in": "query",
@@ -340,70 +319,6 @@
             "description": "Filter results to a single model by exact model identifier. Typically combined with brandId.",
             "schema": {
               "example": "model-1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "minPrice",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles whose price is greater than or equal to this value",
-            "schema": {
-              "minimum": 0,
-              "example": 10000,
-              "type": "number"
-            }
-          },
-          {
-            "name": "maxPrice",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles whose price is lower than or equal to this value",
-            "schema": {
-              "minimum": 0,
-              "example": 40000,
-              "type": "number"
-            }
-          },
-          {
-            "name": "minYear",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles manufactured in or after this year",
-            "schema": {
-              "minimum": 1900,
-              "example": 2018,
-              "type": "number"
-            }
-          },
-          {
-            "name": "maxYear",
-            "required": false,
-            "in": "query",
-            "description": "Return only vehicles manufactured in or before this year",
-            "schema": {
-              "maximum": 2026,
-              "example": 2024,
-              "type": "number"
-            }
-          },
-          {
-            "name": "available",
-            "required": false,
-            "in": "query",
-            "description": "When true, returns only available vehicles. When false, returns only unavailable ones.",
-            "schema": {
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "licensePlate",
-            "required": false,
-            "in": "query",
-            "description": "Partial, case-insensitive search on the license plate field",
-            "schema": {
-              "example": "1234",
               "type": "string"
             }
           },
@@ -541,6 +456,9 @@
           },
           "404": {
             "description": "Vehicle not found"
+          },
+          "409": {
+            "description": "Vehicle conflicts with an existing license plate or brand/model combination"
           }
         },
         "security": [
@@ -1053,22 +971,66 @@
           "meta"
         ]
       },
+      "CarBrandSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Resolved brand identifier",
+            "example": "brand-1"
+          },
+          "name": {
+            "type": "string",
+            "description": "Resolved brand display name",
+            "example": "Toyota"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "CarModelSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Resolved model identifier",
+            "example": "model-1"
+          },
+          "name": {
+            "type": "string",
+            "description": "Resolved model display name",
+            "example": "Corolla"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
       "CarSummary": {
         "type": "object",
         "properties": {
-          "brandId": {
-            "type": "string",
-            "description": "ID of the car brand. Must reference an existing brand (e.g. brand-1, brand-2).",
-            "example": "brand-1"
-          },
-          "modelId": {
-            "type": "string",
-            "description": "ID of the car model. Must reference a model that belongs to the selected brand.",
-            "example": "model-1"
-          },
           "id": {
             "type": "string",
             "description": "Vehicle identifier"
+          },
+          "brand": {
+            "description": "Resolved brand information for read operations",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CarBrandSummary"
+              }
+            ]
+          },
+          "model": {
+            "description": "Resolved model information for read operations",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CarModelSummary"
+              }
+            ]
           },
           "total": {
             "type": "number",
@@ -1081,9 +1043,9 @@
           }
         },
         "required": [
-          "brandId",
-          "modelId",
-          "id"
+          "id",
+          "brand",
+          "model"
         ]
       },
       "CarDetailEntity": {
@@ -1205,19 +1167,25 @@
       "Car": {
         "type": "object",
         "properties": {
-          "brandId": {
-            "type": "string",
-            "description": "ID of the car brand. Must reference an existing brand (e.g. brand-1, brand-2).",
-            "example": "brand-1"
-          },
-          "modelId": {
-            "type": "string",
-            "description": "ID of the car model. Must reference a model that belongs to the selected brand.",
-            "example": "model-1"
-          },
           "id": {
             "type": "string",
             "description": "Vehicle identifier"
+          },
+          "brand": {
+            "description": "Resolved brand information for read operations",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CarBrandSummary"
+              }
+            ]
+          },
+          "model": {
+            "description": "Resolved model information for read operations",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CarModelSummary"
+              }
+            ]
           },
           "carDetails": {
             "description": "Vehicle detail entries",
@@ -1232,9 +1200,9 @@
           }
         },
         "required": [
-          "brandId",
-          "modelId",
-          "id"
+          "id",
+          "brand",
+          "model"
         ]
       },
       "CarDetailsDto": {

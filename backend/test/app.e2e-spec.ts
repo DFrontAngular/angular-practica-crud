@@ -65,6 +65,30 @@ describe('Backend hardening (e2e)', () => {
     ],
   });
 
+  const createCarPayloadForBrandModel = (
+    licensePlate: string,
+    brandId: string,
+    modelId: string,
+    overrides: Record<string, unknown> = {},
+  ) => ({
+    brandId,
+    modelId,
+    carDetails: [
+      {
+        registrationDate: '2024-10-30T10:01:35.288Z',
+        mileage: 15000,
+        currency: 'EUR',
+        price: 20000,
+        manufactureYear: 2020,
+        availability: true,
+        color: 'Blue',
+        description: 'Vehicle prepared for e2e tests',
+        licensePlate,
+        ...overrides,
+      },
+    ],
+  });
+
   const login = async (
     email: string,
     password: string,
@@ -174,7 +198,7 @@ describe('Backend hardening (e2e)', () => {
       .post('/cars')
       .set('Authorization', `Bearer ${adminToken}`)
       .send(
-        createCarPayload(unavailablePlate, {
+        createCarPayloadForBrandModel(unavailablePlate, 'brand-3', 'model-11', {
           availability: false,
         }),
       )
@@ -183,7 +207,9 @@ describe('Backend hardening (e2e)', () => {
     await request(app.getHttpServer())
       .post('/cars')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(createCarPayload(availablePlate))
+      .send(
+        createCarPayloadForBrandModel(availablePlate, 'brand-3', 'model-12'),
+      )
       .expect(201);
 
     const unavailableResults = await request(app.getHttpServer())
@@ -221,20 +247,24 @@ describe('Backend hardening (e2e)', () => {
     const firstCarResponse = await request(app.getHttpServer())
       .post('/cars')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(createCarPayload(originalPlate))
+      .send(
+        createCarPayloadForBrandModel(originalPlate, 'brand-4', 'model-14'),
+      )
       .expect(201);
 
     await request(app.getHttpServer())
       .post('/cars')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(createCarPayload(duplicatePlate))
+      .send(
+        createCarPayloadForBrandModel(duplicatePlate, 'brand-1', 'model-2'),
+      )
       .expect(201);
 
     const updatedWithSamePlate = await request(app.getHttpServer())
       .put(`/cars/${firstCarResponse.body.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(
-        createCarPayload(originalPlate, {
+        createCarPayloadForBrandModel(originalPlate, 'brand-4', 'model-14', {
           color: 'Red',
           description: 'Updated while keeping the same plate',
         }),
@@ -248,19 +278,69 @@ describe('Backend hardening (e2e)', () => {
     const duplicateUpdateResponse = await request(app.getHttpServer())
       .put(`/cars/${firstCarResponse.body.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(createCarPayload(duplicatePlate))
-      .expect(400);
+      .send(
+        createCarPayloadForBrandModel(duplicatePlate, 'brand-4', 'model-14'),
+      )
+      .expect(409);
 
     expect(duplicateUpdateResponse.body.message).toContain(
       'already registered to another car',
     );
   });
 
+  it('rejects duplicated brand/model combinations on create and update', async () => {
+    const firstCarResponse = await request(app.getHttpServer())
+      .post('/cars')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
+      .expect(201);
+
+    const secondCarResponse = await request(app.getHttpServer())
+      .post('/cars')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-7'))
+      .expect(201);
+
+    const duplicateCreateResponse = await request(app.getHttpServer())
+      .post('/cars')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
+      .expect(409);
+
+    expect(duplicateCreateResponse.body.message).toContain(
+      'Only one car per brand and model is allowed',
+    );
+
+    const duplicateUpdateResponse = await request(app.getHttpServer())
+      .put(`/cars/${secondCarResponse.body.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
+      .expect(409);
+
+    expect(duplicateUpdateResponse.body.message).toContain(
+      'Only one car per brand and model is allowed',
+    );
+
+    const unchangedUpdateResponse = await request(app.getHttpServer())
+      .put(`/cars/${firstCarResponse.body.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(
+        createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6', {
+          color: 'Black',
+        }),
+      )
+      .expect(200);
+
+    expect(unchangedUpdateResponse.body.model.id).toBe('model-6');
+  });
+
   it('returns deterministic errors for document upload scenarios and treats missing files consistently', async () => {
     const carResponse = await request(app.getHttpServer())
       .post('/cars')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send(createCarPayload(uniquePlate()))
+      .send(
+        createCarPayloadForBrandModel(uniquePlate(), 'brand-5', 'model-16'),
+      )
       .expect(201);
 
     const carId = carResponse.body.id;

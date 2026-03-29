@@ -279,7 +279,7 @@ Columnas incluidas:
 Ejemplo:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&available=true&sortBy=price&sortOrder=desc
+GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=price&sortOrder=desc
 ```
 
 ### `GET /cars/:id`
@@ -289,8 +289,14 @@ Devuelve el coche completo:
 ```json
 {
   "id": "uuid",
-  "brandId": "brand-1",
-  "modelId": "model-1",
+  "brand": {
+    "id": "brand-1",
+    "name": "Toyota"
+  },
+  "model": {
+    "id": "model-1",
+    "name": "Corolla"
+  },
   "carDetails": [
     {
       "registrationDate": "2024-10-30T10:01:35.288Z",
@@ -400,12 +406,6 @@ Respuesta:
 - `limit`
 - `brandId`
 - `modelId`
-- `minPrice`
-- `maxPrice`
-- `minYear`
-- `maxYear`
-- `available`
-- `licensePlate`
 - `sortBy`
 - `sortOrder`
 
@@ -429,7 +429,7 @@ Valores permitidos para `sortOrder`:
 Ejemplo:
 
 ```http
-GET /cars?page=1&limit=10&brandId=brand-1&minYear=2020&available=true
+GET /cars?page=1&limit=10&brandId=brand-1&modelId=model-1
 ```
 
 Ejemplo con ordenación:
@@ -441,7 +441,7 @@ GET /cars?page=1&limit=10&sortBy=price&sortOrder=desc
 Ejemplo de exportación con los mismos filtros:
 
 ```http
-GET /cars/export/excel?minYear=2020&available=true&sortBy=registrationDate&sortOrder=desc
+GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=registrationDate&sortOrder=desc
 ```
 
 ## Validaciones importantes

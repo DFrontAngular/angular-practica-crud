@@ -137,6 +137,11 @@ export class CarsController {
     type: Car,
   })
   @ApiResponse({ status: 400, description: 'Invalid vehicle payload' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Vehicle conflicts with an existing license plate or brand/model combination',
+  })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   createCar(@Body() createCarDto: CreateCarDto): Car {
     return this.carsService.create(createCarDto);
@@ -155,6 +160,11 @@ export class CarsController {
     status: 400,
     description:
       'Invalid vehicle payload. PUT expects the full CreateCarDto contract.',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Vehicle conflicts with an existing license plate or brand/model combination',
   })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
