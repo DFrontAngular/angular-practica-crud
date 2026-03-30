@@ -16,16 +16,21 @@ export class MulterExceptionFilter implements ExceptionFilter {
     if (exception.code === 'LIMIT_FILE_SIZE') {
       response.status(HttpStatus.PAYLOAD_TOO_LARGE).json({
         statusCode: HttpStatus.PAYLOAD_TOO_LARGE,
-        message: `The uploaded file exceeds the maximum allowed size of ${MAX_DOCUMENT_FILE_SIZE / (1024 * 1024)} MB.`,
         error: 'Payload Too Large',
+        code: 'DOCUMENT_FILE_TOO_LARGE',
+        message: `The uploaded file exceeds the maximum allowed size of ${MAX_DOCUMENT_FILE_SIZE / (1024 * 1024)} MB.`,
+        details: {
+          maxFileSizeBytes: MAX_DOCUMENT_FILE_SIZE,
+        },
       });
       return;
     }
 
     response.status(HttpStatus.BAD_REQUEST).json({
       statusCode: HttpStatus.BAD_REQUEST,
-      message: exception.message,
       error: 'Bad Request',
+      code: 'DOCUMENT_UPLOAD_ERROR',
+      message: exception.message,
     });
   }
 }

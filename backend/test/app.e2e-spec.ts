@@ -283,6 +283,7 @@ describe('Backend hardening (e2e)', () => {
       )
       .expect(409);
 
+    expect(duplicateUpdateResponse.body.code).toBe('CAR_DUPLICATE_LICENSE_PLATE');
     expect(duplicateUpdateResponse.body.message).toContain(
       'already registered to another car',
     );
@@ -307,6 +308,7 @@ describe('Backend hardening (e2e)', () => {
       .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
       .expect(409);
 
+    expect(duplicateCreateResponse.body.code).toBe('CAR_DUPLICATE_BRAND_MODEL');
     expect(duplicateCreateResponse.body.message).toContain(
       'Only one car per brand and model is allowed',
     );
@@ -317,6 +319,7 @@ describe('Backend hardening (e2e)', () => {
       .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
       .expect(409);
 
+    expect(duplicateUpdateResponse.body.code).toBe('CAR_DUPLICATE_BRAND_MODEL');
     expect(duplicateUpdateResponse.body.message).toContain(
       'Only one car per brand and model is allowed',
     );

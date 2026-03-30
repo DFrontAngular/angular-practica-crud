@@ -125,26 +125,6 @@ Qué aprenderás aquí:
 - validación custom
 - reutilización de formularios
 
-## Bloque 4.1. Upload de documentos
-
-Objetivo:
-
-- practicar `multipart/form-data` y subida real de archivos desde Angular
-
-Tareas recomendadas:
-
-1. crear un formulario o acción secundaria para adjuntar documento a un coche
-2. construir `FormData` con `file` y metadatos opcionales
-3. conectar `POST /cars/:id/documents`
-4. mostrar errores de tamaño o tipo no permitido
-5. presentar la respuesta de metadatos devuelta por el backend
-
-Qué aprenderás aquí:
-
-- `FormData`
-- manejo de archivos en Angular
-- validación de uploads
-
 ## Bloque 5. Detalle y experiencia de usuario
 
 Objetivo:
@@ -164,6 +144,27 @@ Qué aprenderás aquí:
 - rutas con parámetros
 - composición de vistas
 - pipes
+
+## Bloque 5.1. Upload de documentos desde detalle
+
+Objetivo:
+
+- practicar `multipart/form-data` integrando la subida dentro de la vista de detalle
+
+Tareas recomendadas:
+
+1. añadir en `cars/:id` una acción o formulario secundario para adjuntar documento al coche
+2. construir `FormData` con `file` y metadatos opcionales
+3. conectar `POST /cars/:id/documents`
+4. mostrar en el detalle los metadatos del documento usando `GET /cars/:id/documents`
+5. mostrar errores de tamaño o tipo no permitido
+
+Qué aprenderás aquí:
+
+- `FormData`
+- manejo de archivos en Angular
+- integración de acciones secundarias dentro de una vista de detalle
+- validación de uploads
 
 ## Bloque 6. Eliminación y feedback
 
@@ -257,7 +258,7 @@ Tareas recomendadas:
 
 1. conectar `page` y `limit`
 2. pintar metadatos de paginación
-3. añadir filtros por marca, modelo, disponibilidad, año, precio y matrícula
+3. añadir filtros por marca y modelo
 4. añadir ordenación por columnas o controles de sort
 5. implementar exportación con `GET /cars/export/excel`
 6. sincronizar filtros con la URL si se quiere subir el nivel

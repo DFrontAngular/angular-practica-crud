@@ -4,15 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
-import * as fs from 'fs';
-import { join, extname } from 'path';
+import * as fs from 'node:fs';
+import { extname, join } from 'node:path';
 import { v4 as uuid } from 'uuid';
 
 import {
   CreateCarDto,
   UploadCarDocumentDto,
-  UploadedPracticeFile,
   UploadedCarDocumentResponseDto,
+  UploadedPracticeFile,
 } from './dto';
 import { Car, CarDetailEntity, CarSummary, StoredCar } from './entities';
 
@@ -23,10 +23,16 @@ import {
   GetCarsFilterDto,
   SortOrder,
 } from './dto/get-cars-filter.dto';
+import { normalizeUploadedFileName } from './utils/uploaded-file-name.utils';
 
 interface StoredCarDocument extends UploadedCarDocumentResponseDto {
   storagePath: string;
 }
+
+type CarConflictCode =
+  | 'CAR_DUPLICATE_LICENSE_PLATE_IN_REQUEST'
+  | 'CAR_DUPLICATE_LICENSE_PLATE'
+  | 'CAR_DUPLICATE_BRAND_MODEL';
 
 @Injectable()
 export class CarsService {
@@ -134,13 +140,10 @@ export class CarsService {
 
     const paginatedItems = filteredCars.slice(skip, skip + limit).map((car) => {
       const matchingDetail = this.getMatchingCarDetail(car);
-      return this.toCarSummary(
-        car,
-        {
-          imageUrl: matchingDetail?.imageUrl,
-          total: car.carDetails?.length || 0,
-        },
-      );
+      return this.toCarSummary(car, {
+        imageUrl: matchingDetail?.imageUrl,
+        total: car.carDetails?.length || 0,
+      });
     });
 
     const totalPages = Math.ceil(totalItems / limit);
@@ -329,6 +332,8 @@ export class CarsService {
     uploadDocumentDto: UploadCarDocumentDto,
     file: UploadedPracticeFile,
   ): UploadedCarDocumentResponseDto {
+    const originalFileName = normalizeUploadedFileName(file.originalname);
+
     this.findOne(id);
     const carDirectory = join(this.documentsRootPath, id);
     fs.mkdirSync(carDirectory, { recursive: true });
@@ -336,16 +341,23 @@ export class CarsService {
     this.deleteStoredDocument(id);
 
     const documentId = uuid();
-    const fileExtension = extname(file.originalname) || this.getExtensionFromMimeType(file.mimetype);
+    const fileExtension =
+      extname(originalFileName) ||
+      this.getExtensionFromMimeType(file.mimetype);
     const storedFileName = `${documentId}${fileExtension}`;
     const storagePath = join(carDirectory, storedFileName);
 
-    fs.writeFileSync(storagePath, file.buffer);
+    const fileContents = new Uint8Array(
+      file.buffer.buffer,
+      file.buffer.byteOffset,
+      file.buffer.byteLength,
+    );
+    fs.writeFileSync(storagePath, fileContents);
 
     const document: StoredCarDocument = {
       id: documentId,
       carId: id,
-      originalName: file.originalname,
+      originalName: originalFileName,
       mimeType: file.mimetype,
       size: file.size,
       documentType: uploadDocumentDto.documentType ?? 'other',
@@ -486,8 +498,14 @@ export class CarsService {
   }
 
   private getFilteredCars(filterDto: GetCarsFilterDto): StoredCar[] {
-    const { available, brandId, licensePlate, modelId, sortBy, sortOrder = 'asc' } =
-      filterDto;
+    const {
+      available,
+      brandId,
+      licensePlate,
+      modelId,
+      sortBy,
+      sortOrder = 'asc',
+    } = filterDto;
 
     let filteredCars = this.cars.filter((car) => {
       const matchingDetail = this.getMatchingCarDetail(car);
@@ -582,9 +600,7 @@ export class CarsService {
     }
   }
 
-  private getMatchingCarDetail(
-    car: StoredCar,
-  ): CarDetailEntity | undefined {
+  private getMatchingCarDetail(car: StoredCar): CarDetailEntity | undefined {
     return car.carDetails[0];
   }
 
@@ -625,13 +641,25 @@ export class CarsService {
 
       if (seenLicensePlates.has(normalizedLicensePlate)) {
         throw new ConflictException(
-          `Duplicate license plate "${detail.licensePlate}" found in the same request.`,
+          this.buildConflictPayload(
+            'CAR_DUPLICATE_LICENSE_PLATE_IN_REQUEST',
+            `Duplicate license plate "${detail.licensePlate}" found in the same request.`,
+            {
+              licensePlate: detail.licensePlate,
+            },
+          ),
         );
       }
 
       if (this.isLicensePlateTaken(detail.licensePlate, excludeCarId)) {
         throw new ConflictException(
-          `The license plate ${detail.licensePlate} is already registered to another car.`,
+          this.buildConflictPayload(
+            'CAR_DUPLICATE_LICENSE_PLATE',
+            `The license plate ${detail.licensePlate} is already registered to another car.`,
+            {
+              licensePlate: detail.licensePlate,
+            },
+          ),
         );
       }
 
@@ -656,12 +684,21 @@ export class CarsService {
       const modelName = duplicatedCar.model?.name ?? modelId;
 
       throw new ConflictException(
-        `There is already a car registered for ${brandName} ${modelName}. Only one car per brand and model is allowed.`,
+        this.buildConflictPayload(
+          'CAR_DUPLICATE_BRAND_MODEL',
+          `There is already a car registered for ${brandName} ${modelName}. Only one car per brand and model is allowed.`,
+          {
+            brandName,
+            modelName,
+          },
+        ),
       );
     }
   }
 
-  private ensureSeedCarsUseUniqueBrandModelCombinations(cars: StoredCar[]): void {
+  private ensureSeedCarsUseUniqueBrandModelCombinations(
+    cars: StoredCar[],
+  ): void {
     const seenCombinations = new Set<string>();
 
     for (const car of cars) {
@@ -679,6 +716,26 @@ export class CarsService {
 
   private normalizeLicensePlate(licensePlate: string): string {
     return licensePlate.replace(/\s+/g, '').trim().toUpperCase();
+  }
+
+  private buildConflictPayload(
+    code: CarConflictCode,
+    message: string,
+    extra: Record<string, string>,
+  ): {
+    statusCode: number;
+    error: string;
+    code: CarConflictCode;
+    message: string;
+    details: Record<string, string>;
+  } {
+    return {
+      statusCode: 409,
+      error: 'Conflict',
+      code,
+      message,
+      details: extra,
+    };
   }
 
   private getStoredCarById(id: string): StoredCar {
@@ -770,7 +827,19 @@ export class CarsService {
   private toDocumentResponse(
     document: StoredCarDocument,
   ): UploadedCarDocumentResponseDto {
-    const { storagePath: _storagePath, ...publicDocument } = document;
-    return publicDocument;
+    return {
+      id: document.id,
+      carId: document.carId,
+      originalName: document.originalName,
+      mimeType: document.mimeType,
+      size: document.size,
+      documentType: document.documentType,
+      title: document.title,
+      description: document.description,
+      uploadedAt: document.uploadedAt,
+      persisted: document.persisted,
+      downloadUrl: document.downloadUrl,
+      message: document.message,
+    };
   }
 }
