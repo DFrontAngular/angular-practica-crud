@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { PaginatedResponseDto } from '../../model/DTO/paginated-response-dto';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class CarsService {
-  private apiUrl = 'http://localhost:3000/';
+  constructor (private http: HttpClient) {}
 
-  constructor (private http: HttpClient) {
-    
+  public getCars(){
+    return this.http.get<PaginatedResponseDto>('/api/cars')
   }
 }
