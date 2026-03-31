@@ -1,3 +1,71 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import 'tailwindcss';
+/*0123456789ABCDEF*/
+
+:root {
+    --bg-color: #ddd;
+    --surface-color: #eee;
+    --text-color: #111;
+    --border-color: #888;
+    --shadow-color: #8888;
+    --primary-color: #228;
+    --danger-color: #822;
+    --success-color: #282;
+    --on-primary-color: #eee;
+
+    --border-radius: 1em;
+    --shadow: 0.5em 1em 0.5em var(--shadow-color);
+    --light-border: 0.1em solid var(--border-color);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    width: 100%;
+    height: 100%;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    padding: 1em;
+}
+
+main {
+    margin: auto;
+    padding: 2em;
+    width: min(1000px, 100%);
+    background-color: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+h1 {
+    text-align: center;
+    font-size: xx-large;
+    color: var(--primary-color);
+    margin: 0 0 1em 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+tr {
+    background-color: var(--surface-color);
+}
+
+tr:nth-child(odd) {
+    background-color: var(--bg-color);
+}
+
+td, th {
+    text-align: center;
+    padding: 0.5em;
+}
+
+th {
+    color: var(--on-primary-color);
+    background-color: var(--primary-color);
+}

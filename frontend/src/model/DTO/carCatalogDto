@@ -1,0 +1,15 @@
+import {CarDto} from './carDto';
+import {MetaDto} from './metaDto';
+
+export class CarCatalogDto {
+    items: Array<CarDto>;
+    meta: MetaDto;
+
+    constructor(
+        items: Array<CarDto>,
+        meta: MetaDto
+    ) {
+        this.items = items;
+        this.meta = meta;
+    }
+}
