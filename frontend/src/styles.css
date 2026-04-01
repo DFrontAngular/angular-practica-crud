@@ -15,7 +15,7 @@
 
     --border-radius: 1em;
     --shadow: 0.5em 1em 0.5em var(--shadow-color);
-    --light-border: 0.1em solid var(--border-color);
+    --normal-border: 0.15em solid var(--border-color);
 }
 
 * {
@@ -24,6 +24,7 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
+    font-size: large;
     width: 100%;
     height: 100%;
     color: var(--text-color);
@@ -60,6 +61,10 @@ tr:nth-child(odd) {
     background-color: var(--bg-color);
 }
 
+tr:not(:first-child):hover {
+    outline: var(--normal-border);
+}
+
 td, th {
     text-align: center;
     padding: 0.5em;
@@ -68,4 +73,9 @@ td, th {
 th {
     color: var(--on-primary-color);
     background-color: var(--primary-color);
+}
+
+img {
+    height: 4em;
+    width: auto;
 }
