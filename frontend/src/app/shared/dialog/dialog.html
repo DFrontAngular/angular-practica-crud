@@ -1,0 +1,12 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <h1>{{title}}</h1>
+    
+    <ng-content></ng-content>
+    
+    <div class="actions">
+        <button (click)="ok()">OK</button>
+        <button (click)="close()">Close</button>
+    </div>
+  </div>
+</div>

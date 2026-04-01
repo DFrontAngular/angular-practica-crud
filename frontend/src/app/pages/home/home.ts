@@ -1,10 +1,13 @@
 import { Component, OnInit, Signal, WritableSignal, computed, signal } from '@angular/core';
 import { PaginatedResponseDto } from '../../../model/DTO/paginated-response-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
+import { RouterLink } from "@angular/router";
+import { Dialog } from '../../shared/dialog/dialog';
+import { CarSummaryDto } from '../../../model/DTO/car-summary-dto';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [RouterLink, Dialog],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -20,6 +23,11 @@ export class Home implements OnInit {
   hasNextPage = computed(()=>this.paginatedResponse()?.meta.hasNextPage ?? false);
   hasPreviousPage = computed(()=>this.paginatedResponse()?.meta.hasPreviousPage ?? false);
   currentPage = computed(()=>this.paginatedResponse()?.meta.currentPage);
+
+  items = computed(()=>this.paginatedResponse()?.items ?? [])
+
+  isDialogOpen = signal(false);
+  carToDelete: WritableSignal<CarSummaryDto | undefined> = signal(undefined);
 
   constructor (private carsService: CarsService) {}
 
@@ -68,5 +76,24 @@ export class Home implements OnInit {
     if (this.currentPage() && this.hasNextPage()) {
       this.navigateToPage(this.currentPage()! + 1);
     }
+  }
+
+  openDialog(carId: string){
+    this.carToDelete.set(
+      this.items().find(
+        (car) => car.id == carId
+      )
+    )
+    
+    this.isDialogOpen.set(true);
+  }
+
+  closeDialog(){
+    this.isDialogOpen.set(false);
+  }
+
+  onDialogConfirmation() {
+    /*TODO delete carToDelete*/ 
+    alert(`Should delete car ${this.carToDelete()?.id ?? 'Error'}`);
   }
 }

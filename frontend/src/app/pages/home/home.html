@@ -42,6 +42,7 @@
                     <th>Brand</th>
                     <th>Model</th>
                     <th>Total</th>
+                    <th>Actions</th>
                 </tr>
 
             @for (car of paginatedResponse()?.items; track car.id) {
@@ -50,8 +51,25 @@
                     <td>{{car.brand.name}}</td>
                     <td>{{car.model.name}}</td>
                     <td>{{car.total}}</td>
+                    <td>
+                        <div class="actions">
+                            <button [routerLink]="`details/${car.id}`">Details</button> <!--eye-->
+                            <button [routerLink]="`form/${car.id}`">Edit</button> <!--pencil-->
+                            <button (click)="openDialog(car.id)">Delete</button> <!--trash can-->
+                        </div>
+                    </td>
                 </tr>
             }
         </table>
     }
 </main>
+
+@if (isDialogOpen()){
+    <app-dialog 
+    title="Delete Car"
+    (closed)="closeDialog()"
+    (oked)="onDialogConfirmation()"
+    >
+        <p>Are you sure you want to delete the car: {{carToDelete()?.brand?.name ?? 'Error'}} {{carToDelete()?.model?.name ?? 'Error'}}?</p>
+    </app-dialog>
+}

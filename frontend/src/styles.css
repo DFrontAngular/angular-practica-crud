@@ -13,13 +13,16 @@
     --success-color: #282;
     --on-primary-color: #eee;
 
+    --modal-overlay-background-color: rgba(0,0,0,0.5);
+
     --border-radius-small: 0.5em;
     --border-radius-medium: 1em;
+    --light-border: 1px solid var(--border-color);
+    --normal-border: 3px solid var(--border-color);
+
     --shadow-small: 0.1em 0.2em 0.1em var(--shadow-color);
     --shadow-big: 0.5em 1em 0.5em var(--shadow-color);
-
-    --light-border: 0.1em solid var(--border-color);
-    --normal-border: 0.15em solid var(--border-color);
+    --shadow-modal: 0.5em 1em 0.5em rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -66,12 +69,13 @@ tr:nth-child(odd) {
 }
 
 tr:not(:first-child):hover {
-    outline: var(--normal-border);
+    outline: var(--light-border);
 }
 
 td, th {
     text-align: left;
     padding: 0.5em;
+    min-height: 100%;
 }
 
 th {
@@ -106,4 +110,43 @@ img {
 .highlight {
     background-color: var(--primary-color);
     color: var(--on-primary-color);
+}
+
+.actions {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.actions button {
+    padding: 0.5em 1em;
+    border: var(--light-border);
+    border-radius: var(--border-radius-small);
+}
+
+.actions button:hover {
+    color: var(--on-primary-color);
+    background-color: var(--primary-color);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--modal-overlay-background-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: var(--surface-color);
+  padding: 2em;
+  border-radius: var(--border-radius-medium);
+  width: min(500px, 100%);
+  box-shadow: var(--shadow-modal);
 }
