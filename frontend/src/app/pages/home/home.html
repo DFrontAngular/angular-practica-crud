@@ -73,3 +73,9 @@
         <p>Are you sure you want to delete the car: {{carToDelete()?.brand?.name ?? 'Error'}} {{carToDelete()?.model?.name ?? 'Error'}}?</p>
     </app-dialog>
 }
+
+<app-fab
+    icon="+"
+    ariaLabel="Add New Car"
+    (clickEvent)="addCar()"
+></app-fab>

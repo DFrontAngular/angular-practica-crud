@@ -4,10 +4,11 @@ import { CarsService } from '../../../services/cars-service/cars-service';
 import { RouterLink } from "@angular/router";
 import { Dialog } from '../../shared/dialog/dialog';
 import { CarSummaryDto } from '../../../model/DTO/car-summary-dto';
+import { Fab } from '../../shared/fab/fab';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, Dialog],
+  imports: [RouterLink, Dialog, Fab],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -94,6 +95,10 @@ export class Home implements OnInit {
 
   onDialogConfirmation() {
     /*TODO delete carToDelete*/ 
-    alert(`Should delete car ${this.carToDelete()?.id ?? 'Error'}`);
+    alert(`Delete car ${this.carToDelete()?.id ?? 'Error'}`);
+  }
+
+  addCar(){
+    alert('Create Car');
   }
 }
