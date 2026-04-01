@@ -39,6 +39,47 @@ En consecuencia, el objetivo no es únicamente completar una aplicación funcion
 
 Los tiempos estimados deben entenderse, por tanto, como ventanas de referencia para una ejecución enfocada y acompasada, no como compromisos cerrados.
 
+## Perfil de entrada recomendado
+
+Esta práctica no está pensada como primer contacto absoluto con el desarrollo frontend.
+
+El punto de partida más adecuado es el de una persona que ya dispone de una base funcional de desarrollo web y quiere consolidar o ampliar su trabajo con Angular en un caso relativamente realista.
+
+Base recomendada:
+
+- HTML: estructura de páginas, formularios y semántica básica
+- CSS: maquetación, responsive básico y organización sencilla de estilos
+- JavaScript: funciones, arrays, objetos, asincronía básica y consumo de APIs
+- TypeScript: tipado básico e interfaces sencillas
+
+## Conocimiento previo de Angular
+
+No es imprescindible llegar con experiencia sólida en Angular para iniciar la práctica.
+
+Sí resulta recomendable haber visto al menos los fundamentos siguientes:
+
+- componentes
+- templates
+- data binding
+- servicios
+- routing
+- `HttpClient`
+- formularios reactivos
+
+Una persona con buena base web pero Angular inicial puede abordar el proyecto si recorre el itinerario de forma progresiva y mantiene el alcance bajo control.
+
+En cambio, si todavía existe inseguridad clara en JavaScript o en la construcción básica de interfaces, conviene reforzar esa base antes de usar este repositorio como práctica principal.
+
+## Implicación sobre la estimación
+
+Las ventanas orientativas de tiempo de este documento parten de una persona que ya cuenta con la base anterior.
+
+Por tanto:
+
+- con base web sólida y Angular básico, las estimaciones son razonables
+- con base web sólida pero sin Angular, la práctica sigue siendo viable, aunque la curva de aprendizaje de los primeros bloques puede ampliar el esfuerzo real
+- sin base suficiente de JavaScript y maquetación, las estimaciones dejan de ser representativas porque el proyecto pasa a cubrir aprendizaje base y no solo práctica aplicada
+
 ## Modelo de seguimiento
 
 Se recomienda trabajar con los siguientes elementos de referencia:
@@ -102,13 +143,15 @@ Alcance opcional recomendado:
 - pulido responsive más allá del layout base
 - refactors orientados a mantenibilidad una vez cerrados los flujos principales
 
-## Rangos estimados por perfil
+## Ventanas orientativas de dedicación por perfil
 
-Estos rangos solo resultan realistas si el alcance permanece controlado y existe soporte de mentoring cuando surgen bloqueos.
+Estas ventanas solo resultan razonables si el alcance permanece controlado y existe soporte de mentoring cuando surgen bloqueos.
 
-Deben comunicarse como ventanas orientativas y no como compromisos de entrega cerrados.
+Deben comunicarse como referencias amplias y no como compromisos de entrega cerrados.
 
 Como referencia, una jornada debe entenderse como una jornada laboral habitual, incluyendo pausas, tiempo de análisis, pruebas, correcciones y bloqueos razonables. No debe interpretarse como ocho horas netas de implementación continua.
+
+Además, cuando la práctica se compagina con onboarding, sesiones formativas, reuniones, soporte o curva de aprendizaje, la duración real puede extenderse sin que eso implique un mal desempeño.
 
 ### Perfil junior
 
@@ -121,11 +164,12 @@ Foco recomendado:
 - validación en frontend
 - gestión básica de errores
 
-Rango orientativo:
+Ventana orientativa:
 
-- `10-14` jornadas para una entrega obligatoria sólida utilizando el modo bypass de autenticación
+- `3-5` semanas de dedicación habitual para una entrega obligatoria sólida utilizando el modo bypass de autenticación
+- como referencia aproximada, esto suele equivaler a `15-25` jornadas, pero conviene comunicar antes la horquilla en semanas que en días
 
-Si para un perfil junior se requiere también autenticación real, el rango debería ampliarse de forma explícita en lugar de mantener la misma expectativa temporal.
+Si para un perfil junior se requiere también autenticación real, la ventana debería ampliarse de forma explícita en lugar de mantener la misma expectativa temporal.
 
 ### Perfil intermedio
 
@@ -136,10 +180,11 @@ Foco recomendado:
 - mejor disciplina en el manejo de estado
 - comportamiento UX consistente
 
-Rango orientativo:
+Ventana orientativa:
 
-- `9-12` jornadas para el alcance obligatorio
-- `13-16` jornadas si desde el inicio se incluye login y comportamiento condicionado por roles
+- `2-4` semanas de dedicación habitual para el alcance obligatorio
+- `3-5` semanas si desde el inicio se incluye login y comportamiento condicionado por roles
+- como referencia aproximada, esto suele equivaler a `10-18` y `14-22` jornadas respectivamente
 
 ### Perfil avanzado
 
@@ -151,10 +196,11 @@ Foco recomendado:
 - mejor resolución de casos borde
 - pulido técnico moderado
 
-Rango orientativo:
+Ventana orientativa:
 
-- `8-10` jornadas para el alcance obligatorio incluyendo login
-- `10-13` jornadas si también se espera una capa adicional de pulido opcional
+- `2-3` semanas de dedicación habitual para el alcance obligatorio incluyendo login
+- `2.5-4` semanas si también se espera una capa adicional de pulido opcional
+- como referencia aproximada, esto suele equivaler a `8-14` y `10-16` jornadas respectivamente
 
 ## Hitos recomendados
 
@@ -176,7 +222,7 @@ El objetivo de un umbral de alerta es facilitar acompañamiento y detección tem
 
 Regla recomendada:
 
-- si una persona supera aproximadamente un `25-35%` del rango esperado sin haber cerrado el hito correspondiente, conviene revisar la situación con ella
+- si una persona supera aproximadamente un `25-35%` de la ventana prevista sin haber cerrado el hito correspondiente, conviene revisar la situación con ella
 
 Motivos habituales:
 
@@ -197,7 +243,7 @@ El detalle operativo de ese acompañamiento queda recogido en:
 
 Puede utilizarse una formulación como la siguiente en el briefing de la formación:
 
-> Este proyecto incluye ventanas de entrega orientativas por perfil con el fin de mantener la práctica dentro de un marco realista y evitar desviaciones innecesarias de tiempo o alcance. Estas ventanas no constituyen deadlines estrictos y no se utilizarán de forma aislada para evaluar el rendimiento. Su objetivo es facilitar la planificación, detectar bloqueos con antelación y mantener un esfuerzo proporcionado al alcance previsto.
+> Este proyecto incluye ventanas orientativas de dedicación por perfil con el fin de mantener la práctica dentro de un marco realista y evitar desviaciones innecesarias de tiempo o alcance. Estas ventanas no constituyen deadlines estrictos y no se utilizarán de forma aislada para evaluar el rendimiento. Su objetivo es facilitar la planificación, detectar bloqueos con antelación y mantener un esfuerzo proporcionado al alcance previsto. Si la práctica se compagina con formación, soporte o curva de aprendizaje, es normal que la duración real pueda ampliarse.
 
 ## Recomendación para este repositorio
 

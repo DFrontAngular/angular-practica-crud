@@ -53,7 +53,7 @@ Importante:
 - los datos viven en memoria
 - si reinicias el backend, el estado vuelve a generarse
 
-## Requisitos previos
+## Requisitos técnicos previos
 
 - Node.js 22 o superior
 - npm
@@ -65,6 +65,50 @@ Instalación de Angular CLI:
 ```bash
 npm install -g @angular/cli
 ```
+
+## Conocimientos previos recomendados
+
+Este proyecto está pensado como práctica formativa, no como un ejercicio reservado a personas expertas en Angular. Aun así, para aprovecharlo bien conviene partir de una base mínima.
+
+### Base recomendada de desarrollo web
+
+Se recomienda contar con conocimientos funcionales de:
+
+- HTML: estructura de páginas, formularios, inputs, tablas, navegación y semántica básica
+- CSS: maquetación, selectores, estados visuales, responsive básico y organización sencilla de estilos
+- JavaScript: variables, funciones, arrays, objetos, promesas, `fetch` o consumo de APIs y manejo básico de errores
+- TypeScript: tipado básico de objetos, arrays, interfaces y nociones de clases
+
+Con esta base ya es razonable abordar la práctica, especialmente si se sigue el itinerario propuesto en `docs/learning-path.md`.
+
+### ¿Hace falta saber Angular antes de empezar?
+
+No es imprescindible llegar con experiencia previa sólida en Angular para comenzar, especialmente en un contexto de formación guiada.
+
+Sin embargo, sí ayuda haber visto al menos estos conceptos:
+
+- componentes
+- templates
+- data binding
+- servicios
+- routing
+- `HttpClient`
+- formularios reactivos
+
+Si no tienes conocimientos previos de Angular, todavía puedes empezar, pero la estimación de esfuerzo será mayor y es recomendable hacerlo con un enfoque progresivo:
+
+- comenzar con `AUTH_ENABLED=false`
+- centrarse primero en listado, detalle, navegación y CRUD base
+- dejar login, guards, interceptor JWT y roles para una fase posterior
+
+### Estimación orientativa según punto de partida
+
+- Base web sólida y Angular básico: punto de partida adecuado para seguir la práctica completa con acompañamiento normal
+- Base web sólida pero sin Angular: punto de partida viable, con curva de aprendizaje clara en los primeros bloques
+- HTML y CSS básicos pero JavaScript todavía inseguro: punto de partida poco recomendable para esta práctica sin refuerzo previo
+- Sin base previa de desarrollo web: no se recomienda usar este proyecto como primer contacto absoluto con frontend
+
+En términos formativos, este repositorio encaja mejor en personas que ya tienen una base de desarrollo web y quieren aprender Angular en un caso realista, o en personas con Angular inicial que quieren consolidar integración con APIs, formularios, routing y autenticación.
 
 ## Puesta en marcha
 
