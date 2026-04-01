@@ -10,8 +10,4 @@ import { CarsService } from '../services/cars-service/cars-service';
 })
 export class App {
   protected readonly title = signal('frontend');
-
-  constructor(carsService: CarsService){
-    carsService.getCars().subscribe((it)=>{console.log(it)});
-  }
 }

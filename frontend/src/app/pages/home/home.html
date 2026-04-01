@@ -1,36 +1,32 @@
 <main>
     <h1>Listado de Coches</h1>
 
-    <table>
-        <tr>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Imagen</th>
-        </tr>
-        <tr>
-            <td>asdf</td>
-            <td>asdf</td>
-            <td>asdf</td>
-        </tr>
-        <tr>
-            <td>asdf</td>
-            <td>asdf</td>
-            <td>asdf</td>
-        </tr>
-        <tr>
-            <td>asdf</td>
-            <td>asdf</td>
-            <td>asdf</td>
-        </tr>
-        <tr>
-            <td>asdf</td>
-            <td>asdf</td>
-            <td>asdf</td>
-        </tr>
-        <tr>
-            <td>asdf</td>
-            <td>asdf</td>
-            <td>asdf</td>
-        </tr>
-    </table>
+    @if (loading()) {
+        <p>Loading...</p>
+    }
+
+    @if (error()) {
+        <p>An error ocurred, please try again.</p>
+        <button (click)="refreshCars()">Retry</button>
+    }
+
+    @if (paginatedResponse()) {
+        <table>
+                <tr>
+                    <th>Image</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Total</th>
+                </tr>
+
+            @for (car of paginatedResponse()?.items; track car.id) {
+                <tr>
+                    <td><img [src]="`/api${car.imageUrl}`" alt="Car Image"></td>
+                    <td>{{car.brand.name}}</td>
+                    <td>{{car.model.name}}</td>
+                    <td>{{car.total}}</td>
+                </tr>
+            }
+        </table>
+    }
 </main>

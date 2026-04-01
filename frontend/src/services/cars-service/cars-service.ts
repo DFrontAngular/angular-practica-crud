@@ -11,6 +11,9 @@ export class CarsService {
   constructor (private http: HttpClient) {}
 
   public getCars(){
-    return this.http.get<PaginatedResponseDto>('/api/cars')
+    return this.http.get<PaginatedResponseDto>(
+      '/api/cars',
+      { timeout: 3000 }
+    )
   }
 }
