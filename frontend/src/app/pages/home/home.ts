@@ -1,4 +1,4 @@
-import { Component, OnInit, WritableSignal, signal } from '@angular/core';
+import { Component, OnInit, Signal, WritableSignal, computed, signal } from '@angular/core';
 import { PaginatedResponseDto } from '../../../model/DTO/paginated-response-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
 
@@ -13,16 +13,24 @@ export class Home implements OnInit {
   error: WritableSignal<any> = signal(null);
   paginatedResponse: WritableSignal<PaginatedResponseDto|null> = signal(null);
 
+  pages: Signal<number[]> = computed(()=>{
+    var totalPages = this.paginatedResponse()?.meta.totalPages ?? 0;
+    return Array.from({length: totalPages}, (_, i)=>i+1);
+  })
+  hasNextPage = computed(()=>this.paginatedResponse()?.meta.hasNextPage ?? false);
+  hasPreviousPage = computed(()=>this.paginatedResponse()?.meta.hasPreviousPage ?? false);
+  currentPage = computed(()=>this.paginatedResponse()?.meta.currentPage);
+
   constructor (private carsService: CarsService) {}
 
   ngOnInit(): void {
-    this.refreshCars();
+    this.getCars(1);
   }
 
-  refreshCars() {
+  getCars(page: number){
     this.loading.set(true);
     
-    this.carsService.getCars().subscribe({
+    this.carsService.getCars(page).subscribe({
 
       "next": (paginatedResponse) => {
         this.paginatedResponse.set(paginatedResponse);
@@ -42,5 +50,23 @@ export class Home implements OnInit {
     });
   }
 
-  
+  refreshCars() {
+    this.getCars(this.currentPage() ?? 1);
+  }
+
+  navigateToPage(page: number){
+    this.getCars(page);
+  }
+
+  goToPrevious(){
+    if (this.currentPage() && this.hasPreviousPage()) {
+      this.navigateToPage(this.currentPage()! - 1);
+    }
+  }
+
+  goToNext(){
+    if (this.currentPage() && this.hasNextPage()) {
+      this.navigateToPage(this.currentPage()! + 1);
+    }
+  }
 }

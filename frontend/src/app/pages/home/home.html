@@ -1,16 +1,41 @@
 <main>
-    <h1>Listado de Coches</h1>
+    <h1>Car List</h1>
+
+    <div class="pagination">
+        <button 
+        (click)="goToPrevious()"
+        [disabled]="!hasPreviousPage()"
+        >
+            &DoubleLongLeftArrow;
+        </button>
+        
+        @for (page of pages(); track page) {
+            <button 
+            [class.highlight]="currentPage() == page"
+            (click)="navigateToPage(page)"
+            >
+                {{page}}
+            </button>
+        }
+        
+        <button 
+        (click)="goToNext()"
+        [disabled]="!hasNextPage()"
+        >
+            &DoubleLongRightArrow;
+        </button>
+    </div>
 
     @if (loading()) {
         <p>Loading...</p>
     }
-
-    @if (error()) {
+    
+    @else if (error()) {
         <p>An error ocurred, please try again.</p>
         <button (click)="refreshCars()">Retry</button>
     }
 
-    @if (paginatedResponse()) {
+    @else if (paginatedResponse()) {
         <table>
                 <tr>
                     <th>Image</th>

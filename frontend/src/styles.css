@@ -13,8 +13,12 @@
     --success-color: #282;
     --on-primary-color: #eee;
 
-    --border-radius: 1em;
-    --shadow: 0.5em 1em 0.5em var(--shadow-color);
+    --border-radius-small: 0.5em;
+    --border-radius-medium: 1em;
+    --shadow-small: 0.1em 0.2em 0.1em var(--shadow-color);
+    --shadow-big: 0.5em 1em 0.5em var(--shadow-color);
+
+    --light-border: 0.1em solid var(--border-color);
     --normal-border: 0.15em solid var(--border-color);
 }
 
@@ -37,8 +41,8 @@ main {
     padding: 2em;
     width: min(1000px, 100%);
     background-color: var(--surface-color);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    border-radius: var(--border-radius-medium);
+    box-shadow: var(--shadow-big);
 }
 
 h1 {
@@ -66,7 +70,7 @@ tr:not(:first-child):hover {
 }
 
 td, th {
-    text-align: center;
+    text-align: left;
     padding: 0.5em;
 }
 
@@ -78,4 +82,28 @@ th {
 img {
     height: 4em;
     width: auto;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5em;
+    list-style: none;
+    padding: 1em;
+}
+
+.pagination button {
+    display: block;
+    padding: 0.5em 1em;
+    font-size: large;
+
+    border: var(--light-border);
+    border-radius: var(--border-radius-small);
+
+    cursor: pointer;
+}
+
+.highlight {
+    background-color: var(--primary-color);
+    color: var(--on-primary-color);
 }

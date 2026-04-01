@@ -10,10 +10,15 @@ import { PaginatedResponseDto } from '../../model/DTO/paginated-response-dto';
 export class CarsService {
   constructor (private http: HttpClient) {}
 
-  public getCars(){
+  public getCars(page: number){
     return this.http.get<PaginatedResponseDto>(
       '/api/cars',
-      { timeout: 3000 }
+      { 
+        params: {
+          page: page
+        },
+        timeout: 3000 
+      }
     )
   }
 }
