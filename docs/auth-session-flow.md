@@ -40,6 +40,13 @@ Tras un login correcto, el backend emite:
 
 El frontend no debe leer estas cookies desde JavaScript ni persistir sus valores manualmente.
 
+### Atributos importantes de cookie
+
+- `HttpOnly`: impide que JavaScript lea la cookie. Es la base de este flujo de sesion
+- `Secure`: hace que la cookie solo viaje por HTTPS. En local con `http://localhost` normalmente se usa `false`; en produccion real debe ser `true`
+- `SameSite`: controla cuando el navegador envia la cookie entre sitios. `lax` es el valor recomendado para esta practica
+- `Path`: limita a que rutas se envia la cookie. En este proyecto se recomienda `/` para no depender de reescrituras delicadas del proxy en desarrollo
+
 ## Endpoints implicados
 
 ### `POST /auth/login`
@@ -85,6 +92,12 @@ Este repositorio no abre CORS de forma permisiva para `localhost` por comodidad.
 La integracion esperada en desarrollo es mediante proxy del frontend.
 
 La idea es que el navegador trabaje como si frontend y backend fueran el mismo origen aparente durante el desarrollo, en lugar de construir una integracion artificial basada en abrir CORS y mover tokens manualmente.
+
+Consecuencia importante:
+
+- la ruta publica que ve el navegador puede ser `/api/auth/...` aunque el backend real exponga `/auth/...`
+- por eso la politica de cookies debe definirse pensando en la ruta publica, no solo en la ruta interna del backend
+- en este repositorio, `AUTH_COOKIE_PATH=/` evita ese acoplamiento y es la configuracion recomendada
 
 ## Lo que no deberia hacer el frontend
 

@@ -1,10 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'node:crypto';
-import {
-  ACCESS_TOKEN_EXPIRES_IN,
-  REFRESH_TOKEN_EXPIRES_IN,
-} from './auth.constants';
+import { getAccessTokenExpiresIn, getRefreshTokenExpiresIn } from './auth.config';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -58,7 +56,10 @@ export class AuthService {
 
   private readonly refreshSessions = new Map<string, string>();
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async login(email: string, password: string): Promise<AuthenticatedSession> {
     const user = this.users.find((u) => u.email === email);
@@ -147,10 +148,10 @@ export class AuthService {
 
     return {
       accessToken: this.jwtService.sign(accessPayload, {
-        expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+        expiresIn: getAccessTokenExpiresIn(this.configService),
       }),
       refreshToken: this.jwtService.sign(refreshPayload, {
-        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+        expiresIn: getRefreshTokenExpiresIn(this.configService),
       }),
     };
   }

@@ -3,7 +3,7 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "description": "Authenticates a user with email and password, issues an HttpOnly access cookie and an HttpOnly refresh cookie, and returns the authenticated user profile. In Swagger, this is the first endpoint to call before trying protected routes. The frontend should use `withCredentials` on subsequent requests instead of manually storing tokens.\n\nThe access token expires after 15m and the refresh token expires after 7d. The frontend should call `POST /auth/refresh` after a `401` caused by an expired access token.\n\n**Available credentials for the practice environment:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
+        "description": "Authenticates a user with email and password, issues an HttpOnly access cookie and an HttpOnly refresh cookie, and returns the authenticated user profile. In Swagger, this is the first endpoint to call before trying protected routes. The frontend should use `withCredentials` on subsequent requests instead of manually storing tokens.\n\nThe access token uses the configured short-lived expiration and the refresh token uses the configured longer-lived expiration. The frontend should call `POST /auth/refresh` after a `401` caused by an expired access token.\n\n**Available credentials for the practice environment:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
         "operationId": "AuthController_login",
         "parameters": [],
         "requestBody": {
@@ -649,7 +649,7 @@
             "description": "Uploaded file exceeds the 5 MB limit"
           },
           "415": {
-            "description": "Unsupported file type"
+            "description": "Unsupported file type. Allowed formats: pdf, txt, doc, docx, png, jpg, jpeg."
           }
         },
         "security": [

@@ -148,6 +148,13 @@ Configuración actual:
 ```env
 AUTH_ENABLED=true
 JWT_SECRET=super-secret-key-123
+ACCESS_TOKEN_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+ACCESS_TOKEN_COOKIE_MAX_AGE_MS=900000
+REFRESH_TOKEN_COOKIE_MAX_AGE_MS=604800000
+AUTH_COOKIE_PATH=/
+AUTH_COOKIE_SAME_SITE=lax
+AUTH_COOKIE_SECURE=false
 API_DELAY_ENABLED=true
 API_DELAY_MIN_MS=200
 API_DELAY_MAX_MS=900
@@ -164,6 +171,19 @@ Implica:
 - acceso a `GET /auth/me`
 - restricciones por rol en operaciones protegidas
 - `access token` corto y `refresh token` rotado
+
+### Cookies de sesion y seguridad
+
+La sesion usa cookies `HttpOnly`, asi que el frontend no debe leer ni guardar tokens manualmente.
+
+- `AUTH_COOKIE_PATH`: limita en que rutas se envian las cookies. En este proyecto se recomienda `/` para desarrollo con proxy Angular porque la ruta publica que ve el navegador suele pasar por `/api/...`
+- `AUTH_COOKIE_SAME_SITE`: controla cuando el navegador envia cookies en peticiones cross-site. `lax` es el valor recomendado para esta practica
+- `AUTH_COOKIE_SECURE`: si esta en `true`, la cookie solo viaja por HTTPS. En local con `http://localhost` debe estar en `false`; en produccion HTTPS deberia estar en `true`
+
+Regla practica:
+
+- local con proxy Angular: `AUTH_COOKIE_PATH=/`, `AUTH_COOKIE_SAME_SITE=lax`, `AUTH_COOKIE_SECURE=false`
+- produccion con HTTPS: `AUTH_COOKIE_PATH=/`, `AUTH_COOKIE_SAME_SITE=lax` o `strict`, `AUTH_COOKIE_SECURE=true`
 
 Credenciales de prueba:
 
@@ -202,6 +222,7 @@ Se puede utilizar:
 
 - el backend no está configurado con una política permisiva de CORS para `localhost`
 - el frontend debe integrarse mediante proxy si quiere trabajar en desarrollo con sesión autenticada
+- si se usan cookies de sesion con proxy, el `Path` de la cookie debe alinearse con la ruta publica que ve el navegador; por eso el valor por defecto recomendado es `AUTH_COOKIE_PATH=/`
 - el contrato real debe tomarse desde Swagger y los DTOs
 - `GET /cars` devuelve un objeto paginado con `items` y `meta`
 - `imageUrl` la resuelve el backend
@@ -233,5 +254,6 @@ Además de este README, el repositorio incluye documentación complementaria par
 - Frontend: `http://localhost:4200`
 - Backend: `http://localhost:3000`
 - Archivo de configuración auth: `backend/.env`
+- Plantilla de entorno backend: `backend/.env.example`
 
 Si tienes dudas sobre cómo modelar una petición o una respuesta, revisa Swagger antes de escribir código. En este proyecto, el backend es la fuente de verdad.

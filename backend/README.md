@@ -57,6 +57,13 @@ El archivo actual es `backend/.env`.
 ```env
 AUTH_ENABLED=true
 JWT_SECRET=super-secret-key-123
+ACCESS_TOKEN_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+ACCESS_TOKEN_COOKIE_MAX_AGE_MS=900000
+REFRESH_TOKEN_COOKIE_MAX_AGE_MS=604800000
+AUTH_COOKIE_PATH=/
+AUTH_COOKIE_SAME_SITE=lax
+AUTH_COOKIE_SECURE=false
 API_DELAY_ENABLED=true
 API_DELAY_MIN_MS=200
 API_DELAY_MAX_MS=900
@@ -91,14 +98,35 @@ Esto está pensado para que perfiles junior o en reciclaje puedan empezar por in
 
 Se usa para firmar y validar tokens JWT.
 
-### Duración de sesión
+### Duracion de sesion y cookies
 
-La práctica usa dos tiempos de sesión realistas:
+La practica usa dos tiempos de sesion realistas por defecto:
 
 - `access token`: `15m`
 - `refresh token`: `7d`
 
-Esto obliga a que el frontend entienda y gestione renovación de sesión sin caer en el patrón irreal de un token manual eterno en cliente.
+Esto obliga a que el frontend entienda y gestione renovacion de sesion sin caer en el patron irreal de un token manual eterno en cliente.
+
+Variables relacionadas:
+
+- `ACCESS_TOKEN_EXPIRES_IN`: expiracion JWT del access token
+- `REFRESH_TOKEN_EXPIRES_IN`: expiracion JWT del refresh token
+- `ACCESS_TOKEN_COOKIE_MAX_AGE_MS`: vida de la cookie `access_token` en navegador
+- `REFRESH_TOKEN_COOKIE_MAX_AGE_MS`: vida de la cookie `refresh_token` en navegador
+- `AUTH_COOKIE_PATH`: rutas en las que el navegador enviara las cookies
+- `AUTH_COOKIE_SAME_SITE`: politica anti-CSRF del navegador (`lax`, `strict`, `none`)
+- `AUTH_COOKIE_SECURE`: si es `true`, la cookie solo viaja por HTTPS
+
+Recomendacion de trabajo:
+
+- local con proxy Angular: `AUTH_COOKIE_PATH=/`, `AUTH_COOKIE_SAME_SITE=lax`, `AUTH_COOKIE_SECURE=false`
+- produccion con HTTPS: `AUTH_COOKIE_PATH=/`, `AUTH_COOKIE_SAME_SITE=lax` o `strict`, `AUTH_COOKIE_SECURE=true`
+
+Nota importante sobre `AUTH_COOKIE_PATH`:
+
+- el navegador decide si envia una cookie segun la ruta publica que ve
+- si el frontend usa un proxy con prefijos como `/api`, una cookie demasiado restringida puede no viajar aunque el backend internamente trabaje en `/auth`
+- por eso `/` es la opcion mas robusta para este proyecto
 
 ## Arquitectura actual
 
@@ -147,6 +175,8 @@ Consecuencia práctica:
 - si el frontend intenta atacar la API como origen distinto sin preparar correctamente su integración, aparecerán problemas de CORS
 
 El README no da una receta cerrada para resolverlo a propósito. Esa parte forma parte del trabajo de integración frontend.
+
+En la solucion de referencia, la politica de cookies esta parametrizada para que el equipo pueda ajustar el comportamiento por entorno sin tocar codigo.
 
 ## Autenticación y autorización
 
