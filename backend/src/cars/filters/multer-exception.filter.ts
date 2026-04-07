@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { MulterError } from 'multer';
-import { MAX_DOCUMENT_FILE_SIZE } from '../pipes/car-document-file-validation.pipe';
+import {
+  MAX_DOCUMENT_FILE_SIZE,
+  MAX_DOCUMENT_FILE_SIZE_MB,
+} from '../pipes/car-document-file-validation.pipe';
 
 @Catch(MulterError)
 export class MulterExceptionFilter implements ExceptionFilter {
@@ -18,7 +21,7 @@ export class MulterExceptionFilter implements ExceptionFilter {
         statusCode: HttpStatus.PAYLOAD_TOO_LARGE,
         error: 'Payload Too Large',
         code: 'DOCUMENT_FILE_TOO_LARGE',
-        message: `The uploaded file exceeds the maximum allowed size of ${MAX_DOCUMENT_FILE_SIZE / (1024 * 1024)} MB.`,
+        message: `The uploaded file exceeds the maximum allowed size of ${MAX_DOCUMENT_FILE_SIZE_MB} MB.`,
         details: {
           maxFileSizeBytes: MAX_DOCUMENT_FILE_SIZE,
         },

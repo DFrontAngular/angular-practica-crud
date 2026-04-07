@@ -11,14 +11,13 @@ import {
   Put,
   Query,
   Res,
-  UnsupportedMediaTypeException,
   UploadedFile,
   UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FileFilterCallback, memoryStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import {
   ApiCookieAuth,
   ApiBody,
@@ -31,7 +30,7 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ACCESS_TOKEN_COOKIE_NAME } from '../auth/auth.constants';
 import { UserRole } from '../auth/auth.service';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -40,7 +39,6 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { MulterExceptionFilter } from './filters/multer-exception.filter';
 import {
-  ALLOWED_DOCUMENT_MIME_TYPES,
   CarDocumentFileValidationPipe,
   MAX_DOCUMENT_FILE_SIZE,
 } from './pipes/car-document-file-validation.pipe';
@@ -233,23 +231,6 @@ export class CarsController {
       limits: {
         fileSize: MAX_DOCUMENT_FILE_SIZE,
       },
-      fileFilter: (
-        _request: Request,
-        file: { mimetype: string },
-        callback: FileFilterCallback,
-      ) => {
-        if (!ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype)) {
-          callback(
-            new UnsupportedMediaTypeException(
-              `Unsupported file type "${file.mimetype}".`,
-            ),
-            false,
-          );
-          return;
-        }
-
-        callback(null, true);
-      },
     }),
   )
   @UseFilters(MulterExceptionFilter)
@@ -296,7 +277,8 @@ export class CarsController {
   })
   @ApiResponse({
     status: 415,
-    description: 'Unsupported file type',
+    description:
+      'Unsupported file type. Allowed formats: pdf, txt, doc, docx, png, jpg, jpeg.',
   })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
