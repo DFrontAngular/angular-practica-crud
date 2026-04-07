@@ -3,7 +3,7 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "description": "Authenticates a user with email and password and returns a JWT access token to be included in subsequent requests as `Authorization: Bearer <token>`.\n\n**Available credentials for the practice environment:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
+        "description": "Authenticates a user with email and password, issues an HttpOnly access cookie and an HttpOnly refresh cookie, and returns the authenticated user profile. In Swagger, this is the first endpoint to call before trying protected routes. The frontend should use `withCredentials` on subsequent requests instead of manually storing tokens.\n\nThe access token expires after 15m and the refresh token expires after 7d. The frontend should call `POST /auth/refresh` after a `401` caused by an expired access token.\n\n**Available credentials for the practice environment:**\n- Admin: `admin@example.com` / `admin123`\n- User: `user@example.com` / `user123`",
         "operationId": "AuthController_login",
         "parameters": [],
         "requestBody": {
@@ -18,7 +18,7 @@
         },
         "responses": {
           "200": {
-            "description": "Authentication completed successfully. Returns the access token and the user profile.",
+            "description": "Authentication completed successfully. Returns the user profile and sets the access and refresh cookies.",
             "content": {
               "application/json": {
                 "schema": {
@@ -31,7 +31,54 @@
             "description": "Invalid email or password."
           }
         },
-        "summary": "Authenticate and issue an access token",
+        "summary": "Authenticate and issue access and refresh cookies",
+        "tags": [
+          "Access Management"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Uses the HttpOnly refresh cookie to issue a new short-lived access token and rotate the refresh token. In Swagger, call this after `POST /auth/login` if a protected endpoint starts returning 401 because the access cookie expired.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Session renewed successfully. New access and refresh cookies were issued.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid refresh cookie."
+          }
+        },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
+        "summary": "Rotate the refresh token and renew the access cookie",
+        "tags": [
+          "Access Management"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Removes the HttpOnly access and refresh cookies used by the application and invalidates the active refresh session. In Swagger, calling this endpoint should make `GET /auth/me` return 401 afterwards.",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Session cookies cleared successfully."
+          }
+        },
+        "summary": "Clear the authenticated session cookies",
         "tags": [
           "Access Management"
         ]
@@ -39,7 +86,7 @@
     },
     "/auth/me": {
       "get": {
-        "description": "Returns the profile associated with the JWT access token provided in the Authorization header.",
+        "description": "Returns the profile associated with the short-lived access cookie. In Swagger, use this endpoint immediately after `POST /auth/login` to verify that the browser session is already authenticated.",
         "operationId": "AuthController_getProfile",
         "parameters": [],
         "responses": {
@@ -54,12 +101,12 @@
             }
           },
           "401": {
-            "description": "Missing or invalid JWT token."
+            "description": "Missing or invalid access cookie."
           }
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Retrieve the current authenticated user profile",
@@ -97,26 +144,6 @@
             }
           },
           {
-            "name": "licensePlate",
-            "required": false,
-            "in": "query",
-            "description": "Filter results by a partial license plate match, ignoring spaces and case",
-            "schema": {
-              "example": "1234",
-              "type": "string"
-            }
-          },
-          {
-            "name": "available",
-            "required": false,
-            "in": "query",
-            "description": "Filter results by availability status",
-            "schema": {
-              "example": false,
-              "type": "boolean"
-            }
-          },
-          {
             "name": "brandId",
             "required": false,
             "in": "query",
@@ -140,19 +167,13 @@
             "name": "sortBy",
             "required": false,
             "in": "query",
-            "description": "Field used to sort the vehicle list",
+            "description": "Field used to sort the vehicle list. Only list-visible fields are exposed here.",
             "schema": {
-              "example": "price",
+              "example": "brand",
               "enum": [
-                "brandId",
-                "modelId",
-                "total",
-                "price",
-                "manufactureYear",
-                "registrationDate",
-                "mileage",
-                "licensePlate",
-                "availability"
+                "brand",
+                "model",
+                "total"
               ],
               "type": "string"
             }
@@ -201,7 +222,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "List vehicles with pagination, filters and sorting",
@@ -245,7 +266,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Create a new vehicle entry (ADMIN only)",
@@ -283,26 +304,6 @@
             }
           },
           {
-            "name": "licensePlate",
-            "required": false,
-            "in": "query",
-            "description": "Filter results by a partial license plate match, ignoring spaces and case",
-            "schema": {
-              "example": "1234",
-              "type": "string"
-            }
-          },
-          {
-            "name": "available",
-            "required": false,
-            "in": "query",
-            "description": "Filter results by availability status",
-            "schema": {
-              "example": false,
-              "type": "boolean"
-            }
-          },
-          {
             "name": "brandId",
             "required": false,
             "in": "query",
@@ -326,19 +327,13 @@
             "name": "sortBy",
             "required": false,
             "in": "query",
-            "description": "Field used to sort the vehicle list",
+            "description": "Field used to sort the vehicle list. Only list-visible fields are exposed here.",
             "schema": {
-              "example": "price",
+              "example": "brand",
               "enum": [
-                "brandId",
-                "modelId",
-                "total",
-                "price",
-                "manufactureYear",
-                "registrationDate",
-                "mileage",
-                "licensePlate",
-                "availability"
+                "brand",
+                "model",
+                "total"
               ],
               "type": "string"
             }
@@ -366,7 +361,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Export the filtered vehicle table to a real Excel file",
@@ -406,7 +401,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Retrieve a vehicle by identifier",
@@ -463,7 +458,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Update an existing vehicle entry (ADMIN only)",
@@ -497,7 +492,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Delete a vehicle entry (ADMIN only)",
@@ -537,7 +532,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Retrieve metadata for the single document linked to a vehicle",
@@ -571,7 +566,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Delete the single document linked to a vehicle (ADMIN only)",
@@ -659,7 +654,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Upload or replace the single stored document for a vehicle (ADMIN only)",
@@ -692,7 +687,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Download the single document linked to a vehicle",
@@ -703,7 +698,7 @@
     },
     "/seed": {
       "post": {
-        "description": "Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding.",
+        "description": "Replaces the current in-memory vehicle catalog with the predefined dataset used for practice and onboarding. Requires an authenticated session with role `ADMIN`.",
         "operationId": "SeedController_populateDB",
         "parameters": [],
         "responses": {
@@ -711,7 +706,7 @@
             "description": "Catalog dataset loaded successfully"
           },
           "401": {
-            "description": "Missing or invalid JWT token"
+            "description": "Missing or invalid session cookie"
           },
           "403": {
             "description": "Forbidden"
@@ -722,7 +717,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "Load the predefined catalog dataset",
@@ -752,7 +747,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "List available vehicle brands",
@@ -795,7 +790,7 @@
         },
         "security": [
           {
-            "bearer": []
+            "access_token": []
           }
         ],
         "summary": "List models for a specific brand",
@@ -807,7 +802,7 @@
   },
   "info": {
     "title": "NTT Demo Vehicle Catalog API",
-    "description": "Backend API for the NTT Angular practice: authentication, vehicle catalog, brands, models, pagination and role-based access.",
+    "description": "Backend API for the NTT Angular practice: authentication, vehicle catalog, brands, models, pagination and role-based access.\n\nRecommended flow in Swagger: call `POST /auth/login`, then use `GET /auth/me` and the protected endpoints normally. When the short-lived access cookie expires, call `POST /auth/refresh` and retry the failed request. Use `POST /auth/logout` to close the session cleanly.",
     "version": "1.0",
     "contact": {}
   },
@@ -815,10 +810,10 @@
   "servers": [],
   "components": {
     "securitySchemes": {
-      "bearer": {
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "type": "http"
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh_token"
       }
     },
     "schemas": {
@@ -879,13 +874,8 @@
       "LoginResponseDto": {
         "type": "object",
         "properties": {
-          "access_token": {
-            "type": "string",
-            "description": "JWT bearer token. Include it in the Authorization header as: Bearer <token>",
-            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-          },
           "user": {
-            "description": "Profile of the authenticated user",
+            "description": "Profile of the authenticated user whose access and refresh cookies were issued",
             "allOf": [
               {
                 "$ref": "#/components/schemas/UserProfileDto"
@@ -894,7 +884,6 @@
           }
         },
         "required": [
-          "access_token",
           "user"
         ]
       },

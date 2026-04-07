@@ -9,7 +9,7 @@ El objetivo de este proyecto es trabajar con un flujo cercano a un entorno profe
 - routing
 - formularios reactivos
 - validación
-- autenticación JWT
+- autenticación basada en cookies HttpOnly y refresh token
 - control de errores
 - paginación, filtros y ordenación
 - roles y autorización
@@ -30,9 +30,11 @@ El repositorio está dividido en dos aplicaciones:
 
 Actualmente, el backend incluye:
 
-- autenticación JWT
+- autenticación con access token corto y refresh token en cookies HttpOnly
 - bypass de autenticación para modo aprendizaje
 - endpoint `POST /auth/login`
+- endpoint `POST /auth/refresh`
+- endpoint `POST /auth/logout`
 - endpoint `GET /auth/me`
 - CRUD de coches
 - listado paginado, filtrable y ordenable
@@ -99,7 +101,7 @@ Si no tienes conocimientos previos de Angular, todavía puedes empezar, pero la 
 
 - comenzar con `AUTH_ENABLED=false`
 - centrarse primero en listado, detalle, navegación y CRUD base
-- dejar login, guards, interceptor JWT y roles para una fase posterior
+- dejar login, guards, refresh de sesión y roles para una fase posterior
 
 ### Estimación orientativa según punto de partida
 
@@ -156,10 +158,12 @@ API_DELAY_MAX_MS=900
 Implica:
 
 - login real mediante `POST /auth/login`
-- uso de `Authorization: Bearer <token>`
+- sesión autenticada mediante cookies `HttpOnly`
+- renovación de sesión con `POST /auth/refresh`
+- cierre de sesión con `POST /auth/logout`
 - acceso a `GET /auth/me`
 - restricciones por rol en operaciones protegidas
-- token sin expiración automática en esta práctica
+- `access token` corto y `refresh token` rotado
 
 Credenciales de prueba:
 
@@ -197,6 +201,7 @@ Se puede utilizar:
 ## Notas técnicas importantes
 
 - el backend no está configurado con una política permisiva de CORS para `localhost`
+- el frontend debe integrarse mediante proxy si quiere trabajar en desarrollo con sesión autenticada
 - el contrato real debe tomarse desde Swagger y los DTOs
 - `GET /cars` devuelve un objeto paginado con `items` y `meta`
 - `imageUrl` la resuelve el backend
@@ -210,6 +215,7 @@ Además de este README, el repositorio incluye documentación complementaria par
 
 - guía principal de formación: [training-guide.md](docs/training-guide.md)
 - itinerario de aprendizaje: [learning-path.md](docs/learning-path.md)
+- flujo de autenticación y sesión: [auth-session-flow.md](docs/auth-session-flow.md)
 - guía del mentor: [mentor-guide.md](docs/mentor-guide.md)
 - rúbrica de evaluación: [rubric.md](docs/rubric.md)
 - guía de entrega: [submission-guide.md](docs/submission-guide.md)

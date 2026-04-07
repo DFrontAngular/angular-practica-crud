@@ -1,17 +1,18 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import {
-  ApiBearerAuth,
+  ApiCookieAuth,
   ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { ACCESS_TOKEN_COOKIE_NAME } from '../auth/auth.constants';
 import { BrandsService } from './brands.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Brand, Model } from './data/brand.data';
 
 @ApiTags('Catalog')
-@ApiBearerAuth()
+@ApiCookieAuth(ACCESS_TOKEN_COOKIE_NAME)
 @Controller('brands')
 @UseGuards(JwtAuthGuard)
 export class BrandsController {

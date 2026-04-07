@@ -1,56 +1,17 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsIn, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export const CAR_SORT_FIELDS = [
-  'brandId',
-  'modelId',
+  'brand',
+  'model',
   'total',
-  'price',
-  'manufactureYear',
-  'registrationDate',
-  'mileage',
-  'licensePlate',
-  'availability',
 ] as const;
 
 export type CarSortField = (typeof CAR_SORT_FIELDS)[number];
 export type SortOrder = 'asc' | 'desc';
 
 export class GetCarsFilterDto extends PaginationDto {
-  @ApiPropertyOptional({
-    description:
-      'Filter results by a partial license plate match, ignoring spaces and case',
-    example: '1234',
-  })
-  @IsString()
-  @IsOptional()
-  licensePlate?: string;
-
-  @ApiPropertyOptional({
-    description: 'Filter results by availability status',
-    example: false,
-  })
-  @Transform(({ value }) => {
-    if (typeof value === 'boolean' || value === undefined) {
-      return value;
-    }
-
-    if (value === 'true') {
-      return true;
-    }
-
-    if (value === 'false') {
-      return false;
-    }
-
-    return value;
-  })
-  @IsBoolean({ message: 'available must be either true or false' })
-  @IsOptional()
-  available?: boolean;
-
   @ApiPropertyOptional({
     description: 'Filter results to a single brand by exact brand identifier',
     example: 'brand-1',
@@ -69,9 +30,10 @@ export class GetCarsFilterDto extends PaginationDto {
   modelId?: string;
 
   @ApiPropertyOptional({
-    description: 'Field used to sort the vehicle list',
+    description:
+      'Field used to sort the vehicle list. Only list-visible fields are exposed here.',
     enum: CAR_SORT_FIELDS,
-    example: 'price',
+    example: 'brand',
   })
   @IsString()
   @IsIn(CAR_SORT_FIELDS)

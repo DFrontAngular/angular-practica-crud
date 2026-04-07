@@ -1,5 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'node:crypto';
+import {
+  ACCESS_TOKEN_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
+} from './auth.constants';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -15,6 +20,21 @@ export interface User {
 
 interface StoredUser extends User {
   password: string;
+}
+
+export interface AuthenticatedSession {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
+
+interface RefreshTokenPayload {
+  sub: string;
+  email: string;
+  role: UserRole;
+  sessionId: string;
+  tokenId: string;
+  type: 'refresh';
 }
 
 @Injectable()
@@ -36,26 +56,121 @@ export class AuthService {
     },
   ];
 
+  private readonly refreshSessions = new Map<string, string>();
+
   constructor(private readonly jwtService: JwtService) {}
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<AuthenticatedSession> {
     const user = this.users.find((u) => u.email === email);
     if (!user || user.password !== password) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
     const publicUser = this.toPublicUser(user);
-    const payload = { sub: user.id, email: user.email, role: user.role };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      ...this.createSessionTokens(user),
       user: publicUser,
     };
+  }
+
+  async refreshSession(refreshToken: string): Promise<AuthenticatedSession> {
+    const payload = await this.verifyRefreshToken(refreshToken);
+
+    const activeUserId = this.refreshSessions.get(payload.tokenId);
+    if (!activeUserId || activeUserId !== payload.sub) {
+      throw new UnauthorizedException('Refresh session is no longer active.');
+    }
+
+    const user = this.users.find((storedUser) => storedUser.id === payload.sub);
+    if (!user) {
+      this.refreshSessions.delete(payload.tokenId);
+      throw new UnauthorizedException('Authenticated user not found.');
+    }
+
+    this.refreshSessions.delete(payload.tokenId);
+
+    return {
+      ...this.createSessionTokens(user),
+      user: this.toPublicUser(user),
+    };
+  }
+
+  logout(userId?: string): void {
+    if (!userId) {
+      return;
+    }
+
+    for (const [tokenId, sessionUserId] of this.refreshSessions.entries()) {
+      if (sessionUserId === userId) {
+        this.refreshSessions.delete(tokenId);
+      }
+    }
+  }
+
+  async logoutByRefreshToken(refreshToken?: string): Promise<void> {
+    if (!refreshToken) {
+      return;
+    }
+
+    try {
+      const payload = await this.verifyRefreshToken(refreshToken);
+      this.refreshSessions.delete(payload.tokenId);
+    } catch {
+      return;
+    }
   }
 
   async findById(id: string): Promise<User | undefined> {
     const user = this.users.find((u) => u.id === id);
     return user ? this.toPublicUser(user) : undefined;
+  }
+
+  private createSessionTokens(user: StoredUser): {
+    accessToken: string;
+    refreshToken: string;
+  } {
+    const tokenId = randomUUID();
+    const accessPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      sessionId: tokenId,
+    };
+    const refreshPayload: RefreshTokenPayload = {
+      ...accessPayload,
+      tokenId,
+      type: 'refresh',
+    };
+
+    this.refreshSessions.set(tokenId, user.id);
+
+    return {
+      accessToken: this.jwtService.sign(accessPayload, {
+        expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+      }),
+      refreshToken: this.jwtService.sign(refreshPayload, {
+        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+      }),
+    };
+  }
+
+  private async verifyRefreshToken(
+    refreshToken: string,
+  ): Promise<RefreshTokenPayload> {
+    let payload: RefreshTokenPayload;
+
+    try {
+      payload = await this.jwtService.verifyAsync<RefreshTokenPayload>(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token.');
+    }
+
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Invalid refresh token type.');
+    }
+
+    return payload;
   }
 
   private toPublicUser(user: StoredUser): User {

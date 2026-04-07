@@ -251,6 +251,6 @@ Para este proyecto en concreto, se considera equilibrado el siguiente enfoque:
 
 - perfiles junior: comenzar con `AUTH_ENABLED=false`
 - perfiles intermedios: completar el CRUD con una integración limpia y consistente
-- perfiles avanzados: trabajar con `AUTH_ENABLED=true` e incluir login, interceptor JWT, guards y awareness de roles
+- perfiles avanzados: trabajar con `AUTH_ENABLED=true` e incluir login, refresh de sesión, guards y awareness de roles
 
-No se recomienda exigir refresh tokens ni gestión avanzada de sesión, ya que ello desplazaría la práctica fuera de su objetivo formativo actual.
+El nivel de refresh implementado en este repositorio sí se considera asumible dentro del alcance, porque forma parte del flujo real de sesión que el frontend debe aprender a integrar. No se espera, en cambio, una solución de identidad corporativa completa ni una persistencia distribuida de sesiones.

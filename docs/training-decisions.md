@@ -29,13 +29,13 @@ Se incluye `AUTH_ENABLED=false` para que perfiles junior o en reciclaje puedan a
 
 La autenticación se mantiene como bloque de valor para perfiles con más experiencia o para fases posteriores de la formación.
 
-## Decisión 6. No incluir refresh token
+## Decisión 6. Incluir refresh token rotado
 
-Se considera que refresh token y gestión avanzada de sesión introducen una complejidad que no aporta suficiente valor al objetivo actual de la práctica.
+Se incorpora un flujo de `access token` corto y `refresh token` rotado en cookies `HttpOnly` porque permite enseñar un modelo de sesión mucho más cercano a una SPA web real sin obligar a montar un proveedor externo de identidad.
 
-## Decisión 7. No hacer expirar automáticamente el access token
+## Decisión 7. Hacer expirar automáticamente el access token
 
-Dado que no existe refresh token, se opta por no introducir expiración automática del token para evitar fricción innecesaria y mantener el foco en login, guards, interceptor JWT y roles.
+Se adopta una caducidad corta del `access token` y una caducidad mayor del `refresh token` para que el frontend practique renovación de sesión y no aprenda un modelo artificial basado en tokens eternos.
 
 ## Decisión 8. Mantener CORS sin configuración permisiva artificial
 

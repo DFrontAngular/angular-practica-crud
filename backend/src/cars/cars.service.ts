@@ -498,34 +498,11 @@ export class CarsService {
   }
 
   private getFilteredCars(filterDto: GetCarsFilterDto): StoredCar[] {
-    const {
-      available,
-      brandId,
-      licensePlate,
-      modelId,
-      sortBy,
-      sortOrder = 'asc',
-    } = filterDto;
+    const { brandId, modelId, sortBy, sortOrder = 'asc' } = filterDto;
 
     let filteredCars = this.cars.filter((car) => {
-      const matchingDetail = this.getMatchingCarDetail(car);
-
       if (brandId && car.brandId !== brandId) return false;
       if (modelId && car.modelId !== modelId) return false;
-      if (
-        typeof available === 'boolean' &&
-        matchingDetail?.availability !== available
-      ) {
-        return false;
-      }
-      if (
-        licensePlate &&
-        !matchingDetail?.licensePlate
-          .toUpperCase()
-          .includes(licensePlate.trim().toUpperCase())
-      ) {
-        return false;
-      }
       return true;
     });
 
@@ -574,27 +551,13 @@ export class CarsService {
     car: StoredCar,
     sortBy: CarSortField,
   ): string | number | boolean | undefined {
-    const matchingDetail = this.getMatchingCarDetail(car);
-
     switch (sortBy) {
-      case 'brandId':
+      case 'brand':
         return car.brand.name;
-      case 'modelId':
+      case 'model':
         return car.model.name;
       case 'total':
         return car.carDetails?.length ?? 0;
-      case 'price':
-        return matchingDetail?.price;
-      case 'manufactureYear':
-        return matchingDetail?.manufactureYear;
-      case 'registrationDate':
-        return matchingDetail?.registrationDate;
-      case 'mileage':
-        return matchingDetail?.mileage;
-      case 'licensePlate':
-        return matchingDetail?.licensePlate;
-      case 'availability':
-        return matchingDetail?.availability;
       default:
         return undefined;
     }

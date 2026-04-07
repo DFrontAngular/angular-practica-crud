@@ -17,15 +17,21 @@ El backend permite trabajar con `AUTH_ENABLED=false` para que una persona junior
 
 Porque la autenticación forma parte del nivel avanzado de la práctica y no debería bloquear el progreso inicial de perfiles con menos experiencia.
 
-## ¿Por qué no hay refresh token?
+## ¿Por qué sí hay refresh token?
 
-Porque se consideró fuera del alcance actual de la formación. El objetivo es practicar login, guards, interceptor JWT y control por roles, sin añadir complejidad adicional de gestión de sesión.
+Porque el objetivo del repositorio es acercarse a un flujo de sesión más realista para una aplicación web moderna. El backend usa `access token` corto y `refresh token` rotado en cookies `HttpOnly`.
 
 ## ¿El token expira?
 
-No automáticamente en el estado actual del proyecto.
+Sí.
 
-Se optó por eliminar la expiración para no introducir fricción innecesaria en una práctica que no incluye refresh token.
+El `access token` caduca a corto plazo y el `refresh token` tiene una vida mayor. Cuando el access caduca, el frontend debe intentar renovar sesión con `POST /auth/refresh`. Si eso falla, la sesión debe darse por cerrada.
+
+## ¿Hay que guardar el token en `localStorage` o `sessionStorage`?
+
+No.
+
+La práctica está planteada para trabajar con cookies `HttpOnly`, no para persistir tokens manualmente en cliente.
 
 ## ¿`GET /cars` devuelve un array?
 

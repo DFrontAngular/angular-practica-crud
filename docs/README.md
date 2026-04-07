@@ -9,6 +9,7 @@ Este directorio reúne la documentación funcional, formativa y operativa del pr
 
 - [training-guide.md](training-guide.md): marco general de la formación, alcance, tiempos orientativos e hitos
 - [learning-path.md](learning-path.md): recorrido recomendado de la práctica y objetivos de aprendizaje por bloques
+- [auth-session-flow.md](auth-session-flow.md): cómo funciona la autenticación real del proyecto y qué se espera del frontend
 - [faq.md](faq.md): dudas frecuentes
 - [submission-guide.md](submission-guide.md): criterio de entrega
 - [support-model.md](support-model.md): cómo pedir ayuda y cuándo escalar

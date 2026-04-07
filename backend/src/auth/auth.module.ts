@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
+import { ACCESS_TOKEN_EXPIRES_IN } from './auth.constants';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -16,6 +17,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: async (configService: ConfigService) => ({
         secret:
           configService.get<string>('JWT_SECRET') || 'super-secret-key-123',
+        signOptions: {
+          expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+        },
       }),
     }),
   ],

@@ -28,15 +28,9 @@ export class UserProfileDto {
 
 export class LoginResponseDto {
   @ApiProperty({
-    description:
-      'JWT bearer token. Include it in the Authorization header as: Bearer <token>',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
-  access_token: string;
-
-  @ApiProperty({
     type: UserProfileDto,
-    description: 'Profile of the authenticated user',
+    description:
+      'Profile of the authenticated user whose access and refresh cookies were issued',
   })
   user: UserProfileDto;
 }

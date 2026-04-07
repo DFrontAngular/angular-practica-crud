@@ -20,7 +20,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileFilterCallback, memoryStorage } from 'multer';
 import {
-  ApiBearerAuth,
+  ApiCookieAuth,
   ApiBody,
   ApiConsumes,
   ApiExtraModels,
@@ -32,6 +32,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { ACCESS_TOKEN_COOKIE_NAME } from '../auth/auth.constants';
 import { UserRole } from '../auth/auth.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
@@ -54,7 +55,7 @@ import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
 import { Car, CarSummary } from './entities';
 
 @ApiTags('Vehicles')
-@ApiBearerAuth()
+@ApiCookieAuth(ACCESS_TOKEN_COOKIE_NAME)
 @ApiExtraModels(PaginatedResponseDto, CarSummary)
 @Controller('cars')
 @UseGuards(JwtAuthGuard, RolesGuard)

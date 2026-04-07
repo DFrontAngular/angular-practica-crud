@@ -2,7 +2,7 @@
 
 Backend de práctica construido con NestJS para dar soporte a una aplicación Angular de gestión de coches.
 
-Este backend ya incorpora autenticación JWT, roles, validaciones, Swagger, carga de dataset, catálogo de marcas y modelos, y un CRUD completo de coches con paginación y filtros.
+Este backend ya incorpora autenticación basada en cookies `HttpOnly`, refresh token rotado, roles, validaciones, Swagger, carga de dataset, catálogo de marcas y modelos, y un CRUD completo de coches con paginación y filtros.
 
 ## Stack
 
@@ -11,7 +11,7 @@ Este backend ya incorpora autenticación JWT, roles, validaciones, Swagger, carg
 - `class-validator`
 - `class-transformer`
 - `@nestjs/swagger`
-- JWT con `passport-jwt`
+- JWT con `passport-jwt` usado dentro de un flujo de cookies `HttpOnly`
 
 ## Objetivo de este backend
 
@@ -20,7 +20,7 @@ Este backend está pensado para que el frontend practique contra una API realist
 Permite trabajar en dos niveles:
 
 - nivel base: consumo de API, tablas, detalle, formularios, validaciones y CRUD
-- nivel avanzado: login real, interceptor JWT, guards de Angular, control por roles, paginación y filtros
+- nivel avanzado: login real, refresh de sesión, guards de Angular, control por roles, paginación y filtros
 
 ## Puesta en marcha
 
@@ -71,7 +71,9 @@ Controla si el backend exige autenticación real o si entra en modo bypass.
 Modo autenticado real:
 
 - hay que hacer login contra `POST /auth/login`
-- hay que enviar `Authorization: Bearer <token>`
+- la sesión se apoya en cookies `HttpOnly`
+- el frontend debe renovar sesión con `POST /auth/refresh` cuando corresponda
+- el frontend debe cerrar sesión con `POST /auth/logout`
 - `GET /auth/me` devuelve el usuario autenticado
 - crear, editar y borrar coches requiere rol `ADMIN`
 
@@ -89,7 +91,14 @@ Esto está pensado para que perfiles junior o en reciclaje puedan empezar por in
 
 Se usa para firmar y validar tokens JWT.
 
-En esta práctica el access token no caduca automáticamente. De este modo se mantiene el foco en login, guards, interceptor JWT y control por roles, sin añadir la complejidad de refresh tokens.
+### Duración de sesión
+
+La práctica usa dos tiempos de sesión realistas:
+
+- `access token`: `15m`
+- `refresh token`: `7d`
+
+Esto obliga a que el frontend entienda y gestione renovación de sesión sin caer en el patrón irreal de un token manual eterno en cliente.
 
 ## Arquitectura actual
 
@@ -154,11 +163,16 @@ Credenciales de prueba:
 - `admin@example.com` / `admin123`
 - `user@example.com` / `user123`
 
+Comportamiento:
+
+- valida credenciales
+- devuelve el usuario autenticado
+- emite `access_token` y `refresh_token` como cookies `HttpOnly`
+
 Respuesta:
 
 ```json
 {
-  "access_token": "jwt-token",
   "user": {
     "id": "1",
     "email": "admin@example.com",
@@ -177,6 +191,35 @@ GET /auth/me
 ```
 
 Requiere token JWT válido si `AUTH_ENABLED=true`.
+
+En la práctica actual, eso significa que debe existir una cookie `access_token` válida.
+
+### Refresh de sesión
+
+Endpoint:
+
+```http
+POST /auth/refresh
+```
+
+Comportamiento:
+
+- usa la cookie `refresh_token`
+- emite nuevas cookies de `access_token` y `refresh_token`
+- invalida el refresh token anterior
+
+### Logout
+
+Endpoint:
+
+```http
+POST /auth/logout
+```
+
+Comportamiento:
+
+- limpia ambas cookies
+- invalida la sesión de refresh activa
 
 ### Roles
 
@@ -203,6 +246,8 @@ Endpoints restringidos a `ADMIN`:
 ### Auth
 
 - `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/logout`
 - `GET /auth/me`
 
 ### Cars
@@ -279,7 +324,7 @@ Columnas incluidas:
 Ejemplo:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=price&sortOrder=desc
+GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=brand&sortOrder=asc
 ```
 
 ### `GET /cars/:id`
@@ -411,15 +456,11 @@ Respuesta:
 
 Valores permitidos para `sortBy`:
 
-- `brandId`
-- `modelId`
+- `brand`
+- `model`
 - `total`
-- `price`
-- `manufactureYear`
-- `registrationDate`
-- `mileage`
-- `licensePlate`
-- `availability`
+
+En esta práctica, el contrato de lista solo expone filtros y ordenación sobre campos visibles del propio listado. Por eso `GET /cars` no acepta filtros por `licensePlate` o `available`, ni ordenación por campos de detalle que no forman parte de `CarSummary`.
 
 Valores permitidos para `sortOrder`:
 
@@ -435,13 +476,13 @@ GET /cars?page=1&limit=10&brandId=brand-1&modelId=model-1
 Ejemplo con ordenación:
 
 ```http
-GET /cars?page=1&limit=10&sortBy=price&sortOrder=desc
+GET /cars?page=1&limit=10&sortBy=brand&sortOrder=asc
 ```
 
 Ejemplo de exportación con los mismos filtros:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=registrationDate&sortOrder=desc
+GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=model&sortOrder=desc
 ```
 
 ## Validaciones importantes
@@ -546,8 +587,8 @@ Si el equipo ya tiene más nivel:
 
 1. trabajar directamente con `AUTH_ENABLED=true`
 2. implementar login desde el inicio
-3. añadir interceptor JWT
-4. consumir `GET /auth/me`
+3. diseñar gestión de sesión con `GET /auth/me`
+4. resolver renovación con `POST /auth/refresh`
 5. restringir UI según rol
 
 ## Ejemplos útiles
@@ -568,7 +609,6 @@ Content-Type: application/json
 
 ```http
 POST /cars
-Authorization: Bearer <token>
 Content-Type: application/json
 
 {
@@ -590,11 +630,12 @@ Content-Type: application/json
 }
 ```
 
+La petición debe realizarse con la sesión autenticada ya establecida en cookies.
+
 ### Subir documento de práctica
 
 ```http
 POST /cars/:id/document
-Authorization: Bearer <token>
 Content-Type: multipart/form-data
 ```
 
@@ -609,19 +650,19 @@ Ejemplo conceptual desde frontend:
 
 ```http
 GET /auth/me
-Authorization: Bearer <token>
 ```
+
+La petición debe viajar con las cookies de sesión.
 
 ## Limitaciones actuales
 
 - no hay base de datos
 - no hay persistencia entre reinicios
-- no hay refresh token
-- no hay logout de servidor
 - no hay subida real de imágenes desde cliente
 - los documentos sí se guardan en disco local, pero su metadata y asociación con cada coche viven en memoria
 - no hay usuarios dinámicos ni registro
 - las credenciales son fijas para práctica
+- la revocación de refresh tokens vive en memoria y no en persistencia compartida
 
 ## Qué debería revisar siempre el frontend antes de integrar
 

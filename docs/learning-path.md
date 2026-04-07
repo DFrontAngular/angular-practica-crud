@@ -218,16 +218,16 @@ Tareas recomendadas:
 
 1. crear pantalla de login
 2. llamar a `POST /auth/login`
-3. persistir el token
-4. crear interceptor para enviar el bearer token
-5. consultar `GET /auth/me`
-6. reconstruir sesión al recargar la app
+3. consultar `GET /auth/me`
+4. reconstruir sesión al recargar la app
+5. resolver `401` autenticando de nuevo la sesión con `POST /auth/refresh`
+6. reintentar la petición original solo cuando el refresh haya funcionado
 
 Qué aprenderás aquí:
 
 - autenticación real
 - persistencia de sesión
-- seguridad de frontend
+- renovación de sesión
 
 ## Bloque 9. Roles y autorización
 

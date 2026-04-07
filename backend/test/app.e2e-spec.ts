@@ -3,6 +3,11 @@ import * as path from 'node:path';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  REFRESH_TOKEN_COOKIE_NAME,
+} from './../src/auth/auth.constants';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { CarsService } from './../src/cars/cars.service';
@@ -11,8 +16,9 @@ type AuthMode = 'true' | 'false';
 
 describe('Backend hardening (e2e)', () => {
   let app: INestApplication;
-  let adminToken: string;
-  let userToken: string;
+  let adminAccessCookie: string;
+  let adminRefreshCookie: string;
+  let userAccessCookie: string;
   let plateCounter = 1200;
 
   const createApp = async (authEnabled: AuthMode): Promise<INestApplication> => {
@@ -25,6 +31,7 @@ describe('Backend hardening (e2e)', () => {
     }).compile();
 
     const nestApp = moduleFixture.createNestApplication();
+    nestApp.use(cookieParser());
     nestApp.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -42,28 +49,6 @@ describe('Backend hardening (e2e)', () => {
     const suffixes = ['BCD', 'FGH', 'JKL', 'MNP', 'RST', 'VWX', 'XYZ'];
     return `${plateCounter} ${suffixes[plateCounter % suffixes.length]}`;
   };
-
-  const createCarPayload = (
-    licensePlate: string,
-    overrides: Record<string, unknown> = {},
-  ) => ({
-    brandId: 'brand-1',
-    modelId: 'model-1',
-    carDetails: [
-      {
-        registrationDate: '2024-10-30T10:01:35.288Z',
-        mileage: 15000,
-        currency: 'EUR',
-        price: 20000,
-        manufactureYear: 2020,
-        availability: true,
-        color: 'Blue',
-        description: 'Vehicle prepared for e2e tests',
-        licensePlate,
-        ...overrides,
-      },
-    ],
-  });
 
   const createCarPayloadForBrandModel = (
     licensePlate: string,
@@ -92,19 +77,43 @@ describe('Backend hardening (e2e)', () => {
   const login = async (
     email: string,
     password: string,
-  ): Promise<{ access_token: string }> => {
+  ): Promise<{ accessCookie: string; refreshCookie: string }> => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email, password })
       .expect(200);
 
-    return response.body;
+    const setCookieHeader = response.headers['set-cookie'];
+    const cookies = Array.isArray(setCookieHeader)
+      ? setCookieHeader
+      : setCookieHeader
+        ? [setCookieHeader]
+        : [];
+    const accessCookie = cookies.find((cookie: string) =>
+      cookie.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`),
+    );
+    const refreshCookie = cookies.find((cookie: string) =>
+      cookie.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`),
+    );
+
+    if (!accessCookie || !refreshCookie) {
+      throw new Error('Authentication cookies were not returned by /auth/login');
+    }
+
+    return {
+      accessCookie: accessCookie.split(';')[0],
+      refreshCookie: refreshCookie.split(';')[0],
+    };
   };
 
   beforeAll(async () => {
     app = await createApp('true');
-    adminToken = (await login('admin@example.com', 'admin123')).access_token;
-    userToken = (await login('user@example.com', 'user123')).access_token;
+    const adminSession = await login('admin@example.com', 'admin123');
+    const userSession = await login('user@example.com', 'user123');
+
+    adminAccessCookie = adminSession.accessCookie;
+    adminRefreshCookie = adminSession.refreshCookie;
+    userAccessCookie = userSession.accessCookie;
   });
 
   afterAll(async () => {
@@ -134,12 +143,19 @@ describe('Backend hardening (e2e)', () => {
       name: 'Admin User',
       role: 'ADMIN',
     });
+    expect(response.body.access_token).toBeUndefined();
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(`${ACCESS_TOKEN_COOKIE_NAME}=`),
+        expect.stringContaining(`${REFRESH_TOKEN_COOKIE_NAME}=`),
+      ]),
+    );
   });
 
   it('returns the canonical authenticated user profile with auth enabled', async () => {
     const response = await request(app.getHttpServer())
       .get('/auth/me')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .expect(200);
 
     expect(response.body).toEqual({
@@ -170,6 +186,59 @@ describe('Backend hardening (e2e)', () => {
     }
   });
 
+  it('rotates access and refresh cookies through the refresh endpoint', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', [adminAccessCookie, adminRefreshCookie])
+      .expect(200);
+
+    const setCookieHeader = response.headers['set-cookie'];
+    const cookies = Array.isArray(setCookieHeader)
+      ? setCookieHeader
+      : setCookieHeader
+        ? [setCookieHeader]
+        : [];
+    const rotatedAccessCookie = cookies.find((cookie: string) =>
+      cookie.startsWith(`${ACCESS_TOKEN_COOKIE_NAME}=`),
+    );
+    const rotatedRefreshCookie = cookies.find((cookie: string) =>
+      cookie.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`),
+    );
+
+    expect(rotatedAccessCookie).toBeDefined();
+    expect(rotatedRefreshCookie).toBeDefined();
+    expect(rotatedAccessCookie?.split(';')[0]).not.toBe(adminAccessCookie);
+    expect(rotatedRefreshCookie?.split(';')[0]).not.toBe(adminRefreshCookie);
+    expect(response.body.user.email).toBe('admin@example.com');
+
+    adminAccessCookie = rotatedAccessCookie!.split(';')[0];
+    adminRefreshCookie = rotatedRefreshCookie!.split(';')[0];
+  });
+
+  it('rejects stale refresh tokens after rotation', async () => {
+    const previousSession = await login('user@example.com', 'user123');
+    const refreshed = await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', [previousSession.accessCookie, previousSession.refreshCookie])
+      .expect(200);
+
+    const refreshedSetCookieHeader = refreshed.headers['set-cookie'];
+    const refreshedCookies = Array.isArray(refreshedSetCookieHeader)
+      ? refreshedSetCookieHeader
+      : refreshedSetCookieHeader
+        ? [refreshedSetCookieHeader]
+        : [];
+    const rotatedRefreshCookie = refreshedCookies.find((cookie: string) =>
+      cookie.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`),
+    )!;
+
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', [previousSession.accessCookie, previousSession.refreshCookie])
+      .expect(401);
+
+  });
+
   it('protects the seed endpoint and exposes it only as POST', async () => {
     process.env.AUTH_ENABLED = 'true';
 
@@ -177,12 +246,12 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/seed')
-      .set('Authorization', `Bearer ${userToken}`)
+      .set('Cookie', userAccessCookie)
       .expect(403);
 
     const response = await request(app.getHttpServer())
       .post('/seed')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .expect(200);
 
     expect(response.body).toEqual({
@@ -190,53 +259,46 @@ describe('Backend hardening (e2e)', () => {
     });
   });
 
-  it('filters correctly when available=false and rejects invalid boolean values', async () => {
-    const unavailablePlate = uniquePlate();
-    const availablePlate = uniquePlate();
-
-    const unavailableCar = await request(app.getHttpServer())
+  it('filters and sorts only by list-visible fields', async () => {
+    await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send(
-        createCarPayloadForBrandModel(unavailablePlate, 'brand-3', 'model-11', {
-          availability: false,
-        }),
-      )
+      .set('Cookie', adminAccessCookie)
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-3', 'model-11'))
       .expect(201);
 
     await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send(
-        createCarPayloadForBrandModel(availablePlate, 'brand-3', 'model-12'),
-      )
+      .set('Cookie', adminAccessCookie)
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-1', 'model-2'))
       .expect(201);
 
-    const unavailableResults = await request(app.getHttpServer())
+    const filteredResults = await request(app.getHttpServer())
       .get('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .query({ available: 'false', licensePlate: unavailablePlate.slice(0, 4) })
+      .set('Cookie', adminAccessCookie)
+      .query({ brandId: 'brand-3', modelId: 'model-11' })
       .expect(200);
 
-    expect(unavailableResults.body.meta.itemCount).toBe(1);
-    expect(unavailableResults.body.items[0].id).toBe(unavailableCar.body.id);
+    expect(filteredResults.body.meta.itemCount).toBe(1);
+    expect(filteredResults.body.items[0].brand.id).toBe('brand-3');
+    expect(filteredResults.body.items[0].model.id).toBe('model-11');
 
-    const availableResults = await request(app.getHttpServer())
+    const sortedResults = await request(app.getHttpServer())
       .get('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .query({ available: 'true', licensePlate: unavailablePlate.slice(0, 4) })
+      .set('Cookie', adminAccessCookie)
+      .query({ sortBy: 'brand', sortOrder: 'asc' })
       .expect(200);
 
-    expect(availableResults.body.meta.itemCount).toBe(0);
+    expect(sortedResults.body.items.length).toBeGreaterThan(1);
+    expect(sortedResults.body.items[0].brand.name.localeCompare(sortedResults.body.items[1].brand.name, 'es', { sensitivity: 'base' })).toBeLessThanOrEqual(0);
 
-    const invalidBooleanResponse = await request(app.getHttpServer())
+    const invalidSortResponse = await request(app.getHttpServer())
       .get('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .query({ available: 'sometimes' })
+      .set('Cookie', adminAccessCookie)
+      .query({ sortBy: 'price' })
       .expect(400);
 
-    expect(invalidBooleanResponse.body.message).toContain(
-      'available must be either true or false',
+    expect(JSON.stringify(invalidSortResponse.body.message)).toContain(
+      'sortBy must be one of the following values: brand, model, total',
     );
   });
 
@@ -246,7 +308,7 @@ describe('Backend hardening (e2e)', () => {
 
     const firstCarResponse = await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(
         createCarPayloadForBrandModel(originalPlate, 'brand-4', 'model-14'),
       )
@@ -254,15 +316,15 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(
-        createCarPayloadForBrandModel(duplicatePlate, 'brand-1', 'model-2'),
+        createCarPayloadForBrandModel(duplicatePlate, 'brand-5', 'model-16'),
       )
       .expect(201);
 
     const updatedWithSamePlate = await request(app.getHttpServer())
       .put(`/cars/${firstCarResponse.body.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(
         createCarPayloadForBrandModel(originalPlate, 'brand-4', 'model-14', {
           color: 'Red',
@@ -277,7 +339,7 @@ describe('Backend hardening (e2e)', () => {
 
     const duplicateUpdateResponse = await request(app.getHttpServer())
       .put(`/cars/${firstCarResponse.body.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(
         createCarPayloadForBrandModel(duplicatePlate, 'brand-4', 'model-14'),
       )
@@ -292,19 +354,19 @@ describe('Backend hardening (e2e)', () => {
   it('rejects duplicated brand/model combinations on create and update', async () => {
     const firstCarResponse = await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
       .expect(201);
 
     const secondCarResponse = await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-7'))
       .expect(201);
 
     const duplicateCreateResponse = await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
       .expect(409);
 
@@ -315,7 +377,7 @@ describe('Backend hardening (e2e)', () => {
 
     const duplicateUpdateResponse = await request(app.getHttpServer())
       .put(`/cars/${secondCarResponse.body.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6'))
       .expect(409);
 
@@ -326,7 +388,7 @@ describe('Backend hardening (e2e)', () => {
 
     const unchangedUpdateResponse = await request(app.getHttpServer())
       .put(`/cars/${firstCarResponse.body.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(
         createCarPayloadForBrandModel(uniquePlate(), 'brand-2', 'model-6', {
           color: 'Black',
@@ -340,9 +402,9 @@ describe('Backend hardening (e2e)', () => {
   it('returns deterministic errors for document upload scenarios and treats missing files consistently', async () => {
     const carResponse = await request(app.getHttpServer())
       .post('/cars')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .send(
-        createCarPayloadForBrandModel(uniquePlate(), 'brand-5', 'model-16'),
+        createCarPayloadForBrandModel(uniquePlate(), 'brand-4', 'model-15'),
       )
       .expect(201);
 
@@ -350,13 +412,13 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`/cars/${carId}/document`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .field('title', 'Missing file')
       .expect(400);
 
     await request(app.getHttpServer())
       .post(`/cars/${carId}/document`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .attach('file', Buffer.from('zip-content'), {
         filename: 'document.zip',
         contentType: 'application/zip',
@@ -365,7 +427,7 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`/cars/${carId}/document`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .attach('file', Buffer.alloc(5 * 1024 * 1024 + 1), {
         filename: 'large.pdf',
         contentType: 'application/pdf',
@@ -374,7 +436,7 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`/cars/${carId}/document`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .field('documentType', 'inspection')
       .attach('file', Buffer.from('valid-pdf-content'), {
         filename: 'inspection.pdf',
@@ -388,25 +450,47 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .get(`/cars/${carId}/document`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .expect(404);
 
     await request(app.getHttpServer())
       .get(`/cars/${carId}/document/download`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .expect(404);
 
     await request(app.getHttpServer())
       .delete(`/cars/${carId}/document`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .expect(404);
   });
 
   it('returns 404 for unknown brands when requesting models', async () => {
     await request(app.getHttpServer())
       .get('/brands/brand-999/models')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Cookie', adminAccessCookie)
       .expect(404);
+  });
+
+  it('clears both session cookies on logout', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/logout')
+      .set('Cookie', [adminAccessCookie, adminRefreshCookie])
+      .expect(204)
+      .expect('set-cookie', new RegExp(`${ACCESS_TOKEN_COOKIE_NAME}=;`));
+
+    await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Cookie', `${ACCESS_TOKEN_COOKIE_NAME}=`)
+      .expect(401);
+
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', `${REFRESH_TOKEN_COOKIE_NAME}=`)
+      .expect(401);
+
+    const adminSession = await login('admin@example.com', 'admin123');
+    adminAccessCookie = adminSession.accessCookie;
+    adminRefreshCookie = adminSession.refreshCookie;
   });
 
   it('generates Swagger with the corrected security and response schemas', async () => {
@@ -415,13 +499,18 @@ describe('Backend hardening (e2e)', () => {
       new DocumentBuilder()
         .setTitle('Test API')
         .setVersion('1.0')
-        .addBearerAuth()
+        .addCookieAuth(ACCESS_TOKEN_COOKIE_NAME)
+        .addCookieAuth(REFRESH_TOKEN_COOKIE_NAME)
         .build(),
     );
 
     expect(swaggerDocument.paths['/auth/login'].post.security).toBeUndefined();
+    expect(swaggerDocument.paths['/auth/logout'].post.security).toBeUndefined();
+    expect(swaggerDocument.paths['/auth/refresh'].post.security).toEqual([
+      { refresh_token: [] },
+    ]);
     expect(swaggerDocument.paths['/auth/me'].get.security).toEqual([
-      { bearer: [] },
+      { access_token: [] },
     ]);
     expect(swaggerDocument.paths['/seed'].post).toBeDefined();
     expect(swaggerDocument.paths['/seed'].get).toBeUndefined();
