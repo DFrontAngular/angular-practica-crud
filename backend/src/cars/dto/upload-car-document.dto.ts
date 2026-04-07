@@ -115,7 +115,7 @@ export class UploadedCarDocumentResponseDto {
 
   @ApiProperty({
     description: 'Download URL for the single document associated with the car',
-    example: '/cars/9f65ec7a-ef2c-4d8a-a7dc-248018fca712/documents/download',
+    example: '/cars/9f65ec7a-ef2c-4d8a-a7dc-248018fca712/document/download',
   })
   downloadUrl: string;
 

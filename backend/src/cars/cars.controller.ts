@@ -175,7 +175,7 @@ export class CarsController {
     return this.carsService.update(id, carToUpdate);
   }
 
-  @Get(':id/documents')
+  @Get(':id/document')
   @ApiOperation({
     summary: 'Retrieve metadata for the single document linked to a vehicle',
   })
@@ -192,7 +192,7 @@ export class CarsController {
     return this.carsService.getDocumentMetadata(id);
   }
 
-  @Get(':id/documents/download')
+  @Get(':id/document/download')
   @ApiOperation({
     summary: 'Download the single document linked to a vehicle',
   })
@@ -210,7 +210,7 @@ export class CarsController {
     response.download(document.storagePath, document.originalName);
   }
 
-  @Delete(':id/documents')
+  @Delete(':id/document')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -224,7 +224,7 @@ export class CarsController {
     this.carsService.removeDocument(id);
   }
 
-  @Post(':id/documents')
+  @Post(':id/document')
   @Roles(UserRole.ADMIN)
   @UseInterceptors(
     FileInterceptor('file', {

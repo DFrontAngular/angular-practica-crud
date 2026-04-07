@@ -349,13 +349,13 @@ describe('Backend hardening (e2e)', () => {
     const carId = carResponse.body.id;
 
     await request(app.getHttpServer())
-      .post(`/cars/${carId}/documents`)
+      .post(`/cars/${carId}/document`)
       .set('Authorization', `Bearer ${adminToken}`)
       .field('title', 'Missing file')
       .expect(400);
 
     await request(app.getHttpServer())
-      .post(`/cars/${carId}/documents`)
+      .post(`/cars/${carId}/document`)
       .set('Authorization', `Bearer ${adminToken}`)
       .attach('file', Buffer.from('zip-content'), {
         filename: 'document.zip',
@@ -364,7 +364,7 @@ describe('Backend hardening (e2e)', () => {
       .expect(415);
 
     await request(app.getHttpServer())
-      .post(`/cars/${carId}/documents`)
+      .post(`/cars/${carId}/document`)
       .set('Authorization', `Bearer ${adminToken}`)
       .attach('file', Buffer.alloc(5 * 1024 * 1024 + 1), {
         filename: 'large.pdf',
@@ -373,7 +373,7 @@ describe('Backend hardening (e2e)', () => {
       .expect(413);
 
     await request(app.getHttpServer())
-      .post(`/cars/${carId}/documents`)
+      .post(`/cars/${carId}/document`)
       .set('Authorization', `Bearer ${adminToken}`)
       .field('documentType', 'inspection')
       .attach('file', Buffer.from('valid-pdf-content'), {
@@ -387,17 +387,17 @@ describe('Backend hardening (e2e)', () => {
     fs.unlinkSync(storedDocument.storagePath);
 
     await request(app.getHttpServer())
-      .get(`/cars/${carId}/documents`)
+      .get(`/cars/${carId}/document`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404);
 
     await request(app.getHttpServer())
-      .get(`/cars/${carId}/documents/download`)
+      .get(`/cars/${carId}/document/download`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404);
 
     await request(app.getHttpServer())
-      .delete(`/cars/${carId}/documents`)
+      .delete(`/cars/${carId}/document`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404);
   });

@@ -155,8 +155,8 @@ Tareas recomendadas:
 
 1. añadir en `cars/:id` una acción o formulario secundario para adjuntar documento al coche
 2. construir `FormData` con `file` y metadatos opcionales
-3. conectar `POST /cars/:id/documents`
-4. mostrar en el detalle los metadatos del documento usando `GET /cars/:id/documents`
+3. conectar `POST /cars/:id/document`
+4. mostrar en el detalle los metadatos del documento usando `GET /cars/:id/document`
 5. mostrar errores de tamaño o tipo no permitido
 
 Qué aprenderás aquí:

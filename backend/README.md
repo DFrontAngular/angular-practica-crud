@@ -195,8 +195,8 @@ Endpoints restringidos a `ADMIN`:
 - `POST /cars`
 - `PUT /cars/:id`
 - `DELETE /cars/:id`
-- `POST /cars/:id/documents`
-- `DELETE /cars/:id/documents`
+- `POST /cars/:id/document`
+- `DELETE /cars/:id/document`
 
 ## Endpoints disponibles
 
@@ -210,11 +210,11 @@ Endpoints restringidos a `ADMIN`:
 - `GET /cars`
 - `GET /cars/export/excel`
 - `GET /cars/:id`
-- `GET /cars/:id/documents`
-- `GET /cars/:id/documents/download`
+- `GET /cars/:id/document`
+- `GET /cars/:id/document/download`
 - `POST /cars`
-- `POST /cars/:id/documents`
-- `DELETE /cars/:id/documents`
+- `POST /cars/:id/document`
+- `DELETE /cars/:id/document`
 - `PUT /cars/:id`
 - `DELETE /cars/:id`
 
@@ -315,7 +315,7 @@ Devuelve el coche completo:
 }
 ```
 
-### `POST /cars/:id/documents`
+### `POST /cars/:id/document`
 
 Permite practicar subida de ficheros usando `multipart/form-data`.
 
@@ -362,20 +362,20 @@ Respuesta de ejemplo:
   "description": "Documento de prueba para practicar subida con FormData",
   "uploadedAt": "2026-03-27T10:15:00.000Z",
   "persisted": true,
-  "downloadUrl": "/cars/uuid/documents/download",
+  "downloadUrl": "/cars/uuid/document/download",
   "message": "The file was stored on disk and replaced any previous document linked to the vehicle."
 }
 ```
 
-### `GET /cars/:id/documents`
+### `GET /cars/:id/document`
 
 Devuelve los metadatos del único documento asociado al coche.
 
-### `GET /cars/:id/documents/download`
+### `GET /cars/:id/document/download`
 
 Descarga el único documento asociado al coche usando el `id` del vehículo.
 
-### `DELETE /cars/:id/documents`
+### `DELETE /cars/:id/document`
 
 Elimina el único documento asociado al coche usando el `id` del vehículo.
 
@@ -593,7 +593,7 @@ Content-Type: application/json
 ### Subir documento de práctica
 
 ```http
-POST /cars/:id/documents
+POST /cars/:id/document
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 ```

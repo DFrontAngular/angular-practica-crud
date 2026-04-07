@@ -506,7 +506,7 @@
         ]
       }
     },
-    "/cars/{id}/documents": {
+    "/cars/{id}/document": {
       "get": {
         "operationId": "CarsController_getCarDocumentMetadata",
         "parameters": [
@@ -668,7 +668,7 @@
         ]
       }
     },
-    "/cars/{id}/documents/download": {
+    "/cars/{id}/document/download": {
       "get": {
         "operationId": "CarsController_downloadCarDocument",
         "parameters": [
@@ -1416,7 +1416,7 @@
           "downloadUrl": {
             "type": "string",
             "description": "Download URL for the single document associated with the car",
-            "example": "/cars/9f65ec7a-ef2c-4d8a-a7dc-248018fca712/documents/download"
+            "example": "/cars/9f65ec7a-ef2c-4d8a-a7dc-248018fca712/document/download"
           },
           "message": {
             "type": "string",

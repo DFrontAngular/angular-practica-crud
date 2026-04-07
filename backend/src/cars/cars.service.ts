@@ -365,7 +365,7 @@ export class CarsService {
       description: uploadDocumentDto.description?.trim() || undefined,
       uploadedAt: new Date().toISOString(),
       persisted: true,
-      downloadUrl: `/cars/${id}/documents/download`,
+      downloadUrl: `/cars/${id}/document/download`,
       message:
         'The file was stored on disk and replaced any previous document linked to the vehicle.',
       storagePath,
