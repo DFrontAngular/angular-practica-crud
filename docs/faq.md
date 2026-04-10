@@ -45,7 +45,7 @@ No.
 
 La asigna el backend automáticamente.
 
-## ¿Se pueden hardcodear marcas, modelos o monedas?
+## ¿Se pueden hardcodear marcas o modelos?
 
 No es recomendable.
 
