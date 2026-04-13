@@ -39,19 +39,19 @@ export class Home implements OnInit {
   getCars(page: number){
     this.loading.set(true);
     
-    this.carsService.getCars(page).subscribe({
+    this.carsService.getCarList(page).subscribe({
 
-      "next": (paginatedResponse) => {
+      next: (paginatedResponse) => {
         this.paginatedResponse.set(paginatedResponse);
       },
 
-      "error": (error) => {
+      error: (error) => {
         this.loading.set(false);
         this.error.set(error);
         this.paginatedResponse.set(null);
       },
 
-      "complete": () => {
+      complete: () => {
         this.loading.set(false);
         this.error.set(null);
       }

@@ -1,1 +1,64 @@
-<p>details works!</p>
+<main>
+    <h1>Car Details</h1>
+
+    @if (loading()) {
+        <p>Loading...</p>
+    }
+
+    @else if (error()) {
+        <p>{{error()}}</p>
+    }
+
+    @else if(carDetails()) {
+        @for (carDetailsEntity of carDetails()?.carDetails; track $index) {
+            <img [src]="`/api${carDetailsEntity.imageUrl}`" alt="Car Image">
+            <h2>{{carDetailsEntity.description}}</h2>
+            <table>
+                <tr>
+                    <td>Brand</td>
+                    <td>{{carDetails()?.brand?.name}}</td>
+                </tr>
+
+                <tr>
+                    <td>Model</td>
+                    <td>{{carDetails()?.model?.name}}</td>
+                </tr>
+
+                <tr>
+                    <td>Registration Date</td>
+                    <td>{{carDetailsEntity.registrationDate | date : 'dd-MM-yyyy'}}</td>
+                </tr>
+
+                <tr>
+                    <td>Mileage</td>
+                    <td>{{carDetailsEntity.mileage}}</td>
+                </tr>
+
+                <tr>
+                    <td>Price</td>
+                    <td>{{carDetailsEntity.price | currency : carDetailsEntity.currency}}</td>
+                </tr>
+
+                <tr>
+                    <td>Manufacture Year</td>
+                    <td>{{carDetailsEntity.manufactureYear}}</td>
+                </tr>
+
+                <tr>
+                    <td>Availability</td>
+                    <td>{{carDetailsEntity.availability ? 'Available' : 'Taken'}}</td>
+                </tr>
+
+                <tr>
+                    <td>Color</td>
+                    <td>{{carDetailsEntity.color}}</td>
+                </tr>
+
+                <tr>
+                    <td>License Number</td>
+                    <td>{{carDetailsEntity.licensePlate}}</td>
+                </tr>
+            </table>
+        }
+    }
+</main>
