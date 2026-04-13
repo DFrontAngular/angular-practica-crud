@@ -1,17 +1,20 @@
 import { Component, Input, OnInit, signal, WritableSignal } from '@angular/core';
 import { CarDetailDto } from '../../../model/DTO/car-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { Dialog } from '../../shared/dialog/dialog';
 
 @Component({
   selector: 'app-details',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe, RouterLink, Dialog],
   templateUrl: './details.html',
   styleUrl: './details.css',
 })
 export class Details implements OnInit {
   carId: string|null = null;
+
+  isDialogOpen: WritableSignal<boolean> = signal(false);
 
   loading: WritableSignal<boolean> = signal(false);
   error: WritableSignal<any> = signal(null);
@@ -42,6 +45,8 @@ export class Details implements OnInit {
         this.loading.set(false);
         this.error.set(error);
         this.carDetails.set(null);
+
+        console.log(error)
       },
 
       complete: () => {
@@ -49,5 +54,18 @@ export class Details implements OnInit {
         this.error.set(null);
       }
     });
+  }
+
+  openDialog(){
+    this.isDialogOpen.set(true);
+  }
+
+  closeDialog(){
+    this.isDialogOpen.set(false);
+  }
+
+  onDialogConfirmation(){
+    alert(`DELETE CAR ${this.carDetails()?.brand.name ?? 'ERROR'} ${this.carDetails()?.model.name ?? 'ERROR'}`);
+    this.isDialogOpen.set(false);
   }
 }

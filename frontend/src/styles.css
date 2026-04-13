@@ -124,8 +124,10 @@ td img {
 .actions {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
+    gap: 1em;
+    padding: 1em;
 }
 
 .actions button {

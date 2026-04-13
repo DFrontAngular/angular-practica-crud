@@ -1,12 +1,17 @@
 <main>
     <h1>Car Details</h1>
 
+    <div class="actions">
+        <button [routerLink]="`/form/${carDetails()?.id}`">Edit</button>
+        <button (click)="openDialog()">Delete</button>
+    </div>
+
     @if (loading()) {
         <p>Loading...</p>
     }
 
     @else if (error()) {
-        <p>{{error()}}</p>
+        <p>{{error().error}}</p>
     }
 
     @else if(carDetails()) {
@@ -62,3 +67,13 @@
         }
     }
 </main>
+
+@if (isDialogOpen()){
+    <app-dialog 
+    title="Delete Car"
+    (closed)="closeDialog()"
+    (oked)="onDialogConfirmation()"
+    >
+        <p>Are you sure you want to delete the car: {{carDetails()?.brand?.name ?? 'Error'}} {{carDetails()?.model?.name ?? 'Error'}}?</p>
+    </app-dialog>
+}

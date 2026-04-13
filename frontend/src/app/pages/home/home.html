@@ -26,6 +26,10 @@
         </button>
     </div>
 
+    <div class="actions">
+        <button>Create a New Car</button>
+    </div>
+
     @if (loading()) {
         <p>Loading...</p>
     }
@@ -53,9 +57,9 @@
                     <td>{{car.total}}</td>
                     <td>
                         <div class="actions">
-                            <button [routerLink]="`details/${car.id}`">Details</button> <!--eye-->
-                            <button [routerLink]="`form/${car.id}`">Edit</button> <!--pencil-->
-                            <button (click)="openDialog(car.id)">Delete</button> <!--trash can-->
+                            <button [routerLink]="`/details/${car.id}`">Details</button>
+                            <button [routerLink]="`/form/${car.id}`">Edit</button>
+                            <button (click)="openDialog(car.id)">Delete</button>
                         </div>
                     </td>
                 </tr>
