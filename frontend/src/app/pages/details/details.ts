@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { CarDetailDto } from '../../../model/DTO/car-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
