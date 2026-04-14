@@ -17,12 +17,23 @@
 
     --border-radius-small: 0.5em;
     --border-radius-medium: 1em;
+
     --light-border: 1px solid var(--border-color);
-    --normal-border: 1px solid var(--border-color);
+    --normal-border: 2px solid var(--border-color);
+
+    --light-primary-border: 1px solid var(--primary-color);
 
     --shadow-small: 0.1em 0.2em 0.1em var(--shadow-color);
     --shadow-big: 0.5em 1em 0.5em var(--shadow-color);
     --shadow-modal: 0.5em 1em 0.5em rgba(0, 0, 0, 0.3);
+
+    --small-padding: 0.5em;
+    --medium-padding: 1em;
+    --large-padding: 2em;
+
+    --small-margin: 0.5em;
+    --medium-margin: 1em;
+    --large-margin: 2em;
 }
 
 * {
@@ -190,3 +201,30 @@ td img {
     font-weight: bold;
     line-height: 1;
 }
+
+form {
+    display: block;
+    border: var(--light-border);
+    border-radius: var(--border-radius-small);
+    padding: var(--large-padding);
+}
+
+label {
+    display: block;
+    width: 100%;
+    padding: var(--small-margin) 0;
+}
+
+input, select, textarea {
+    display: block;
+    width: 100%;
+    font-size: 1em;
+    padding: var(--small-padding);
+    outline: none;
+    border: var(--normal-border);
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary-color);
+}
+

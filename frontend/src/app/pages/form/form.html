@@ -1,25 +1,57 @@
 <main>
-    @if (loading()) {
-        <p>Loading...</p>
-    }
+    <h1>Car Form</h1>
 
-    @else if (error()) {
-        <p>{{error()?.message}}</p>
-    }
+    <form>
 
-    @else if (brands().length > 0) {
-        @for (brand of brands(); track brand.id) {
-            <h2>{{brand.name}}</h2>
-            
-            <ul>
-            @for (model of brand.models; track model.id) {
-                <li>{{model.name}}</li>
-            }
-            </ul>
-            
-            @if (!$last) {
-                <hr>
-            }
-        }
-    }
+        <label>Brand
+            <select name="brandId" id="brandId">
+                <option value="a">Brand</option>
+            </select>
+        </label>
+
+        <label>Model
+            <select name="modelId" id="modelId">
+                <option value="a">Model</option>
+            </select>
+        </label>
+
+        <label>Registration Date
+            <input type="date">
+        </label>
+
+        <label>Mileage
+            <input type="number">
+        </label>
+
+        <label>Currency
+            <select name="currency" id="currency">
+
+            </select>
+        </label>
+
+        <label>Price
+            <input type="number">
+        </label>
+
+        <label>Manufacture Year
+            <input type="number">
+        </label>
+
+        <label>Availability
+            <input type="checkbox">
+        </label>
+
+        <label>Color
+            <input type="text">
+        </label>
+
+        <label>Description
+            <textarea name="description" id="description"></textarea>
+        </label>
+
+        <label>License Plate
+            <input type="text">
+        </label>
+
+    </form>
 </main>
