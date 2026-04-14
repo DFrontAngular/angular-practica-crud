@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { PaginatedResponseDto } from '../../model/DTO/paginated-response-dto';
-import { CarDetailDto } from '../../model/DTO/car-dto';
+import { CarDetailDto } from '../../model/DTO/car-detail-dto';
+import { CreateCarDto } from '../../model/DTO/create-car-dto';
 
 
 @Injectable({
@@ -28,6 +28,26 @@ export class CarsService {
   public getCarDetails(carId: string) {
     return this.http.get<CarDetailDto>(
       `${this.baseUrl}/cars/${carId}`,
+      {
+        timeout: 3000
+      }
+    )
+  }
+
+  public createCar(car: CreateCarDto) {
+    return this.http.post(
+      `${this.baseUrl}/cars`, 
+      car,
+      {
+        timeout: 3000
+      }
+    )
+  }
+
+  public editCar(carId: number, car: CreateCarDto) {
+    return this.http.put(
+      `${this.baseUrl}/cars/${carId}`,
+      car,
       {
         timeout: 3000
       }
