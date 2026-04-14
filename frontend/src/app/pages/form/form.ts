@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, Signal } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CarBrandDto } from '../../../model/DTO/car-brand-dto';
 import { CarModelDto } from '../../../model/DTO/car-model-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
@@ -21,6 +21,13 @@ export class Form {
   error = signal<HttpErrorResponse|null>(null);
   loading = signal(false);
   brands = signal<BrandDao[]>([]);
+  currencies = this.carsService.getCurrencyCodes();
+
+  form = this.formBuilder.nonNullable.group({
+    brandId: ['', Validators.required],
+    modelId: ['', Validators.required],
+    carDetails: this.formBuilder.array<FormControl<string>>([])
+  });
 
   constructor(){
     this.loadBrands();

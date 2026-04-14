@@ -25,7 +25,9 @@
 
         <label>Currency
             <select name="currency" id="currency">
-
+                @for (currency of currencies; track $index) {
+                    <option>{{currency}}</option>
+                }
             </select>
         </label>
 

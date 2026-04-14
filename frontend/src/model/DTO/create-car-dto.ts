@@ -1,7 +1,7 @@
 import { CreateCarDetailsDto } from "./create-car-details";
 
 export interface CreateCarDto {
-    brandId: number;
-    modelId: number;
+    brandId: string;
+    modelId: string;
     carDetails: CreateCarDetailsDto[];
 }

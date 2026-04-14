@@ -17,6 +17,17 @@ export class CarsService {
 
   constructor (private http: HttpClient) {}
 
+  public getCurrencyCodes(): string[] {
+    return [ 
+      'EUR', 'GBP', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 
+      'HUF', 'RON', 'BGN', 'HRK', 'ARS', 'BRL', 'CLP', 'COP', 
+      'PEN', 'UYU', 'PYG', 'BOB', 'VES', 'USD', 'CAD', 'MXN', 
+      'JPY', 'CNY', 'INR', 'KRW', 'SGD', 'HKD', 'MYR', 'IDR', 
+      'THB', 'VND', 'PKR', 'AUD', 'NZD', 'ZAR', 'EGP', 'NGN', 
+      'KES', 'GHS' 
+    ]
+  }
+
   public getCarList(page: number): Observable<PaginatedResponseDto> {
     return this.http.get<PaginatedResponseDto>(
       `${this.baseUrl}/cars`,
