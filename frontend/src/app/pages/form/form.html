@@ -1,1 +1,25 @@
-<p>form works!</p>
+<main>
+    @if (loading()) {
+        <p>Loading...</p>
+    }
+
+    @else if (error()) {
+        <p>{{error()?.message}}</p>
+    }
+
+    @else if (brands().length > 0) {
+        @for (brand of brands(); track brand.id) {
+            <h2>{{brand.name}}</h2>
+            
+            <ul>
+            @for (model of brand.models; track model.id) {
+                <li>{{model.name}}</li>
+            }
+            </ul>
+            
+            @if (!$last) {
+                <hr>
+            }
+        }
+    }
+</main>

@@ -52,12 +52,16 @@ main {
     box-shadow: var(--shadow-big);
 }
 
-h1 {
+h1, h2 {
     text-align: center;
-    font-size: xx-large;
     color: var(--primary-color);
     margin: 0 0 1em 0;
 }
+
+h1 {font-size: xx-large;}
+h2 {font-size: x-large;}
+
+hr {margin: 2em 0;}
 
 table {
     width: 100%;
