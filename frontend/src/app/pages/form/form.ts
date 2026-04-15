@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, Signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CarBrandDto } from '../../../model/DTO/car-brand-dto';
 import { CarModelDto } from '../../../model/DTO/car-model-dto';
@@ -8,6 +8,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ModelDao } from '../../../model/DAO/model-dao';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { CreateCarDetailsDto } from '../../../model/DTO/create-car-details';
+import { regex } from '../../../utilities';
 
 @Component({
   selector: 'app-form',
@@ -16,7 +18,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './form.css',
 })
 export class Form {
-  private formBuilder = inject(FormBuilder);
+  private fb = inject(FormBuilder).nonNullable;
   private carsService = inject(CarsService);
 
   error = signal<HttpErrorResponse|null>(null);
@@ -25,10 +27,16 @@ export class Form {
   currentBrand = signal<BrandDao|null>(null);
   currencies = this.carsService.getCurrencyCodes();
 
-  form = this.formBuilder.nonNullable.group({
-    brandId: ['', Validators.required],
-    modelId: ['', Validators.required],
-    carDetails: this.formBuilder.array([])
+  form = this.fb.group({
+    brandId: this.fb.control<string>(
+      '',
+      Validators.required
+    ),
+    modelId: this.fb.control<string>(
+      '',
+      Validators.required
+    ),
+    carDetails: this.fb.array([])
   });
 
   constructor(){
@@ -40,6 +48,14 @@ export class Form {
       );
       this.form.controls.modelId.setValue('');
     })
+
+    effect(()=>{
+      if (this.currentBrand() == null){
+        this.form.get('modelId')?.disable();
+      } else {
+        this.form.get('modelId')?.enable();
+      }
+    });
   }
 
   loadBrands(){
@@ -91,16 +107,70 @@ export class Form {
   }
 
   createCarDetailsGroup(): FormGroup {
-    return this.formBuilder.group({
-      registrationDate: [''],
-      mileage: [0],
-      currency: [''],
-      price: [0],
-      manufactureYear: [0],
-      availability: [false],
-      color: [''],
-      description: [''],
-      licensePlate: ['']
+    return this.fb.group({
+      registrationDate: this.fb.control(
+        '',
+        [
+          Validators.required,
+          regex(/^\d{4}-\d{2}-\d{2}$/)
+        ]
+      ),
+
+      mileage: this.fb.control(
+        0,
+        [
+          Validators.min(0),
+          Validators.required
+        ]
+      ),
+
+      currency: this.fb.control(
+        'EUR',
+        [
+          regex(/[A-Z]{3}/),
+          Validators.required
+        ]
+      ),
+
+      price: this.fb.control(
+        0,
+        [
+          Validators.min(0),
+          Validators.required
+        ]
+      ),
+
+      manufactureYear: this.fb.control(
+        1,
+        [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(new Date().getFullYear())
+        ]
+      ),
+
+      availability: this.fb.control(
+        false,
+        Validators.required
+      ),
+
+      color: this.fb.control(
+        '',
+        Validators.required
+      ),
+
+      description: this.fb.control(
+        '',
+        Validators.required
+      ),
+
+      licensePlate: this.fb.control(
+        '',
+        [
+          Validators.required,
+          regex(/^\d{4} [B-DF-HJ-NP-TV-Z]{3}$/) // match 4 numbers, a space, and three uppercase consonants
+        ]
+      )
     });
   }
 
