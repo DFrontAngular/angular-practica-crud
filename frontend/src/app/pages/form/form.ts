@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CarBrandDto } from '../../../model/DTO/car-brand-dto';
 import { CarModelDto } from '../../../model/DTO/car-model-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
@@ -9,7 +9,7 @@ import { ModelDao } from '../../../model/DAO/model-dao';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { CreateCarDetailsDto } from '../../../model/DTO/create-car-details';
-import { regex } from '../../../utilities';
+import { isInvalid, regex } from '../../../utilities';
 
 @Component({
   selector: 'app-form',
@@ -180,6 +180,14 @@ export class Form {
 
   removeCarDetails(index: number){
     this.carDetails.removeAt(index);
+  }
+
+  getControl(group: AbstractControl, name: string){
+    return group.get(name);
+  }
+
+  isInvalid(control: AbstractControl|null): boolean {
+    return !!(control && control.invalid && (control.touched || control.dirty));
   }
 
   submit(){

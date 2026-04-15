@@ -9,6 +9,12 @@
                     <option [value]="brand.id">{{brand.name}}</option>
                 }
             </select>
+
+            @if (isInvalid(form.get('brandId'))){
+                @if (form.get('brandId')?.errors?.['required']) {
+                    <p class="error">Brand is required</p>
+                }
+            }
         </label>
 
         <label>Model
@@ -17,6 +23,12 @@
                     <option [value]="model.id">{{model.name}}</option>
                 }
             </select>
+
+            @if (isInvalid(form.get('modelId'))){
+                @if (form.get('modelId')?.errors?.['required']) {
+                    <p class="error">Model is required</p>
+                }
+            }
         </label>
 
         <hr>
@@ -27,10 +39,28 @@
             <div [formGroupName]="$index">
                 <label>Registration Date
                     <input type="date" formControlName="registrationDate">
+                    
+                    @if (isInvalid(carDetailsGroup.get('registrationDate'))){
+                        @if (carDetailsGroup.get('registrationDate')?.errors?.['required']) {
+                            <p class="error">Registration Date is required</p>
+                        }
+                        @if (carDetailsGroup.get('registrationDate')?.errors?.['pattern'])  {
+                            <p class="error">Registration Date must have the format of YYYY-MM-DD</p>
+                        }
+                    }
                 </label>
 
                 <label>Mileage
                     <input type="number" formControlName="mileage">
+
+                    @if (isInvalid(carDetailsGroup.get('mileage'))) {
+                        @if (carDetailsGroup.get('mileage')?.errors?.['required']) {
+                            <p class="error">Mileage is required</p>
+                        }
+                        @if (carDetailsGroup.get('mileage')?.errors?.['min']) {
+                            <p class="error">Mileage cannot be negative</p>
+                        }
+                    }
                 </label>
 
                 <label>Currency
@@ -39,14 +69,44 @@
                             <option [value]="currency">{{currency}}</option>
                         }
                     </select>
+
+                    @if (isInvalid(carDetailsGroup.get('currency'))) {
+                        @if (carDetailsGroup.get('currency')?.errors?.['required']) {
+                            <p class="error">Currency is required</p>
+                        }
+                        @if (carDetailsGroup.get('currency')?.errors?.['pattern']) {
+                            <p class="error">Currency should have ISO format (EUR, USD...)</p>
+                        }
+                    }
                 </label>
 
                 <label>Price
                     <input type="number" formControlName="price">
+
+                    @if (isInvalid(carDetailsGroup.get('price'))) {
+                        @if (carDetailsGroup.get('price')?.errors?.['required']) {
+                            <p class="error">Price is required</p>
+                        }
+                        @if (carDetailsGroup.get('price')?.errors?.['min']) {
+                            <p class="error">Price cannot be negative</p>
+                        }
+                    }
                 </label>
 
                 <label>Manufacture Year
                     <input type="number" formControlName="manufactureYear">
+
+                    @if (isInvalid(carDetailsGroup.get('manufactureYear'))) {
+                        @if (carDetailsGroup.get('manufactureYear')?.errors?.['required']) {
+                            <p class="error">Manufacture Year is required</p>
+                        }
+                        @if (carDetailsGroup.get('manufactureYear')?.errors?.['min']) {
+                            <p class="error">Manufacture Year should be greater than 0</p>
+                        }
+                        @if (carDetailsGroup.get('manufactureYear')?.errors?.['max']) {
+                            <p class="error">Manufacture Year cannot be in the future</p>
+                        }
+                    }
                 </label>
 
                 <label>Availability
@@ -55,14 +115,35 @@
 
                 <label>Color
                     <input type="text" formControlName="color">
+
+                    @if (isInvalid(carDetailsGroup.get('color'))) {
+                        @if (carDetailsGroup.get('color')?.errors?.['required']) {
+                            <p class="error">Color is required</p>
+                        }
+                    }
                 </label>
 
                 <label>Description
                     <textarea formControlName="description"></textarea>
+
+                    @if (isInvalid(carDetailsGroup.get('description'))) {
+                        @if (carDetailsGroup.get('description')?.errors?.['required']) {
+                            <p class="error">Description is required</p>
+                        }
+                    }
                 </label>
 
                 <label>License Plate
                     <input type="text" formControlName="licensePlate">
+
+                    @if (isInvalid(carDetailsGroup.get('licensePlate'))) {
+                        @if (carDetailsGroup.get('licensePlate')?.errors?.['required']) {
+                            <p class="error">License Plate is required</p>
+                        }
+                        @if (carDetailsGroup.get('licensePlate')?.errors?.['pattern']) {
+                            <p class="error">License Plate should follow the Spanish format (0000 BBB)</p>
+                        }
+                    }
                 </label>
 
                 <button type="button" (click)="removeCarDetails($index)">Remove Car</button>
