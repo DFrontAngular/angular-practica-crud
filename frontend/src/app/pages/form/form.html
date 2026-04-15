@@ -19,46 +19,62 @@
             </select>
         </label>
 
-        <label>Registration Date
-            <input type="date">
-        </label>
+        <hr>
 
-        <label>Mileage
-            <input type="number">
-        </label>
+        <div formArrayName="carDetails">
 
-        <label>Currency
-            <select name="currency" id="currency">
-                @for (currency of currencies; track $index) {
-                    <option>{{currency}}</option>
-                }
-            </select>
-        </label>
+        @for (carDetailsGroup of carDetails.controls; track carDetailsGroup) {
+            <div [formGroupName]="$index">
+                <label>Registration Date
+                    <input type="date" formControlName="registrationDate">
+                </label>
 
-        <label>Price
-            <input type="number">
-        </label>
+                <label>Mileage
+                    <input type="number" formControlName="mileage">
+                </label>
 
-        <label>Manufacture Year
-            <input type="number">
-        </label>
+                <label>Currency
+                    <select formControlName="currency">
+                        @for (currency of currencies; track $index) {
+                            <option [value]="currency">{{currency}}</option>
+                        }
+                    </select>
+                </label>
 
-        <label>Availability
-            <input type="checkbox">
-        </label>
+                <label>Price
+                    <input type="number" formControlName="price">
+                </label>
 
-        <label>Color
-            <input type="text">
-        </label>
+                <label>Manufacture Year
+                    <input type="number" formControlName="manufactureYear">
+                </label>
 
-        <label>Description
-            <textarea name="description" id="description"></textarea>
-        </label>
+                <label>Availability
+                    <input type="checkbox" formControlName="availability">
+                </label>
 
-        <label>License Plate
-            <input type="text">
-        </label>
+                <label>Color
+                    <input type="text" formControlName="color">
+                </label>
 
+                <label>Description
+                    <textarea formControlName="description"></textarea>
+                </label>
+
+                <label>License Plate
+                    <input type="text" formControlName="licensePlate">
+                </label>
+
+                <button type="button" (click)="removeCarDetails($index)">Remove Car</button>
+
+                <hr>
+            </div>
+        }
+
+            <button type="button" (click)="addCarDetails()">Add Car</button>
+
+        </div>
+        
         <button type="submit" [disabled]="form.invalid">Submit</button>
 
     </form>

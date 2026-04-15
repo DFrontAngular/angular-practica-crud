@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, Signal } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CarBrandDto } from '../../../model/DTO/car-brand-dto';
 import { CarModelDto } from '../../../model/DTO/car-model-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
@@ -28,6 +28,7 @@ export class Form {
   form = this.formBuilder.nonNullable.group({
     brandId: ['', Validators.required],
     modelId: ['', Validators.required],
+    carDetails: this.formBuilder.array([])
   });
 
   constructor(){
@@ -83,6 +84,32 @@ export class Form {
         this.brands.set([]);
       }
     });
+  }
+
+  get carDetails(): FormArray {
+    return this.form.get('carDetails') as FormArray;
+  }
+
+  createCarDetailsGroup(): FormGroup {
+    return this.formBuilder.group({
+      registrationDate: [''],
+      mileage: [0],
+      currency: [''],
+      price: [0],
+      manufactureYear: [0],
+      availability: [false],
+      color: [''],
+      description: [''],
+      licensePlate: ['']
+    });
+  }
+
+  addCarDetails(){
+    this.carDetails.push(this.createCarDetailsGroup());
+  }
+
+  removeCarDetails(index: number){
+    this.carDetails.removeAt(index);
   }
 
   submit(){
