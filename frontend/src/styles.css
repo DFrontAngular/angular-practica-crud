@@ -228,3 +228,7 @@ input:focus, select:focus, textarea:focus {
     border-color: var(--primary-color);
 }
 
+input[type=checkbox] {
+    width: 2em;
+    height: 2em;
+}
