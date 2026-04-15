@@ -233,6 +233,21 @@ input[type=checkbox] {
     height: 2em;
 }
 
+button {
+    width: 100%;
+    font-size: 1.05em;
+    padding: var(--small-padding);
+    margin: 0.5em 0;
+    color: var(--primary-color);
+    border: var(--light-border);
+    cursor: pointer;
+}
+
+button[type=submit] {
+    background-color: var(--primary-color);
+    color: var(--on-primary-color);
+}
+
 .error {
     color: var(--danger-color);
 }
