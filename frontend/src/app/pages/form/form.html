@@ -1,17 +1,21 @@
 <main>
     <h1>Car Form</h1>
 
-    <form>
+    <form [formGroup]="form" (ngSubmit)="submit()">
 
         <label>Brand
-            <select name="brandId" id="brandId">
-                <option value="a">Brand</option>
+            <select formControlName="brandId">
+                @for (brand of brands(); track brand.id) {
+                    <option [value]="brand.id">{{brand.name}}</option>
+                }
             </select>
         </label>
 
         <label>Model
-            <select name="modelId" id="modelId">
-                <option value="a">Model</option>
+            <select formControlName="modelId" [disabled]="currentBrand() == null">
+                @for (model of currentBrand()?.models; track model.id) {
+                    <option [value]="model.id">{{model.name}}</option>
+                }
             </select>
         </label>
 
@@ -54,6 +58,8 @@
         <label>License Plate
             <input type="text">
         </label>
+
+        <button type="submit" [disabled]="form.invalid">Submit</button>
 
     </form>
 </main>

@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, Signal } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CarBrandDto } from '../../../model/DTO/car-brand-dto';
 import { CarModelDto } from '../../../model/DTO/car-model-dto';
 import { CarsService } from '../../../services/cars-service/cars-service';
@@ -7,10 +7,11 @@ import { BrandDao } from '../../../model/DAO/brand-dao';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ModelDao } from '../../../model/DAO/model-dao';
 import { forkJoin } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-form',
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './form.html',
   styleUrl: './form.css',
 })
@@ -21,16 +22,23 @@ export class Form {
   error = signal<HttpErrorResponse|null>(null);
   loading = signal(false);
   brands = signal<BrandDao[]>([]);
+  currentBrand = signal<BrandDao|null>(null);
   currencies = this.carsService.getCurrencyCodes();
 
   form = this.formBuilder.nonNullable.group({
     brandId: ['', Validators.required],
     modelId: ['', Validators.required],
-    carDetails: this.formBuilder.array<FormControl<string>>([])
   });
 
   constructor(){
     this.loadBrands();
+
+    this.form.controls.brandId.valueChanges.subscribe(brandId => {
+      this.currentBrand.set(
+        this.brands().find(brand => brand.id == brandId) ?? null
+      );
+      this.form.controls.modelId.setValue('');
+    })
   }
 
   loadBrands(){
@@ -75,5 +83,9 @@ export class Form {
         this.brands.set([]);
       }
     });
+  }
+
+  submit(){
+    console.log(this.form.getRawValue());
   }
 }
