@@ -233,7 +233,7 @@ input[type=checkbox] {
     height: 2em;
 }
 
-button {
+form button {
     width: 100%;
     font-size: 1.05em;
     padding: var(--small-padding);
@@ -243,7 +243,7 @@ button {
     cursor: pointer;
 }
 
-button[type=submit] {
+form button[type=submit] {
     background-color: var(--primary-color);
     color: var(--on-primary-color);
 }
