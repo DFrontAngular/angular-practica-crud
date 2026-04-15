@@ -12,7 +12,7 @@
         </label>
 
         <label>Model
-            <select formControlName="modelId" [disabled]="currentBrand() == null">
+            <select formControlName="modelId">
                 @for (model of currentBrand()?.models; track model.id) {
                     <option [value]="model.id">{{model.name}}</option>
                 }
@@ -35,7 +35,7 @@
 
                 <label>Currency
                     <select formControlName="currency">
-                        @for (currency of currencies; track $index) {
+                        @for (currency of currencies; track currency) {
                             <option [value]="currency">{{currency}}</option>
                         }
                     </select>
