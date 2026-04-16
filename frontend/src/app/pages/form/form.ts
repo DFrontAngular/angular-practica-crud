@@ -9,6 +9,7 @@ import { CreateCarDetailsDto } from '../../../model/DTO/create-car-details';
 import { regex } from '../../../utilities';
 import { ActivatedRoute } from '@angular/router';
 import { CreateCarDto } from '../../../model/DTO/create-car-dto';
+import { CarDetailEntityDto } from '../../../model/DTO/car-detail-entity-dto';
 
 type CreateCarDetailsFormGroup = FormGroup<{
   registrationDate: FormControl<string>,
@@ -127,11 +128,17 @@ export class Form {
 
     this.carsService.getCarDetails(this.carId).subscribe({
       next: (car)=>{
-        this.form.setValue({
+        this.form.patchValue({
           brandId: car.brand.id,
-          modelId: car.model.id,
-          carDetails: car.carDetails
+          modelId: car.model.id
         });
+
+        this.form.setControl(
+          'carDetails',
+          this.fb.array(
+            car.carDetails.map(d => this.createCarDetailsFormGroup(d))
+          )
+        );
       }
     });
   }
@@ -140,10 +147,10 @@ export class Form {
     return this.form.get('carDetails') as FormArray<CreateCarDetailsFormGroup>;
   }
 
-  createCarDetailsFormGroup(data?: Partial<CreateCarDetailsDto>): CreateCarDetailsFormGroup {
+  createCarDetailsFormGroup(data?: Partial<CarDetailEntityDto>): CreateCarDetailsFormGroup {
     return this.fb.group({
       registrationDate: this.fb.control(
-        data?.registrationDate ?? '',
+        data?.registrationDate?.slice(0, 10) ?? '', // Slice the YYYY-MM-DD part
         [
           Validators.required,
           regex(/^\d{4}-\d{2}-\d{2}$/)
