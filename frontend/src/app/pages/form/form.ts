@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { CreateCarDetailsDto } from '../../../model/DTO/create-car-details';
 import { isInvalid, regex } from '../../../utilities';
 import { ActivatedRoute } from '@angular/router';
+import { CreateCarDto } from '../../../model/DTO/create-car-dto';
 
 @Component({
   selector: 'app-form',
@@ -199,6 +200,32 @@ export class Form {
   }
 
   submit(){
-    console.log(this.form.getRawValue());
+    let car = this.form.getRawValue() as CreateCarDto;
+
+    car.carDetails.forEach((car)=>{
+      car.registrationDate += 'T00:00:00.000Z' // For some reason, backend expects this date format (YYYY-MM-DDTHH:MM:SS.mmmZ)
+    });
+
+    if (this.carId == null) {
+      this.carsService.createCar(car).subscribe({
+        next: () => {
+          console.log('Car created');
+        },
+        error: () => {
+          console.log('Error creating the car');
+        }
+      });
+    }
+
+    else {
+      this.carsService.editCar(this.carId, car).subscribe({
+        next: () => {
+          console.log('Car editted');
+        },
+        error: () => {
+          console.log('Error editting the car');
+        }
+      });
+    }
   }
 }

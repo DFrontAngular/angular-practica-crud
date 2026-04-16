@@ -59,7 +59,7 @@ export class CarsService {
     )
   }
 
-  public editCar(carId: number, car: CreateCarDto): Observable<CarDetailDto> {
+  public editCar(carId: string, car: CreateCarDto): Observable<CarDetailDto> {
     return this.http.put<CarDetailDto>(
       `${this.baseUrl}/cars/${carId}`,
       car,
