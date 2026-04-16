@@ -10,6 +10,7 @@ import { regex } from '../../../utilities';
 import { ActivatedRoute } from '@angular/router';
 import { CreateCarDto } from '../../../model/DTO/create-car-dto';
 import { CarDetailEntityDto } from '../../../model/DTO/car-detail-entity-dto';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 type CreateCarDetailsFormGroup = FormGroup<{
   registrationDate: FormControl<string>,
@@ -41,16 +42,6 @@ export class Form {
   brands = signal<BrandDao[]>([]);
   currencies = this.carsService.getCurrencyCodes();
   
-  currenBrandId = computed(()=>{
-    return this.form.controls.brandId.value;
-  });
-  currentBrand = computed(()=>{
-    return this.brands().find(b => b.id == this.currenBrandId());
-  });
-
-  previousBrandId: string|null = null;
-  
-
   form = this.fb.group({
     brandId: this.fb.control<string>(
       '',
@@ -63,6 +54,16 @@ export class Form {
     carDetails: this.fb.array<CreateCarDetailsFormGroup>([])
   });
 
+  brandIdSignal = toSignal(
+    this.form.get('brandId')!.valueChanges,
+    { initialValue: this.form.get('brandId')!.value }
+  );
+
+  currenBrandId = computed(()=>this.brandIdSignal());
+  currentBrand = computed(()=>{
+    return this.brands().find(b => b.id == this.currenBrandId());
+  });
+  
   constructor (private route: ActivatedRoute) {
     effect(()=>{
       if (this.currentBrand() == null) this.form.get('modelId')?.disable();
