@@ -10,6 +10,7 @@ import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { CreateCarDetailsDto } from '../../../model/DTO/create-car-details';
 import { isInvalid, regex } from '../../../utilities';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-form',
@@ -20,6 +21,9 @@ import { isInvalid, regex } from '../../../utilities';
 export class Form {
   private fb = inject(FormBuilder).nonNullable;
   private carsService = inject(CarsService);
+
+  carId: string|null = null;
+  title: string = 'Create Car';
 
   error = signal<HttpErrorResponse|null>(null);
   loading = signal(false);
@@ -39,7 +43,11 @@ export class Form {
     carDetails: this.fb.array([])
   });
 
-  constructor(){
+  constructor (private route: ActivatedRoute) {
+    this.carId = this.route.snapshot.paramMap.get('id');
+    if (this.carId == null) this.title = 'Create Car';
+    else this.title = 'Edit Car';
+
     this.loadBrands();
 
     this.form.controls.brandId.valueChanges.subscribe(brandId => {

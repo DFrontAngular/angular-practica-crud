@@ -246,8 +246,15 @@ form button {
 form button[type=submit] {
     background-color: var(--primary-color);
     color: var(--on-primary-color);
+    border: none;
 }
 
 .error {
     color: var(--danger-color);
+}
+
+.error-container {
+    background-color: var(--danger-color);
+    color: var(--on-primary-color);
+    border: none;
 }
