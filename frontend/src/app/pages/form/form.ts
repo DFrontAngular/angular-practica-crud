@@ -39,8 +39,17 @@ export class Form {
   error = signal<HttpErrorResponse|null>(null);
   loading = signal(false);
   brands = signal<BrandDao[]>([]);
-  currentBrand = signal<BrandDao|null>(null);
   currencies = this.carsService.getCurrencyCodes();
+  
+  currenBrandId = computed(()=>{
+    return this.form.controls.brandId.value;
+  });
+  currentBrand = computed(()=>{
+    return this.brands().find(b => b.id == this.currenBrandId());
+  });
+
+  previousBrandId: string|null = null;
+  
 
   form = this.fb.group({
     brandId: this.fb.control<string>(
@@ -55,13 +64,6 @@ export class Form {
   });
 
   constructor (private route: ActivatedRoute) {
-    this.form.controls.brandId.valueChanges.subscribe(brandId => {
-      this.currentBrand.set(
-        this.brands().find(brand => brand.id == brandId) ?? null
-      );
-      this.form.controls.modelId.setValue('');
-    })
-
     effect(()=>{
       if (this.currentBrand() == null) this.form.get('modelId')?.disable();
       else this.form.get('modelId')?.enable();
