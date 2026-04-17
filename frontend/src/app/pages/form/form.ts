@@ -6,7 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { CreateCarDetailsDto } from '../../../model/DTO/create-car-details';
-import { regex } from '../../../utilities';
+import { regex, registrationDateValidator } from '../../../utilities';
 import { ActivatedRoute } from '@angular/router';
 import { CreateCarDto } from '../../../model/DTO/create-car-dto';
 import { CarDetailEntityDto } from '../../../model/DTO/car-detail-entity-dto';
@@ -154,71 +154,77 @@ export class Form {
   }
 
   createCarDetailsFormGroup(data?: Partial<CarDetailEntityDto>): CreateCarDetailsFormGroup {
-    return this.fb.group({
-      registrationDate: this.fb.control(
-        data?.registrationDate?.slice(0, 10) ?? '', // Slice the YYYY-MM-DD part
-        [
-          Validators.required,
-          regex(/^\d{4}-\d{2}-\d{2}$/)
-        ]
-      ),
+    return this.fb.group(
+      {
+        registrationDate: this.fb.control(
+          data?.registrationDate?.slice(0, 10) ?? '', // Slice the YYYY-MM-DD part
+          [
+            Validators.required,
+            regex(/^\d{4}-\d{2}-\d{2}$/)
+          ]
+        ),
 
-      mileage: this.fb.control(
-        data?.mileage ?? 0,
-        [
-          Validators.min(0),
+        mileage: this.fb.control(
+          data?.mileage ?? 0,
+          [
+            Validators.min(0),
+            Validators.required
+          ]
+        ),
+
+        currency: this.fb.control(
+          data?.currency ?? 'EUR',
+          [
+            regex(/[A-Z]{3}/),
+            Validators.required
+          ]
+        ),
+
+        price: this.fb.control(
+          data?.price ?? 0,
+          [
+            Validators.min(0),
+            Validators.required
+          ]
+        ),
+
+        manufactureYear: this.fb.control(
+          data?.manufactureYear ?? 1,
+          [
+            Validators.required,
+            Validators.min(1),
+            Validators.max(new Date().getFullYear())
+          ]
+        ),
+
+        availability: this.fb.control(
+          data?.availability ?? false,
           Validators.required
-        ]
-      ),
+        ),
 
-      currency: this.fb.control(
-        data?.currency ?? 'EUR',
-        [
-          regex(/[A-Z]{3}/),
+        color: this.fb.control(
+          data?.color ?? '',
           Validators.required
-        ]
-      ),
+        ),
 
-      price: this.fb.control(
-        data?.price ?? 0,
-        [
-          Validators.min(0),
+        description: this.fb.control(
+          data?.description ?? '',
           Validators.required
-        ]
-      ),
+        ),
 
-      manufactureYear: this.fb.control(
-        data?.manufactureYear ?? 1,
-        [
-          Validators.required,
-          Validators.min(1),
-          Validators.max(new Date().getFullYear())
-        ]
-      ),
+        licensePlate: this.fb.control(
+          data?.licensePlate ?? '',
+          [
+            Validators.required,
+            regex(/^\d{4} [B-DF-HJ-NP-TV-Z]{3}$/) // match 4 numbers, a space, and three uppercase consonants
+          ]
+        )
+      },
 
-      availability: this.fb.control(
-        data?.availability ?? false,
-        Validators.required
-      ),
-
-      color: this.fb.control(
-        data?.color ?? '',
-        Validators.required
-      ),
-
-      description: this.fb.control(
-        data?.description ?? '',
-        Validators.required
-      ),
-
-      licensePlate: this.fb.control(
-        data?.licensePlate ?? '',
-        [
-          Validators.required,
-          regex(/^\d{4} [B-DF-HJ-NP-TV-Z]{3}$/) // match 4 numbers, a space, and three uppercase consonants
-        ]
-      )
-    });
+      {
+        validators: registrationDateValidator
+      }
+    );
   }
 
   addCarDetails(data?: Partial<CreateCarDetailsDto>){

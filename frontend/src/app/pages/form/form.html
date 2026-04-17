@@ -48,6 +48,12 @@
                             <p class="error">Registration Date must have the format of YYYY-MM-DD</p>
                         }
                     }
+
+                    @if (isInvalid(carDetailsGroup)) {
+                        @if (carDetailsGroup.errors?.['registrationDateBeforeManufatureYear']) {
+                            <p class="error">Registration Date cannot be earlier than Manufacture Year.</p>
+                        }
+                    }
                 </label>
 
                 <label>Mileage
