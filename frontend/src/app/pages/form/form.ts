@@ -41,6 +41,9 @@ export class Form {
   loading = signal(false);
   brands = signal<BrandDao[]>([]);
   currencies = this.carsService.getCurrencyCodes();
+
+  submitSuccessMessage = signal<string|null>(null);
+  submitErrorMessage = signal<string|null>(null);
   
   form = this.fb.group({
     brandId: this.fb.control<string>(
@@ -241,24 +244,57 @@ export class Form {
       car.registrationDate += 'T00:00:00.000Z' // For some reason, backend expects this date format (YYYY-MM-DDTHH:MM:SS.mmmZ)
     });
 
-    if (this.carId == null) {
+    if (this.carId == null) { // We are creating a car
       this.carsService.createCar(car).subscribe({
         next: () => {
-          console.log('Car created');
+          this.submitErrorMessage.set(null);
+          this.submitSuccessMessage.set('Car created successfully.');
         },
-        error: () => {
-          console.log('Error creating the car');
+        error: (error: HttpErrorResponse) => {
+          this.submitSuccessMessage.set(null);
+          switch (error.status) {
+            case 400:
+              this.submitErrorMessage.set('There was an unexpected error while creating the car.');
+              break;
+            case 403:
+              this.submitErrorMessage.set('You do not have the permission to create a car');
+              break;
+            case 409:
+              this.submitErrorMessage.set('There is already a car registered with that brand/model combination.');
+              break;
+            default:
+              this.submitErrorMessage.set('Unexpected error while editting the car.');
+              break;
+          }
         }
       });
     }
 
-    else {
+    else { // We are editing a car
       this.carsService.editCar(this.carId, car).subscribe({
         next: () => {
-          console.log('Car editted');
+          this.submitErrorMessage.set(null);
+          this.submitSuccessMessage.set('Car editted successfully.');
         },
-        error: () => {
-          console.log('Error editting the car');
+        error: (error: HttpErrorResponse) => {
+          this.submitSuccessMessage.set(null);
+          switch(error.status){
+            case 400:
+              this.submitErrorMessage.set('Unexpected error while editting the car.');
+              break;
+            case 403:
+              this.submitErrorMessage.set('You do not have the permission to edit a car.');
+              break;
+            case 404:
+              this.submitErrorMessage.set('That vehicle does not exist.');
+              break;
+            case 409:
+              this.submitErrorMessage.set('There is already a car with that license plat or brand/model combination.');
+              break;
+            default:
+              this.submitErrorMessage.set('Unexpected error while editting the car.');
+              break;
+          }
         }
       });
     }

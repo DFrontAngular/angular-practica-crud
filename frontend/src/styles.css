@@ -258,3 +258,13 @@ form button[type=submit] {
     color: var(--on-primary-color);
     border: none;
 }
+
+.success {
+    color: var(--success-color);
+}
+
+.success-container {
+    background-color: var(--success-color);
+    color: var(--on-primary-color);
+    border: none;
+}

@@ -158,5 +158,13 @@
         
         <button type="submit" [disabled]="form.invalid">Submit</button>
 
+        @if (submitSuccessMessage()) {
+            <p class="success">{{submitSuccessMessage()}}</p>
+        }
+
+        @if (submitErrorMessage()) {
+            <p class="error">{{submitErrorMessage()}}</p>
+        }
+
     </form>
 </main>
