@@ -308,6 +308,48 @@ describe('Backend hardening (e2e)', () => {
     );
   });
 
+  it('searches vehicles by brand, model, and license plate', async () => {
+    const byBrandResponse = await request(app.getHttpServer())
+      .get('/cars')
+      .set('Cookie', adminAccessCookie)
+      .query({ search: 'toyota', limit: 50 })
+      .expect(200);
+
+    expect(byBrandResponse.body.items.length).toBeGreaterThan(0);
+    expect(
+      byBrandResponse.body.items.every(
+        (car: { brand: { name: string } }) => car.brand.name === 'Toyota',
+      ),
+    ).toBe(true);
+
+    const listedCar = byBrandResponse.body.items[0];
+    const byModelResponse = await request(app.getHttpServer())
+      .get('/cars')
+      .set('Cookie', adminAccessCookie)
+      .query({ search: listedCar.model.name })
+      .expect(200);
+
+    expect(byModelResponse.body.items).toEqual([
+      expect.objectContaining({ id: listedCar.id }),
+    ]);
+
+    const detailResponse = await request(app.getHttpServer())
+      .get(`/cars/${listedCar.id}`)
+      .set('Cookie', adminAccessCookie)
+      .expect(200);
+    const licensePlate = detailResponse.body.carDetails[0].licensePlate;
+
+    const byLicensePlateResponse = await request(app.getHttpServer())
+      .get('/cars')
+      .set('Cookie', adminAccessCookie)
+      .query({ search: licensePlate })
+      .expect(200);
+
+    expect(byLicensePlateResponse.body.items).toEqual([
+      expect.objectContaining({ id: listedCar.id }),
+    ]);
+  });
+
   it('allows keeping the same license plate on update and rejects duplicates from another car', async () => {
     const originalPlate = uniquePlate();
     const duplicatePlate = uniquePlate();

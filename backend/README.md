@@ -358,7 +358,7 @@ Columnas incluidas:
 Ejemplo:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&sortBy=brand&sortOrder=asc
+GET /cars/export/excel?brandId=brand-1&search=Corolla&sortBy=brand&sortOrder=asc
 ```
 
 ### `GET /cars/:id`
@@ -483,6 +483,7 @@ Respuesta:
 
 - `page`
 - `limit`
+- `search`
 - `brandId`
 - `sortBy`
 - `sortOrder`
@@ -493,7 +494,9 @@ Valores permitidos para `sortBy`:
 - `model`
 - `total`
 
-En esta práctica, el contrato de lista solo expone filtros y ordenación sobre campos visibles del propio listado. Por eso `GET /cars` no acepta filtros por `licensePlate` o `available`, ni ordenación por campos de detalle que no forman parte de `CarSummary`.
+`search` busca texto por marca, modelo y matrícula, sin distinguir mayúsculas, minúsculas ni acentos. Es el filtro adecuado para una caja de búsqueda con `debounce` en frontend. Los parámetros `brandId`, `sortBy` y `sortOrder` se pueden combinar con él.
+
+El contrato no expone filtros independientes por matrícula o disponibilidad, ni ordenación por campos de detalle que no forman parte de `CarSummary`.
 
 Valores permitidos para `sortOrder`:
 
@@ -506,6 +509,12 @@ Ejemplo:
 GET /cars?page=1&limit=10&brandId=brand-1
 ```
 
+Ejemplo de búsqueda de texto:
+
+```http
+GET /cars?page=1&limit=10&search=corolla
+```
+
 Ejemplo con ordenación:
 
 ```http
@@ -515,7 +524,7 @@ GET /cars?page=1&limit=10&sortBy=brand&sortOrder=asc
 Ejemplo de exportación con los mismos filtros:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&sortBy=model&sortOrder=desc
+GET /cars/export/excel?search=Corolla&sortBy=model&sortOrder=desc
 ```
 
 ## Validaciones importantes

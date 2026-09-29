@@ -498,10 +498,16 @@ export class CarsService {
   }
 
   private getFilteredCars(filterDto: GetCarsFilterDto): StoredCar[] {
-    const { brandId, sortBy, sortOrder = 'asc' } = filterDto;
+    const { brandId, search, sortBy, sortOrder = 'asc' } = filterDto;
+    const normalizedSearch = search
+      ? this.normalizeSearchValue(search)
+      : undefined;
 
     let filteredCars = this.cars.filter((car) => {
       if (brandId && car.brandId !== brandId) return false;
+      if (normalizedSearch && !this.matchesSearch(car, normalizedSearch)) {
+        return false;
+      }
       return true;
     });
 
@@ -678,6 +684,26 @@ export class CarsService {
 
   private normalizeLicensePlate(licensePlate: string): string {
     return licensePlate.replace(/\s+/g, '').trim().toUpperCase();
+  }
+
+  private matchesSearch(car: StoredCar, normalizedSearch: string): boolean {
+    const searchableValues = [
+      car.brand.name,
+      car.model.name,
+      ...(car.carDetails ?? []).map((detail) => detail.licensePlate),
+    ];
+
+    return searchableValues.some((value) =>
+      this.normalizeSearchValue(value).includes(normalizedSearch),
+    );
+  }
+
+  private normalizeSearchValue(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLocaleLowerCase('es-ES')
+      .trim();
   }
 
   private buildConflictPayload(
