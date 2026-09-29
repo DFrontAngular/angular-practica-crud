@@ -93,7 +93,7 @@ export class CarsService {
 
   constructor() {
     fs.mkdirSync(this.documentsRootPath, { recursive: true });
-    this.cars = this.generateSeedData(50);
+    this.cars = this.generateSeedData();
   }
 
   private getImageUrlForCar(modelId: string, brandId: string): string {
@@ -163,11 +163,12 @@ export class CarsService {
   }
 
   /**
-   * Generates a set of seed data for the dealership.
-   * @param count - The number of cars to generate.
+   * Generates a compact starter catalog: one selected model for each brand.
+   * Keeping the remaining models empty lets users create new vehicles without
+   * having to delete seeded entries first.
    * @returns An array of generated cars.
    */
-  private generateSeedData(count: number): StoredCar[] {
+  private generateSeedData(): StoredCar[] {
     const seedCars: StoredCar[] = [];
     const colors = ['White', 'Black', 'Grey', 'Silver', 'Blue', 'Red'];
     const descriptions = [
@@ -178,12 +179,20 @@ export class CarsService {
       'Ready for adventure, off-road capable.',
       'Sporty look with high performance engine.',
     ];
-    const shuffledModels = [...modelsDB]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, Math.min(count, modelsDB.length));
+    const selectedModels = brandsDB.map((brand) => {
+      const model = modelsDB.find((entry) => entry.brandId === brand.id);
 
-    for (let i = 0; i < shuffledModels.length; i++) {
-      const model = shuffledModels[i];
+      if (!model) {
+        throw new NotFoundException(
+          `No model found for brand ${brand.id} while generating seed data`,
+        );
+      }
+
+      return model;
+    });
+
+    for (let i = 0; i < selectedModels.length; i++) {
+      const model = selectedModels[i];
       const brand = brandsDB.find((entry) => entry.id === model.brandId);
 
       if (!brand) {
