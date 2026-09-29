@@ -547,8 +547,16 @@ describe('Backend hardening (e2e)', () => {
       new DocumentBuilder()
         .setTitle('Test API')
         .setVersion('1.0')
-        .addCookieAuth(ACCESS_TOKEN_COOKIE_NAME)
-        .addCookieAuth(REFRESH_TOKEN_COOKIE_NAME)
+        .addCookieAuth(
+          ACCESS_TOKEN_COOKIE_NAME,
+          undefined,
+          ACCESS_TOKEN_COOKIE_NAME,
+        )
+        .addCookieAuth(
+          REFRESH_TOKEN_COOKIE_NAME,
+          undefined,
+          REFRESH_TOKEN_COOKIE_NAME,
+        )
         .build(),
     );
 
@@ -560,6 +568,18 @@ describe('Backend hardening (e2e)', () => {
     expect(swaggerDocument.paths['/auth/me'].get.security).toEqual([
       { access_token: [] },
     ]);
+    expect(swaggerDocument.components.securitySchemes).toEqual(
+      expect.objectContaining({
+        access_token: expect.objectContaining({
+          in: 'cookie',
+          name: ACCESS_TOKEN_COOKIE_NAME,
+        }),
+        refresh_token: expect.objectContaining({
+          in: 'cookie',
+          name: REFRESH_TOKEN_COOKIE_NAME,
+        }),
+      }),
+    );
     expect(swaggerDocument.paths['/seed'].post).toBeDefined();
     expect(swaggerDocument.paths['/seed'].get).toBeUndefined();
     const brandsResponse = swaggerDocument.paths['/brands'].get.responses[

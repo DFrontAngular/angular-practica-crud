@@ -72,6 +72,7 @@ export class PaginatedMetaDto {
 export class PaginatedResponseDto<T> {
   @ApiProperty({
     isArray: true,
+    type: Object,
     description: 'Collection of records returned for the current page',
   })
   items: T[];

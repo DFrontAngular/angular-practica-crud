@@ -144,22 +144,23 @@
             }
           },
           {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Free-text search across brand name, model name, and license plate. The match is case-insensitive and accent-insensitive.",
+            "schema": {
+              "maxLength": 100,
+              "example": "Corolla",
+              "type": "string"
+            }
+          },
+          {
             "name": "brandId",
             "required": false,
             "in": "query",
             "description": "Filter results to a single brand by exact brand identifier",
             "schema": {
               "example": "brand-1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "modelId",
-            "required": false,
-            "in": "query",
-            "description": "Filter results to a single model by exact model identifier. Typically combined with brandId.",
-            "schema": {
-              "example": "model-1",
               "type": "string"
             }
           },
@@ -304,22 +305,23 @@
             }
           },
           {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Free-text search across brand name, model name, and license plate. The match is case-insensitive and accent-insensitive.",
+            "schema": {
+              "maxLength": 100,
+              "example": "Corolla",
+              "type": "string"
+            }
+          },
+          {
             "name": "brandId",
             "required": false,
             "in": "query",
             "description": "Filter results to a single brand by exact brand identifier",
             "schema": {
               "example": "brand-1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "modelId",
-            "required": false,
-            "in": "query",
-            "description": "Filter results to a single model by exact model identifier. Typically combined with brandId.",
-            "schema": {
-              "example": "model-1",
               "type": "string"
             }
           },
@@ -356,7 +358,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Excel file generated successfully"
+            "description": "Excel file generated successfully",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -380,6 +390,7 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -418,6 +429,7 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -475,6 +487,7 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -511,6 +524,7 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -549,6 +563,7 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -583,6 +598,7 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -673,13 +689,22 @@
             "in": "path",
             "description": "Vehicle identifier",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Document download started successfully"
+            "description": "Document download started successfully",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
           },
           "404": {
             "description": "Vehicle or document not found"
@@ -810,7 +835,12 @@
   "servers": [],
   "components": {
     "securitySchemes": {
-      "cookie": {
+      "access_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "access_token"
+      },
+      "refresh_token": {
         "type": "apiKey",
         "in": "cookie",
         "name": "refresh_token"
@@ -943,7 +973,7 @@
             "description": "Collection of records returned for the current page",
             "type": "array",
             "items": {
-              "type": "array"
+              "type": "object"
             }
           },
           "meta": {

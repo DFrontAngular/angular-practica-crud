@@ -29,8 +29,16 @@ async function bootstrap() {
         'Recommended flow in Swagger: call `POST /auth/login`, then use `GET /auth/me` and the protected endpoints normally. When the short-lived access cookie expires, call `POST /auth/refresh` and retry the failed request. Use `POST /auth/logout` to close the session cleanly.',
     )
     .setVersion('1.0')
-    .addCookieAuth(ACCESS_TOKEN_COOKIE_NAME)
-    .addCookieAuth(REFRESH_TOKEN_COOKIE_NAME)
+    .addCookieAuth(
+      ACCESS_TOKEN_COOKIE_NAME,
+      undefined,
+      ACCESS_TOKEN_COOKIE_NAME,
+    )
+    .addCookieAuth(
+      REFRESH_TOKEN_COOKIE_NAME,
+      undefined,
+      REFRESH_TOKEN_COOKIE_NAME,
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

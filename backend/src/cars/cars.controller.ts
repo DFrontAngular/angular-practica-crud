@@ -97,6 +97,11 @@ export class CarsController {
   @ApiResponse({
     status: 200,
     description: 'Excel file generated successfully',
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: { type: 'string', format: 'binary' },
+      },
+    },
   })
   async exportCarsToExcel(
     @Query() filterDto: GetCarsFilterDto,
@@ -116,7 +121,12 @@ export class CarsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve a vehicle by identifier' })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiResponse({
     status: 200,
     description: 'Vehicle returned successfully',
@@ -149,7 +159,12 @@ export class CarsController {
   @Put(':id')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update an existing vehicle entry (ADMIN only)' })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiResponse({
     status: 200,
     description: 'Vehicle updated successfully',
@@ -178,7 +193,12 @@ export class CarsController {
   @ApiOperation({
     summary: 'Retrieve metadata for the single document linked to a vehicle',
   })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiResponse({
     status: 200,
     description: 'Document metadata returned successfully',
@@ -195,10 +215,20 @@ export class CarsController {
   @ApiOperation({
     summary: 'Download the single document linked to a vehicle',
   })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiResponse({
     status: 200,
     description: 'Document download started successfully',
+    content: {
+      'application/octet-stream': {
+        schema: { type: 'string', format: 'binary' },
+      },
+    },
   })
   @ApiResponse({ status: 404, description: 'Vehicle or document not found' })
   downloadCarDocument(
@@ -215,7 +245,12 @@ export class CarsController {
   @ApiOperation({
     summary: 'Delete the single document linked to a vehicle (ADMIN only)',
   })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiResponse({ status: 204, description: 'Document deleted successfully' })
   @ApiResponse({ status: 404, description: 'Vehicle or document not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -239,7 +274,12 @@ export class CarsController {
     summary:
       'Upload or replace the single stored document for a vehicle (ADMIN only)',
   })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -295,7 +335,12 @@ export class CarsController {
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a vehicle entry (ADMIN only)' })
-  @ApiParam({ name: 'id', type: String, description: 'Vehicle identifier' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Vehicle identifier',
+  })
   @ApiResponse({ status: 204, description: 'Vehicle deleted successfully' })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
