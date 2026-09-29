@@ -56,7 +56,7 @@ El archivo actual es `backend/.env`.
 
 ```env
 AUTH_ENABLED=true
-JWT_SECRET=super-secret-key-123
+JWT_SECRET=change-me-in-real-environments
 ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
 ACCESS_TOKEN_COOKIE_MAX_AGE_MS=900000
@@ -97,6 +97,10 @@ Esto está pensado para que perfiles junior o en reciclaje puedan empezar por in
 ### `JWT_SECRET`
 
 Se usa para firmar y validar tokens JWT.
+
+Es obligatorio cuando `AUTH_ENABLED=true`. Si falta, el backend no arranca para
+evitar usar una clave predecible. En modo `AUTH_ENABLED=false` no es necesario,
+porque no se emiten ni validan sesiones reales.
 
 ### Duracion de sesion y cookies
 

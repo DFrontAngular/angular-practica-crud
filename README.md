@@ -147,7 +147,7 @@ Configuración actual:
 
 ```env
 AUTH_ENABLED=true
-JWT_SECRET=super-secret-key-123
+JWT_SECRET=change-me-in-real-environments
 ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
 ACCESS_TOKEN_COOKIE_MAX_AGE_MS=900000

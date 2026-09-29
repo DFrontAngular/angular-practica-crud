@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { ACCESS_TOKEN_COOKIE_NAME } from '../auth.constants';
+import { getJwtSecret } from '../auth.config';
 import { AuthService, User } from '../auth.service';
 
 const extractJwtFromCookie = (request: Request): string | null => {
@@ -26,8 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>('JWT_SECRET') || 'super-secret-key-123',
+      secretOrKey: getJwtSecret(configService),
     });
   }
 
