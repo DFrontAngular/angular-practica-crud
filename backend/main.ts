@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import * as fs from 'node:fs';
 import { join } from 'node:path';
 import * as swaggerUi from 'swagger-ui-express';

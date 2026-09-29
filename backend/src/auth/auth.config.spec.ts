@@ -2,9 +2,9 @@ import { ConfigService } from '@nestjs/config';
 import { getJwtSecret } from './auth.config';
 
 const createConfigService = (values: Record<string, string | undefined>) =>
-  {
+  ({
     get: jest.fn((key: string) => values[key]),
-  } as unknown as ConfigService;
+  }) as unknown as ConfigService;
 
 describe('getJwtSecret', () => {
   it('uses the configured secret', () => {

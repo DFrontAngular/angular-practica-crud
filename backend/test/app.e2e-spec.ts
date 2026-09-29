@@ -3,12 +3,12 @@ import * as path from 'node:path';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import {
   ACCESS_TOKEN_COOKIE_NAME,
   REFRESH_TOKEN_COOKIE_NAME,
 } from './../src/auth/auth.constants';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { CarsService } from './../src/cars/cars.service';
 
@@ -21,7 +21,9 @@ describe('Backend hardening (e2e)', () => {
   let userAccessCookie: string;
   let plateCounter = 1200;
 
-  const createApp = async (authEnabled: AuthMode): Promise<INestApplication> => {
+  const createApp = async (
+    authEnabled: AuthMode,
+  ): Promise<INestApplication> => {
     process.env.AUTH_ENABLED = authEnabled;
     process.env.JWT_SECRET = 'test-secret-key';
     process.env.API_DELAY_ENABLED = 'false';
@@ -97,7 +99,9 @@ describe('Backend hardening (e2e)', () => {
     );
 
     if (!accessCookie || !refreshCookie) {
-      throw new Error('Authentication cookies were not returned by /auth/login');
+      throw new Error(
+        'Authentication cookies were not returned by /auth/login',
+      );
     }
 
     return {
@@ -219,7 +223,10 @@ describe('Backend hardening (e2e)', () => {
     const previousSession = await login('user@example.com', 'user123');
     const refreshed = await request(app.getHttpServer())
       .post('/auth/refresh')
-      .set('Cookie', [previousSession.accessCookie, previousSession.refreshCookie])
+      .set('Cookie', [
+        previousSession.accessCookie,
+        previousSession.refreshCookie,
+      ])
       .expect(200);
 
     const refreshedSetCookieHeader = refreshed.headers['set-cookie'];
@@ -234,9 +241,11 @@ describe('Backend hardening (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/auth/refresh')
-      .set('Cookie', [previousSession.accessCookie, previousSession.refreshCookie])
+      .set('Cookie', [
+        previousSession.accessCookie,
+        previousSession.refreshCookie,
+      ])
       .expect(401);
-
   });
 
   it('protects the seed endpoint and exposes it only as POST', async () => {
@@ -295,7 +304,13 @@ describe('Backend hardening (e2e)', () => {
       .expect(200);
 
     expect(sortedResults.body.items.length).toBeGreaterThan(1);
-    expect(sortedResults.body.items[0].brand.name.localeCompare(sortedResults.body.items[1].brand.name, 'es', { sensitivity: 'base' })).toBeLessThanOrEqual(0);
+    expect(
+      sortedResults.body.items[0].brand.name.localeCompare(
+        sortedResults.body.items[1].brand.name,
+        'es',
+        { sensitivity: 'base' },
+      ),
+    ).toBeLessThanOrEqual(0);
 
     const invalidSortResponse = await request(app.getHttpServer())
       .get('/cars')
@@ -357,9 +372,7 @@ describe('Backend hardening (e2e)', () => {
     const firstCarResponse = await request(app.getHttpServer())
       .post('/cars')
       .set('Cookie', adminAccessCookie)
-      .send(
-        createCarPayloadForBrandModel(originalPlate, 'brand-4', 'model-14'),
-      )
+      .send(createCarPayloadForBrandModel(originalPlate, 'brand-4', 'model-14'))
       .expect(201);
 
     await request(app.getHttpServer())
@@ -393,7 +406,9 @@ describe('Backend hardening (e2e)', () => {
       )
       .expect(409);
 
-    expect(duplicateUpdateResponse.body.code).toBe('CAR_DUPLICATE_LICENSE_PLATE');
+    expect(duplicateUpdateResponse.body.code).toBe(
+      'CAR_DUPLICATE_LICENSE_PLATE',
+    );
     expect(duplicateUpdateResponse.body.message).toContain(
       'already registered to another car',
     );
@@ -451,9 +466,7 @@ describe('Backend hardening (e2e)', () => {
     const carResponse = await request(app.getHttpServer())
       .post('/cars')
       .set('Cookie', adminAccessCookie)
-      .send(
-        createCarPayloadForBrandModel(uniquePlate(), 'brand-4', 'model-15'),
-      )
+      .send(createCarPayloadForBrandModel(uniquePlate(), 'brand-4', 'model-15'))
       .expect(201);
 
     const carId = carResponse.body.id;
@@ -591,15 +604,17 @@ describe('Backend hardening (e2e)', () => {
       '200'
     ] as any;
 
-    expect(
-      brandsResponse.content['application/json'].schema.items,
-    ).toEqual({ $ref: '#/components/schemas/Brand' });
-    expect(
-      modelsResponse.content['application/json'].schema.items,
-    ).toEqual({ $ref: '#/components/schemas/Model' });
+    expect(brandsResponse.content['application/json'].schema.items).toEqual({
+      $ref: '#/components/schemas/Brand',
+    });
+    expect(modelsResponse.content['application/json'].schema.items).toEqual({
+      $ref: '#/components/schemas/Model',
+    });
 
     const carsSchema = carsResponse.content['application/json'].schema;
 
-    expect(JSON.stringify(carsSchema)).toContain('#/components/schemas/CarSummary');
+    expect(JSON.stringify(carsSchema)).toContain(
+      '#/components/schemas/CarSummary',
+    );
   });
 });
