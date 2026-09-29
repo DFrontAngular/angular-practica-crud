@@ -358,7 +358,7 @@ Columnas incluidas:
 Ejemplo:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=brand&sortOrder=asc
+GET /cars/export/excel?brandId=brand-1&sortBy=brand&sortOrder=asc
 ```
 
 ### `GET /cars/:id`
@@ -484,7 +484,6 @@ Respuesta:
 - `page`
 - `limit`
 - `brandId`
-- `modelId`
 - `sortBy`
 - `sortOrder`
 
@@ -504,7 +503,7 @@ Valores permitidos para `sortOrder`:
 Ejemplo:
 
 ```http
-GET /cars?page=1&limit=10&brandId=brand-1&modelId=model-1
+GET /cars?page=1&limit=10&brandId=brand-1
 ```
 
 Ejemplo con ordenación:
@@ -516,7 +515,7 @@ GET /cars?page=1&limit=10&sortBy=brand&sortOrder=asc
 Ejemplo de exportación con los mismos filtros:
 
 ```http
-GET /cars/export/excel?brandId=brand-1&modelId=model-1&sortBy=model&sortOrder=desc
+GET /cars/export/excel?brandId=brand-1&sortBy=model&sortOrder=desc
 ```
 
 ## Validaciones importantes

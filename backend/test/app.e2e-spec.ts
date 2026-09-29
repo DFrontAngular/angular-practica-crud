@@ -275,12 +275,18 @@ describe('Backend hardening (e2e)', () => {
     const filteredResults = await request(app.getHttpServer())
       .get('/cars')
       .set('Cookie', adminAccessCookie)
-      .query({ brandId: 'brand-3', modelId: 'model-11' })
+      .query({ brandId: 'brand-3' })
       .expect(200);
 
     expect(filteredResults.body.meta.itemCount).toBe(1);
     expect(filteredResults.body.items[0].brand.id).toBe('brand-3');
     expect(filteredResults.body.items[0].model.id).toBe('model-11');
+
+    await request(app.getHttpServer())
+      .get('/cars')
+      .set('Cookie', adminAccessCookie)
+      .query({ modelId: 'model-11' })
+      .expect(400);
 
     const sortedResults = await request(app.getHttpServer())
       .get('/cars')

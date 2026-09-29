@@ -498,11 +498,10 @@ export class CarsService {
   }
 
   private getFilteredCars(filterDto: GetCarsFilterDto): StoredCar[] {
-    const { brandId, modelId, sortBy, sortOrder = 'asc' } = filterDto;
+    const { brandId, sortBy, sortOrder = 'asc' } = filterDto;
 
     let filteredCars = this.cars.filter((car) => {
       if (brandId && car.brandId !== brandId) return false;
-      if (modelId && car.modelId !== modelId) return false;
       return true;
     });
 

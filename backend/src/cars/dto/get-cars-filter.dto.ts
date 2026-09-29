@@ -22,15 +22,6 @@ export class GetCarsFilterDto extends PaginationDto {
 
   @ApiPropertyOptional({
     description:
-      'Filter results to a single model by exact model identifier. Typically combined with brandId.',
-    example: 'model-1',
-  })
-  @IsString()
-  @IsOptional()
-  modelId?: string;
-
-  @ApiPropertyOptional({
-    description:
       'Field used to sort the vehicle list. Only list-visible fields are exposed here.',
     enum: CAR_SORT_FIELDS,
     example: 'brand',
