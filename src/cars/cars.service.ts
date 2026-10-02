@@ -42,7 +42,7 @@ export class CarsService {
 
   /**
    * Public image path catalog keyed by model id.
-   * Files live under backend/public/images/car_images.
+   * Files live under public/images/car_images.
    */
   private readonly imageBasePath = '/images/car_images';
 

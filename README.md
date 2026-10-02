@@ -1,30 +1,8 @@
-# Angular CRUD + NestJS API
+# Vehicle Catalog API
 
-Repositorio de práctica para construir una aplicación Angular moderna contra una API real hecha con NestJS.
+Repositorio de la API NestJS utilizada en la práctica formativa de Angular.
 
-El objetivo de este proyecto es trabajar con un flujo cercano a un entorno profesional:
-
-- arquitectura frontend y backend
-- consumo real de APIs
-- routing
-- formularios reactivos
-- validación
-- autenticación basada en cookies HttpOnly y refresh token
-- control de errores
-- paginación, filtros y ordenación
-- roles y autorización
-- subida de archivos
-- exportación de datos
-- testing y calidad
-
-El backend ya incorpora una base funcional amplia. El frontend se mantiene deliberadamente ligero para que la parte principal de la práctica esté en Angular y en la integración con la API.
-
-## Estructura del repositorio
-
-El repositorio está dividido en dos aplicaciones:
-
-- `frontend/`: Angular 21
-- `backend/`: NestJS 10
+Este repositorio contiene únicamente el backend. El frontend debe crearse como un proyecto Angular independiente, en otro repositorio Git, para practicar también la creación y configuración de una aplicación desde cero.
 
 ## Qué incluye el backend
 
@@ -59,14 +37,7 @@ Importante:
 
 - Node.js 22 o superior
 - npm
-- Angular CLI 21 o superior
 - Visual Studio Code u otro editor
-
-Instalación de Angular CLI:
-
-```bash
-npm install -g @angular/cli
-```
 
 ## Conocimientos previos recomendados
 
@@ -112,12 +83,9 @@ Si no tienes conocimientos previos de Angular, todavía puedes empezar, pero la 
 
 En términos formativos, este repositorio encaja mejor en personas que ya tienen una base de desarrollo web y quieren aprender Angular en un caso realista, o en personas con Angular inicial que quieren consolidar integración con APIs, formularios, routing y autenticación.
 
-## Puesta en marcha
-
-### Backend
+## Puesta en marcha de la API
 
 ```bash
-cd backend
 npm install
 npm run start:dev
 ```
@@ -126,22 +94,26 @@ Disponible en:
 
 - API: `http://localhost:3000`
 - Swagger: `http://localhost:3000/api-docs`
+- Especificación OpenAPI generada: `swagger.json`
 
-### Frontend
+Los comandos se ejecutan desde la raíz del repositorio. También están disponibles `npm run build`, `npm test` y `npm run test:e2e`.
+
+## Crear el frontend en otro repositorio
+
+Instala Angular CLI si todavía no lo tienes y crea el proyecto fuera de este repositorio:
 
 ```bash
-cd frontend
-npm install
+npm install -g @angular/cli
+ng new vehicle-catalog-frontend --routing --style=css
+cd vehicle-catalog-frontend
 npm start
 ```
 
-Disponible en:
-
-- App: `http://localhost:4200`
+El proyecto Angular deberá consumir esta API, revisar Swagger como fuente de verdad y resolver su integración local con proxy y cookies cuando se active la autenticación. No se debe crear una carpeta `frontend/` dentro de este repositorio.
 
 ## Autenticación y modos de trabajo
 
-El backend soporta dos modos controlados desde `backend/.env`.
+La API soporta dos modos controlados desde `.env`.
 
 Configuración actual:
 
@@ -198,25 +170,9 @@ Implica:
 - inyección de un usuario ficticio con rol `ADMIN`
 - posibilidad de trabajar primero el CRUD sin implementar login
 
-## UI y estilos
+## Criterios para el frontend externo
 
-En esta práctica no se proporciona un diseño cerrado.
-
-En el contexto habitual del equipo, los desarrollos frontend suelen trabajar sobre diseños definidos por perfiles especializados de UX/UI. En esta práctica se omite esa capa de forma intencionada para priorizar la resolución funcional de la interfaz, la claridad estructural y la toma de decisiones básicas de frontend.
-
-No se busca evaluar diseño visual experto, sino una interfaz coherente, funcional y defendible.
-
-Estado actual del frontend:
-
-- Tailwind está instalado
-
-Se puede utilizar:
-
-- CSS plano
-- SCSS
-- Tailwind
-- una combinación razonable de las opciones anteriores
-- librerías de componentes, si se justifican con criterio
+El frontend no se proporciona en este repositorio ni tiene un diseño cerrado. La persona participante puede elegir CSS plano, SCSS, Tailwind o una librería de componentes, siempre que la elección esté justificada y la interfaz sea coherente, funcional y defendible.
 
 ## Notas técnicas importantes
 
@@ -250,10 +206,9 @@ Además de este README, el repositorio incluye documentación complementaria par
 
 ## Referencias rápidas
 
-- Swagger backend: `http://localhost:3000/api-docs`
-- Frontend: `http://localhost:4200`
-- Backend: `http://localhost:3000`
-- Archivo de configuración auth: `backend/.env`
-- Plantilla de entorno backend: `backend/.env.example`
+- Swagger de la API: `http://localhost:3000/api-docs`
+- API: `http://localhost:3000`
+- Archivo de configuración auth: `.env`
+- Plantilla de entorno: `.env.example`
 
-Si tienes dudas sobre cómo modelar una petición o una respuesta, revisa Swagger antes de escribir código. En este proyecto, el backend es la fuente de verdad.
+Si tienes dudas sobre cómo modelar una petición o una respuesta, revisa Swagger antes de escribir código. En este proyecto, la API es la fuente de verdad.

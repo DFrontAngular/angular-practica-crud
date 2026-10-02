@@ -9,9 +9,9 @@ Este documento recoge decisiones relevantes del diseño de la formación y el mo
 
 Su objetivo es facilitar la continuidad del programa en futuras ediciones y ayudar a que nuevas personas formadoras comprendan el criterio pedagógico y técnico aplicado.
 
-## Decisión 1. Mantener backend y frontend en el mismo repositorio
+## Decisión 1. Separar API y frontend en repositorios independientes
 
-Se adopta esta estructura para facilitar la experiencia de onboarding, la trazabilidad del proyecto y la comprensión del contrato entre frontend y backend.
+La API vive en este repositorio y el frontend debe crearse en un repositorio Angular independiente. Así la persona participante practica el uso de `ng new`, la configuración inicial de Angular, la creación del repositorio y la integración con un contrato de API existente.
 
 ## Decisión 2. Utilizar un backend funcional ya construido
 

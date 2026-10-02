@@ -94,7 +94,7 @@ export const getJwtSecret = (configService: ConfigService): string => {
 
   if (configService.get<string>('AUTH_ENABLED') === 'true') {
     throw new Error(
-      'JWT_SECRET must be configured when AUTH_ENABLED=true. Set it in backend/.env or in the environment.',
+      'JWT_SECRET must be configured when AUTH_ENABLED=true. Set it in .env or in the environment.',
     );
   }
 

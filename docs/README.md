@@ -3,7 +3,7 @@
 **Audiencia:** transversal
 **Última revisión:** 2026-03-27
 
-Este directorio reúne la documentación funcional, formativa y operativa del proyecto.
+Este directorio reúne la documentación funcional, formativa y operativa de la API y de la práctica Angular que la consume desde un repositorio independiente.
 
 ## Para personas participantes
 

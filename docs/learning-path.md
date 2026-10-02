@@ -25,17 +25,19 @@ No todos los perfiles tienen que recorrerla exactamente del mismo modo, pero sí
 
 Objetivo:
 
-- entender la estructura del repositorio
-- arrancar backend y frontend
+- entender que este repositorio contiene únicamente la API
+- crear el frontend en un repositorio independiente
+- arrancar la API y el frontend por separado
 - abrir Swagger
 - revisar la forma real de las respuestas
 
 Tareas recomendadas:
 
-1. arrancar backend y frontend
+1. clonar este repositorio y arrancar la API desde su raíz
 2. visitar `/api-docs`
-3. probar `GET /cars`, `GET /brands` y `GET /brands/:brandId/models`
-4. decidir si se comenzará con login activado o desactivado
+3. crear un repositorio frontend con `ng new vehicle-catalog-frontend --routing --style=css`
+4. probar `GET /cars`, `GET /brands` y `GET /brands/:brandId/models`
+5. decidir si se comenzará con login activado o desactivado
 
 Qué aprenderás aquí:
 

@@ -27,7 +27,7 @@ Las estimaciones incluidas en este documento son orientativas y no deben interpr
 
 ## Enfoque
 
-Este repositorio mantiene una finalidad formativa.
+Este repositorio mantiene una finalidad formativa y proporciona la API base. Cada participante crea su aplicación Angular en un repositorio independiente mediante Angular CLI.
 
 En consecuencia, el objetivo no es únicamente completar una aplicación funcional, sino también demostrar un proceso de trabajo coherente y proporcionado al nivel esperado:
 

@@ -18,7 +18,8 @@ Documentos relacionados:
 
 Como mínimo, se recomienda que la entrega incluya:
 
-- enlace al repositorio o rama de trabajo correspondiente
+- enlace al repositorio frontend o rama de trabajo correspondiente
+- enlace al repositorio de la API utilizado, si no coincide con el proporcionado para la práctica
 - instrucciones básicas de puesta en marcha si difieren del estándar del proyecto
 - breve resumen de lo implementado
 - indicación de alcance cubierto y alcance pendiente, si aplica
