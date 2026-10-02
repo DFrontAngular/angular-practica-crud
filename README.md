@@ -4,6 +4,12 @@ Repositorio de la API NestJS utilizada en la práctica formativa de Angular.
 
 Este repositorio contiene únicamente el backend. El frontend debe crearse como un proyecto Angular independiente, en otro repositorio Git, para practicar también la creación y configuración de una aplicación desde cero.
 
+## Alcance del repositorio
+
+Este repositorio es exclusivamente el backend de la práctica: una API NestJS y su documentación.
+
+No se debe crear ni incluir aquí el frontend Angular. El frontend debe vivir en una carpeta y un repositorio Git independientes, creados fuera de este repositorio. Por tanto, este proyecto no debe contener una carpeta `frontend/`, código Angular ni la configuración propia de una aplicación Angular.
+
 ## Qué incluye el backend
 
 Actualmente, el backend incluye:
@@ -83,6 +89,22 @@ Si no tienes conocimientos previos de Angular, todavía puedes empezar, pero la 
 
 En términos formativos, este repositorio encaja mejor en personas que ya tienen una base de desarrollo web y quieren aprender Angular en un caso realista, o en personas con Angular inicial que quieren consolidar integración con APIs, formularios, routing y autenticación.
 
+## Tarea 0: crear el repositorio Angular en un sitio aparte
+
+Antes de empezar la práctica de frontend, crea el proyecto Angular fuera de la carpeta de este repositorio y conviértelo en un repositorio Git independiente. Si partes de la raíz de este repositorio, sal primero a la carpeta contenedora para que ambos proyectos queden como carpetas hermanas:
+
+```bash
+cd ..
+npm install -g @angular/cli
+ng new vehicle-catalog-frontend --routing --style=css
+cd vehicle-catalog-frontend
+git init
+npm install
+npm start
+```
+
+El nombre y la ubicación del repositorio frontend pueden cambiar, pero debe mantenerse separado de este repositorio backend. La aplicación Angular deberá consumir esta API, usando Swagger como fuente de verdad para el contrato.
+
 ## Puesta en marcha de la API
 
 ```bash
@@ -97,19 +119,6 @@ Disponible en:
 - Especificación OpenAPI generada: `swagger.json`
 
 Los comandos se ejecutan desde la raíz del repositorio. También están disponibles `npm run build`, `npm test` y `npm run test:e2e`.
-
-## Crear el frontend en otro repositorio
-
-Instala Angular CLI si todavía no lo tienes y crea el proyecto fuera de este repositorio:
-
-```bash
-npm install -g @angular/cli
-ng new vehicle-catalog-frontend --routing --style=css
-cd vehicle-catalog-frontend
-npm start
-```
-
-El proyecto Angular deberá consumir esta API, revisar Swagger como fuente de verdad y resolver su integración local con proxy y cookies cuando se active la autenticación. No se debe crear una carpeta `frontend/` dentro de este repositorio.
 
 ## Autenticación y modos de trabajo
 
