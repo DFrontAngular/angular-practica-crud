@@ -1,7 +1,7 @@
 # Gobernanza del programa
 
 **Audiencia:** responsables del programa
-**Última revisión:** 2026-03-27
+**Última revisión:** 2026-10-02
 
 ## Propósito
 

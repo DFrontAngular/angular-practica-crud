@@ -109,6 +109,19 @@ El nombre y la ubicación del repositorio frontend pueden cambiar, pero debe man
 
 ```bash
 npm install
+```
+
+Antes del primer arranque, crea el archivo local de configuración a partir de la plantilla:
+
+```bash
+Copy-Item .env.example .env
+```
+
+En macOS/Linux, el equivalente es `cp .env.example .env`. Revisa especialmente `AUTH_ENABLED` y `JWT_SECRET`; `.env` es local y no debe compartirse ni subirse al repositorio.
+
+Después, arranca la API:
+
+```bash
 npm run start:dev
 ```
 
@@ -155,7 +168,7 @@ Implica:
 
 ### Cookies de sesion y seguridad
 
-La sesion usa cookies `HttpOnly`, asi que el frontend no debe leer ni guardar tokens manualmente.
+La sesión usa cookies `HttpOnly`, así que el frontend no debe leer ni guardar tokens manualmente. En Angular, las peticiones de sesión deben usar `withCredentials: true` para que el navegador envíe y acepte las cookies.
 
 - `AUTH_COOKIE_PATH`: limita en que rutas se envian las cookies. En este proyecto se recomienda `/` para desarrollo con proxy Angular porque la ruta publica que ve el navegador suele pasar por `/api/...`
 - `AUTH_COOKIE_SAME_SITE`: controla cuando el navegador envia cookies en peticiones cross-site. `lax` es el valor recomendado para esta practica
@@ -179,6 +192,8 @@ Implica:
 - inyección de un usuario ficticio con rol `ADMIN`
 - posibilidad de trabajar primero el CRUD sin implementar login
 
+Este modo no representa el flujo de autenticación real y no debe usarse para validar login, refresh, logout ni permisos por rol. Para volver al comportamiento normal, cambia `AUTH_ENABLED=true` y reinicia la API.
+
 ## Criterios para el frontend externo
 
 El frontend no se proporciona en este repositorio ni tiene un diseño cerrado. La persona participante puede elegir CSS plano, SCSS, Tailwind o una librería de componentes, siempre que la elección esté justificada y la interfaz sea coherente, funcional y defendible.
@@ -192,6 +207,28 @@ El frontend no se proporciona en este repositorio ni tiene un diseño cerrado. L
 - `GET /cars` devuelve un objeto paginado con `items` y `meta`
 - `imageUrl` la resuelve el backend
 - el backend permite trabajar con subida de documentos y exportación
+
+### Proxy Angular de desarrollo
+
+Como el backend no habilita CORS permisivo para `localhost`, el frontend externo deberá configurar un proxy de desarrollo hacia `http://localhost:3000`. La ruta pública puede usar el prefijo `/api`, que deberá eliminarse o reenviarse según la configuración elegida. Las llamadas autenticadas deben incluir `withCredentials: true`; no añadas un header `Authorization` con un JWT. La configuración concreta del proxy forma parte del aprendizaje de Angular.
+
+### Seed y persistencia de datos
+
+- Al iniciar la API se genera un catálogo inicial en memoria.
+- `POST /seed` sustituye el catálogo actual por el dataset definido en `src/seed/data/cars.seed.ts`. Solo puede ejecutarlo una sesión `ADMIN` cuando `AUTH_ENABLED=true`; con bypass se inyecta un `ADMIN` ficticio.
+- Para cambiar el seed, edita `src/seed/data/cars.seed.ts`, conserva IDs de marca/modelo válidos y evita duplicar combinaciones `brandId` + `modelId` o matrículas.
+- Los coches creados o modificados en la API se pierden al reiniciar, porque no hay base de datos. Ejecutar `/seed` también descarta esos cambios.
+- Los documentos subidos se escriben en `uploads/cars/<carId>`. No se borran al reiniciar si la carpeta permanece, pero el mapa de metadatos vive en memoria; por eso, tras reiniciar, un documento existente no queda disponible a través de la API hasta que se vuelva a subir.
+
+### Documentos
+
+El backend mantiene un único documento por coche. `POST /cars/:id/document` reemplaza el anterior y requiere `ADMIN`; el campo de archivo debe llamarse `file`. El límite es 5 MB y los tipos permitidos son `pdf`, `txt`, `doc`, `docx`, `png`, `jpg` y `jpeg`.
+
+- `GET /cars/:id/document`: metadatos
+- `GET /cars/:id/document/download`: descarga del fichero
+- `DELETE /cars/:id/document`: elimina el fichero y sus metadatos; requiere `ADMIN`
+
+Consulta Swagger para los campos opcionales `title`, `documentType` y `description`, y para las respuestas de error `400`, `413` y `415`.
 
 ## Documentación de apoyo
 

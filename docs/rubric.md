@@ -1,7 +1,7 @@
 # Rúbrica de evaluación
 
 **Audiencia:** equipo mentor
-**Última revisión:** 2026-03-27
+**Última revisión:** 2026-10-02
 
 ## Propósito
 

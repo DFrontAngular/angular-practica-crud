@@ -122,7 +122,7 @@ Alcance obligatorio recomendado:
 Para los perfiles que trabajen en modo autenticado, el alcance obligatorio puede incluir adicionalmente:
 
 - pantalla de login
-- estrategia de almacenamiento del JWT
+- gestión de sesión mediante cookies `HttpOnly`, `withCredentials: true` y renovación con refresh; el frontend no almacena el JWT
 - interceptor de autenticación
 - protección de rutas
 - comportamiento de interfaz condicionado por rol cuando resulte aplicable

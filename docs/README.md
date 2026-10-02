@@ -1,7 +1,7 @@
 # Índice de documentación
 
 **Audiencia:** transversal
-**Última revisión:** 2026-03-27
+**Última revisión:** 2026-10-02
 
 Este directorio reúne la documentación funcional, formativa y operativa de la API y de la práctica Angular que la consume desde un repositorio independiente.
 
@@ -32,7 +32,8 @@ Este directorio reúne la documentación funcional, formativa y operativa de la 
 Si se participa en la práctica, el orden recomendado es:
 
 1. [training-guide.md](training-guide.md)
-2. [learning-path.md](learning-path.md)
-3. [faq.md](faq.md)
-4. [submission-guide.md](submission-guide.md)
-5. [support-model.md](support-model.md)
+2. [auth-session-flow.md](auth-session-flow.md) — antes de implementar login, refresh o guards
+3. [learning-path.md](learning-path.md)
+4. [faq.md](faq.md)
+5. [submission-guide.md](submission-guide.md)
+6. [support-model.md](support-model.md)

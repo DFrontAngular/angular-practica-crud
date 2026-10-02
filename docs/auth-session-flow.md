@@ -1,7 +1,7 @@
 # Flujo de autenticacion y sesion
 
 **Audiencia:** personas participantes
-**Ultima revision:** 2026-04-07
+**Última revisión:** 2026-10-02
 
 ## Proposito
 
@@ -80,7 +80,7 @@ Un comportamiento razonable seria:
 1. enviar credenciales a `POST /auth/login`
 2. tratar el login como correcto si el backend responde `200`
 3. consultar `GET /auth/me` para obtener el perfil y construir el estado autenticado
-4. consumir endpoints protegidos sin almacenar tokens manualmente
+4. consumir endpoints protegidos con `withCredentials: true`, sin almacenar tokens manualmente
 5. si una peticion autenticada devuelve `401` por expiracion del `access token`, llamar a `POST /auth/refresh`
 6. si el refresh funciona, reintentar una vez la peticion original
 7. si el refresh falla, limpiar estado cliente y redirigir al login
@@ -90,6 +90,8 @@ Un comportamiento razonable seria:
 Este repositorio no abre CORS de forma permisiva para `localhost` por comodidad.
 
 La integracion esperada en desarrollo es mediante proxy del frontend.
+
+En Angular, configura el proxy para publicar `/api` hacia `http://localhost:3000` y usa `withCredentials: true` en login, refresh, logout, `GET /auth/me` y en las peticiones protegidas. El navegador gestiona las cookies; el frontend solo mantiene en memoria el perfil y el estado de sesión.
 
 La idea es que el navegador trabaje como si frontend y backend fueran el mismo origen aparente durante el desarrollo, en lugar de construir una integracion artificial basada en abrir CORS y mover tokens manualmente.
 
