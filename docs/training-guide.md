@@ -127,6 +127,8 @@ Para los perfiles que trabajen en modo autenticado, el alcance obligatorio puede
 - protección de rutas
 - comportamiento de interfaz condicionado por rol cuando resulte aplicable
 
+La accesibilidad forma parte del alcance obligatorio de la práctica. Debe aplicarse desde la primera pantalla y en todos los flujos, incluyendo navegación por teclado, gestión del foco, nombres y roles accesibles, semántica, contraste, mensajes de error y estados comprensibles.
+
 ## Alcance opcional
 
 El alcance opcional debe quedar explícitamente diferenciado para evitar que elementos de valor añadido se interpreten como requisitos mínimos.
@@ -139,7 +141,6 @@ Alcance opcional recomendado:
 - flujo de subida de ficheros
 - flujo de exportación
 - tests adicionales
-- mejoras de accesibilidad
 - pulido responsive más allá del layout base
 - refactors orientados a mantenibilidad una vez cerrados los flujos principales
 

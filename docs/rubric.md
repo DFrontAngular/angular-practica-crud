@@ -52,6 +52,7 @@ Se valora:
 - estados de carga
 - feedback visual razonable
 - consistencia básica de la interfaz
+- accesibilidad funcional: teclado, foco, semántica, nombres accesibles, contraste y mensajes comprensibles
 
 ### 5. Comprensión y criterio
 

@@ -63,6 +63,32 @@ Qué aprenderás aquí:
 - arquitectura básica de frontend
 - separación entre features y piezas compartidas
 
+## Bloque 1.1. Tooling, accesibilidad y calidad desde el inicio
+
+Objetivo:
+
+- establecer una base de trabajo consistente antes de crecer en funcionalidades
+- incorporar accesibilidad y comportamiento reutilizable sin acoplarse a una librería visual concreta
+
+Tareas recomendadas:
+
+1. configurar ESLint y Prettier
+2. añadir hooks con Husky para ejecutar validaciones antes de commit o push
+3. usar preferentemente Angular CDK para overlays, diálogos, menús, focus management, drag and drop y otras primitivas de comportamiento
+4. usar preferentemente Angular Aria para helpers y patrones accesibles de interacción
+5. documentar las decisiones de tooling, accesibilidad y dependencias
+
+La accesibilidad no es opcional y debe aplicarse desde la primera pantalla y en todos los flujos: navegación por teclado, gestión del foco, nombres y roles accesibles, semántica, contraste, mensajes de error y estados comprensibles. Angular CDK y Angular Aria son herramientas fuertemente recomendadas para ayudar a cumplir este objetivo, pero la responsabilidad final es de la aplicación.
+
+Angular CDK y Angular Aria no son librerías de componentes visuales completos. Proporcionan primitivas, directivas, servicios y helpers para resolver comportamiento, interacción y accesibilidad; la apariencia y el marcado final siguen siendo responsabilidad de la aplicación. Se recomienda firmemente conocerlas y usarlas cuando aporten valor, pero no son un requisito obligatorio ni sustituyen a una librería de componentes como Angular Material.
+
+Qué aprenderás aquí:
+
+- automatización de comprobaciones de calidad
+- utilidad de los hooks del repositorio
+- diferencia entre primitivas de comportamiento y componentes visuales
+- fundamentos de accesibilidad aplicados a la interfaz
+
 ## Bloque 2. Tabla de listado
 
 Objetivo:
@@ -279,19 +305,37 @@ Objetivo:
 
 Tareas recomendadas:
 
-1. configurar ESLint y Prettier si no está hecho
-2. añadir hooks con Husky
-3. documentar decisiones de arquitectura
-4. escribir tests unitarios y de componentes
-5. definir un criterio mínimo de cobertura
-6. crear plantilla de Pull Request
-7. usar ramas con naming consistente
+1. documentar decisiones de arquitectura
+2. crear plantilla de Pull Request
+3. usar ramas con naming consistente
+4. revisar dependencias y scripts del proyecto
+5. preparar una lista de comprobación para las entregas
 
 Qué aprenderás aquí:
 
 - calidad de código
 - revisión de cambios
 - disciplina de equipo
+
+## Bloque 12. Tests unitarios y de componentes
+
+Objetivo:
+
+- validar la lógica y los comportamientos importantes sin depender únicamente de pruebas manuales
+
+Tareas recomendadas:
+
+1. escribir tests unitarios para servicios, pipes, helpers y validaciones
+2. escribir tests de componentes para formularios, estados y acciones relevantes
+3. cubrir como mínimo los flujos críticos y los casos de error
+4. definir un criterio razonable de cobertura
+5. integrar la ejecución de tests en los hooks o en CI cuando el equipo esté preparado
+
+Qué aprenderás aquí:
+
+- diseño de código comprobable
+- diferencia entre tests unitarios y de componentes
+- cobertura orientada al riesgo
 
 ## Roadmap orientativo por ramas
 
@@ -311,4 +355,5 @@ Si se quiere trabajar como si fuera un proyecto real, una secuencia razonable po
 12. `feat/roles-and-route-guards`
 13. `feat/pagination-and-filters`
 14. `feat/document-upload`
-15. `docs/project-documentation`
+15. `test/unit-and-component-tests`
+16. `docs/project-documentation`

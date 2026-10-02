@@ -196,7 +196,7 @@ Este modo no representa el flujo de autenticación real y no debe usarse para va
 
 ## Criterios para el frontend externo
 
-El frontend no se proporciona en este repositorio ni tiene un diseño cerrado. La persona participante puede elegir CSS plano, SCSS, Tailwind o una librería de componentes, siempre que la elección esté justificada y la interfaz sea coherente, funcional y defendible.
+El frontend no se proporciona en este repositorio ni tiene un diseño cerrado. La persona participante puede elegir CSS plano, SCSS, Tailwind o una librería de componentes, siempre que la elección esté justificada y la interfaz sea coherente, funcional y defendible. La accesibilidad forma parte del alcance obligatorio y debe estar presente en toda la interfaz. Se recomienda firmemente usar Angular CDK y Angular Aria como apoyo para primitivas de comportamiento y accesibilidad. No son componentes visuales completos: no imponen por sí mismos una apariencia ni sustituyen a una librería de componentes.
 
 ## Notas técnicas importantes
 
